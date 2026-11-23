@@ -11,6 +11,9 @@
 
 /* ===== 结构 token（跨主题共享） ===== */
 :root {
+  /* 声明自带明暗支持：防浏览器强制深色反转；滚动条/表单控件随模式着色 */
+  color-scheme: dark;
+
   /* 圆角与间距 */
   --radius: 12px;
   --radius-sm: 8px;
@@ -189,6 +192,8 @@
 }
 
 /* ================= 浅色模式（data-mode="light" · 每主题一套） ================= */
+
+[data-mode='light'] { color-scheme: light; }
 
 /* linear · 浅色（Linear light 工作区） */
 [data-theme='linear'][data-mode='light'] {

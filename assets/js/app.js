@@ -104,6 +104,53 @@ function ensureAllEstimates(){
     ensureEstimate(n,leaf);
   });
 }
+function pad2(n){ return n<10?'0'+n:''+n; }
+function dateKey(d){
+  d=d||today0();
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+}
+function parseMetrics(text,node){
+  const t=text||'';
+  if(/^O[:：\s]|Objective/i.test(t)) node.role='O';
+  if(/^KR[:：\s]|关键结果/.test(t)) node.role='KR';
+  if(/习惯|打卡|日课|日更/.test(t)) node.role=node.role||'habit';
+  let m=t.match(/(\d+)\s*\/\s*(\d+)/);
+  if(m){ node.targetDone=+m[1]; node.targetNum=+m[2]; return; }
+  m=t.match(/目标\s*(\d+)|共\s*(\d+)\s*次|×\s*(\d+)/);
+  if(m) node.targetNum=+(m[1]||m[2]||m[3]);
+}
+function ensureMetrics(n){
+  if(!n.role) n.role='';
+  if(n.targetNum!=null) n.targetNum=clamp(+n.targetNum||0,0,9999)||null;
+  if(n.targetDone==null) n.targetDone=0;
+  else n.targetDone=clamp(+n.targetDone||0,0,9999);
+}
+function metricProgress(n){
+  if(!n) return null;
+  if(n.targetNum>0) return {done:n.targetDone||0,tgt:n.targetNum,pct:Math.round((n.targetDone||0)/n.targetNum*100)};
+  if(n.role==='O'){
+    const p=subtreeProgress(n);
+    return p?{done:p.done,tgt:p.total,pct:p.pct,kind:'leaf'}:null;
+  }
+  return null;
+}
+function paceStatus(n){
+  const m=metricProgress(n);
+  if(!m||!n.deadlineDate) return null;
+  const start=today0();
+  const end=new Date(n.deadlineDate); end.setHours(23,59,59,999);
+  const total=Math.max(1,end.getTime()-start.getTime());
+  const elapsed=clamp(Date.now()-start.getTime(),0,total);
+  const expect=Math.round(m.tgt*elapsed/total);
+  const ahead=(m.done||0)-expect;
+  return {expect,done:m.done||0,ahead,m};
+}
+function bumpDailyCompletion(){
+  if(!state.meta) state.meta={};
+  if(!state.meta.dailyCompletions) state.meta.dailyCompletions={};
+  const dk=dateKey();
+  state.meta.dailyCompletions[dk]=(state.meta.dailyCompletions[dk]||0)+1;
+}
 function setNodeDone(n, checked){
   n.done=!!checked;
   n.doneAt=checked?Date.now():null;
@@ -112,6 +159,12 @@ function setNodeDone(n, checked){
     if(state.topId && isUnderTopNode(n, state.topId)) n.touchedAt=Date.now();
     const chain=goldChainIds(state.topId);
     if(chain.has(n.id)) n.touchedAt=Date.now();
+    computeTree(state.nodes);
+    const isLeaf=n.parentId&&n._children.length===0;
+    if(isLeaf){
+      bumpDailyCompletion();
+      if((n.recur||n.role==='habit'||n.role==='KR')&&n.targetNum>0) n.targetDone=(n.targetDone||0)+1;
+    }
   }
 }
 function category(im,ur){
@@ -200,6 +253,8 @@ function applySuggestions(node,text){
   ensureVE(node);
   const est=parseEstimateMinutes(text);
   if(est!=null) node.estimateMinutes=est;
+  parseMetrics(text,node);
+  ensureMetrics(node);
 }
 function parseText(raw,today){
   if(today) TODAY=today;
@@ -210,7 +265,7 @@ function parseText(raw,today){
     const indent=line.length-line.trimStart().length;
     const content=line.trim();
     const clean=content.replace(/^([-*•·]|\d+[.、])\s+/,'');
-    const node={id:'n'+(idc++),text:clean,im:3,ur:3,val:null,eff:null,deadline:'',deadlineDate:null,daysLeft:null,overdue:false,done:false,doneAt:null,touchedAt:null,estimateMinutes:null,actualMinutes:null,recur:false,scale:null,slot:''};
+    const node={id:'n'+(idc++),text:clean,im:3,ur:3,val:null,eff:null,role:'',targetNum:null,targetDone:0,deadline:'',deadlineDate:null,daysLeft:null,overdue:false,done:false,doneAt:null,touchedAt:null,estimateMinutes:null,actualMinutes:null,recur:false,scale:null,slot:''};
     applySuggestions(node,clean);
     while(stack.length&&stack[stack.length-1].indent>=indent) stack.pop();
     node.parentId = (i>0) ? (stack.length?stack[stack.length-1].node.id:nodes[0].id) : null;
@@ -398,7 +453,9 @@ function sankeyLayout(vis){
 }
 
 /* ============ 渲染 SVG（桑基流图） ============ */
-let state={nodes:[], topId:null, scale:'all', viewMode:'sankey', quadQuickWin:false, meta:{weekReviews:[],bannerDismissedWeek:''}};
+let state={nodes:[], topId:null, scale:'all', viewMode:'sankey', quadQuickWin:false,
+  pomo:{active:false,endAt:0,nodeId:null,minutes:25},
+  meta:{weekReviews:[],monthReviews:[],quarterReviews:[],bannerDismissedWeek:'',dailyCompletions:{}}};
 const byId=id=>state.nodes.find(n=>n.id===id);
 
 function normalizeNode(n){
@@ -408,11 +465,13 @@ function normalizeNode(n){
   if(n.recur==null) n.recur=inferRecur(n.text,n.scale);
   if(n.touchedAt!=null && typeof n.touchedAt==='string') n.touchedAt=+new Date(n.touchedAt);
   ensureVE(n);
+  ensureMetrics(n);
   return n;
 }
 function serializeNodes(nodes){
   return nodes.map(n=>({
-    id:n.id,text:n.text,im:n.im,ur:n.ur,val:n.val,eff:n.eff,deadline:n.deadline||'',
+    id:n.id,text:n.text,im:n.im,ur:n.ur,val:n.val,eff:n.eff,role:n.role||'',targetNum:n.targetNum??null,targetDone:n.targetDone||0,
+    deadline:n.deadline||'',
     deadlineDate:n.deadlineDate?n.deadlineDate.getTime():null,
     daysLeft:n.daysLeft,overdue:!!n.overdue,done:!!n.done,doneAt:n.doneAt||null,
     touchedAt:n.touchedAt||null,estimateMinutes:n.estimateMinutes??null,actualMinutes:n.actualMinutes??null,
@@ -470,9 +529,88 @@ function nodesToIndentedText(){
   }).join('\n');
 }
 
+const VIZ_HTML=new Set(['kanban','heatmap','mindmap']);
 function renderCanvas(){
+  const svg=document.getElementById('diagram-svg');
+  const alt=document.getElementById('vizAlt');
+  if(svg) svg.style.display=VIZ_HTML.has(state.viewMode)?'none':'';
+  if(alt){
+    alt.style.display=VIZ_HTML.has(state.viewMode)?'block':'none';
+    if(VIZ_HTML.has(state.viewMode)){
+      if(state.viewMode==='kanban') renderKanban(alt);
+      else if(state.viewMode==='heatmap') renderHeatmap365(alt);
+      else renderMindMap(alt);
+      return;
+    }
+  }
   if(state.viewMode==='network') renderNetwork();
   else render();
+}
+function renderKanban(box){
+  computeTree(state.nodes);
+  const nodes=quadNodes();
+  const buckets={now:[],core:[],distract:[],noise:[]};
+  nodes.forEach(n=>{ (buckets[category(n.im,n.ur).key]||buckets.noise).push(n); });
+  let html='<div class="kanban">';
+  QUAD_ORDER.forEach(q=>{
+    html+=`<div class="kb-col" data-q="${q}"><div class="kb-h">${QUAD[q].icon} ${QUAD[q].label.split('·')[0]}</div><div class="kb-cards">`;
+    const list=buckets[q].slice(0,24);
+    list.forEach(n=>{
+      const mp=metricProgress(n);
+      const pace=paceStatus(n);
+      html+=`<div class="kb-card" data-id="${n.id}"><b>${esc(n.text.length>36?n.text.slice(0,36)+'…':n.text)}</b>`;
+      if(mp) html+=`<span class="kb-m">${mp.done}/${mp.tgt} · ${mp.pct}%</span>`;
+      if(pace) html+=`<span class="kb-m pace">节奏 ${pace.ahead>=0?'+':''}${pace.ahead}</span>`;
+      html+=`</div>`;
+    });
+    if(!list.length) html+='<div class="kb-empty">—</div>';
+    html+=`</div></div>`;
+  });
+  html+='</div>';
+  box.innerHTML=html;
+  box.querySelectorAll('.kb-card').forEach(c=>{
+    const id=c.dataset.id;
+    c.onclick=()=>{ if(!VIZ_HTML.has(state.viewMode)) return; highlightQuad(id,true); };
+  });
+}
+function completionByDay(){
+  const map={};
+  if(state.meta&&state.meta.dailyCompletions) Object.assign(map,state.meta.dailyCompletions);
+  computeTree(state.nodes);
+  state.nodes.forEach(n=>{
+    if(!n.doneAt) return;
+    const dk=dateKey(new Date(n.doneAt));
+    map[dk]=(map[dk]||0)+1;
+  });
+  return map;
+}
+function renderHeatmap365(box){
+  const map=completionByDay();
+  const t=today0();
+  const cells=[];
+  for(let i=364;i>=0;i--){
+    const d=new Date(t); d.setDate(d.getDate()-i);
+    const k=dateKey(d);
+    const c=map[k]||0;
+    const lvl=c===0?0:c===1?1:c<=3?2:c<=5?3:4;
+    cells.push(`<i class="hm c${lvl}" title="${k} · ${c} 叶子完成"></i>`);
+  }
+  const total=Object.values(map).reduce((s,v)=>s+v,0);
+  box.innerHTML=`<div class="heatmap365"><div class="hm-head"><b>365 天叶子完成热力</b><span>${total} 次 · 越深越多</span></div><div class="hm-grid">${cells.join('')}</div></div>`;
+}
+function renderMindMap(box){
+  if(!state.nodes.length){ box.innerHTML='<div class="hint">暂无目标树</div>'; return; }
+  computeTree(state.nodes);
+  const root=state.nodes.find(n=>!n.parentId)||state.nodes[0];
+  function branch(n,depth){
+    const kids=n._children||[];
+    const mp=metricProgress(n);
+    const badge=mp?` <em>${mp.pct}%</em>`:'';
+    let h=`<div class="mm-node" style="--d:${depth}"><span class="mm-t">${esc(n.text)}${badge}</span>`;
+    if(kids.length) h+=`<div class="mm-kids">${kids.map(c=>branch(c,depth+1)).join('')}</div>`;
+    return h+'</div>';
+  }
+  box.innerHTML=`<div class="mindmap">${branch(root,0)}</div>`;
 }
 
 function render(){
@@ -760,6 +898,62 @@ function bindDiagramHover(){
   });
 }
 
+/* ============ 番茄钟 · 绑定 Top1 ============ */
+let pomoTimer=null;
+function pomoRemainMs(){ return state.pomo.active?Math.max(0,state.pomo.endAt-Date.now()):0; }
+function startPomo(minutes){
+  const id=state.topId;
+  if(!id){ alert('请先载入目标，选出当下最重要'); return; }
+  minutes=minutes||25;
+  state.pomo={active:true,endAt:Date.now()+minutes*60000,nodeId:id,minutes};
+  document.body.classList.add('focus-timer-on');
+  if(pomoTimer) clearInterval(pomoTimer);
+  pomoTimer=setInterval(()=>{ if(pomoRemainMs()<=0) finishPomo(true); else renderPomoBar(); },1000);
+  renderHero(); renderPomoBar();
+}
+function stopPomo(){ finishPomo(false); }
+function finishPomo(credit){
+  if(credit&&state.pomo.nodeId){
+    const n=byId(state.pomo.nodeId);
+    if(n){ n.actualMinutes=(n.actualMinutes||0)+Math.round(state.pomo.minutes||25); n.touchedAt=Date.now(); save(); }
+  }
+  state.pomo.active=false;
+  document.body.classList.remove('focus-timer-on');
+  if(pomoTimer) clearInterval(pomoTimer);
+  renderHero(); renderPomoBar(); afterChange();
+}
+function renderPomoBar(){
+  const el=document.getElementById('pomoBar'); if(!el) return;
+  if(!state.pomo.active){ el.classList.remove('show'); el.innerHTML=''; return; }
+  const ms=pomoRemainMs();
+  const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
+  const n=byId(state.pomo.nodeId);
+  el.classList.add('show');
+  el.innerHTML=`<div class="pomo-inner"><b>🍅 专注</b><span class="pomo-task">${esc((n&&n.text)||'')}</span><span class="pomo-t">${pad2(m)}:${pad2(s)}</span>
+    <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="pomoStop">结束</button></div>`;
+  const stop=el.querySelector('#pomoStop');
+  if(stop) stop.onclick=()=>stopPomo();
+}
+function renderMetricsStrip(){
+  const el=document.getElementById('metricsStrip'); if(!el) return;
+  const krs=state.nodes.filter(n=>(n.role==='KR'||n.role==='habit'||n.targetNum>0)&&n.parentId).slice(0,8);
+  const lp=leafProgress();
+  const top=state.topId?byId(state.topId):null;
+  const imp=top?focusScore(top):0;
+  if(!state.nodes.length){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display='block';
+  const pills=[
+    lp?`<span class="ms-pill">叶子 <b>${lp.pct}%</b> <small>${lp.done}/${lp.total}</small></span>`:'',
+    top?`<span class="ms-pill">Top1 分 <b>${imp}</b></span>`:'',
+  ].concat(krs.map(n=>{
+    const mp=metricProgress(n); if(!mp) return '';
+    const pace=paceStatus(n);
+    const tag=n.role==='habit'?'习惯':(n.role==='KR'?'KR':'目标');
+    return `<span class="ms-pill" title="${esc(n.text)}">${tag} ${mp.done}/${mp.tgt} <b>${mp.pct}%</b>${pace?` · Δ${pace.ahead>=0?'+':''}${pace.ahead}`:''}</span>`;
+  })).filter(Boolean);
+  el.innerHTML=`<div class="metrics-strip">${pills.join('')}</div>`;
+}
+
 /* ============ 英雄卡：当下最重要（按尺度） ============ */
 function renderHero(){
   const box=document.getElementById('hero');
@@ -788,14 +982,21 @@ function renderHero(){
     altHtml=`<div class="hero-stack"><div class="hs-lbl">执行栈 · 仍可优先（Top ${alts.length+1} 之 ${alts.length>1?'②③':'②'}）</div>`+
       alts.map((n,i)=>`<div class="hero-alt"><span class="rank">#${i+2}</span><b>${esc(n.text)}</b></div>`).join('')+'</div>';
   }
+  const pace=paceStatus(top);
+  const pacePill=pace?`<span class="pill pace" title="相对期限应有进度">节奏 ${pace.ahead>=0?'领先':'落后'} ${Math.abs(pace.ahead)}</span>`:'';
+  const mp=metricProgress(top);
+  const mpPill=mp&&mp.kind!=='leaf'?`<span class="pill">📊 ${mp.done}/${mp.tgt}</span>`:'';
   box.innerHTML=`<div class="hero-main"><span class="hero-star">★</span> ${scaleTag}：<b>${esc(top.text)}</b></div>
     <div class="hero-sub">
       <span class="pill"><span class="dot" style="background:${c.color}"></span>${c.label}</span>
       <span class="pill">⏱ ${esc(dl)}</span>
-      <span class="pill">重要 ${top.im} · 紧急 ${top.ur}</span>
-      ${progPill}
+      <span class="pill">重要 ${top.im} · 紧急 ${top.ur} · 分 ${focusScore(top)}</span>
+      ${progPill}${mpPill}${pacePill}
+      <button type="button" class="gf-btn gf-btn--sm gf-btn--primary" id="btnPomo25" title="番茄钟绑定当前 Top1">🍅 专注 25′</button>
       <span class="why">▶ ${why}</span>
     </div>${altHtml}`;
+  const pb=document.getElementById('btnPomo25');
+  if(pb) pb.onclick=()=>startPomo(25);
 }
 
 /* ============ 顶部比例尺（随尺度缩放切换） ============ */
@@ -1070,7 +1271,7 @@ function insertChildren(pid, texts){
   const idx=state.nodes.findIndex(n=>n.id===pid);
   let maxId=state.nodes.reduce((m,n)=>Math.max(m, +(n.id||'n0').slice(1)||0), 0);
   const newNodes=texts.map(t=>{
-    const node={id:'n'+(++maxId),text:t,im:Math.min(5,parent.im),ur:Math.min(5,parent.ur),val:null,eff:null,deadline:'',deadlineDate:null,daysLeft:null,overdue:false,done:false,doneAt:null,touchedAt:null,estimateMinutes:null,actualMinutes:null,recur:false,parentId:pid,scale:parent.scale,slot:''};
+    const node={id:'n'+(++maxId),text:t,im:Math.min(5,parent.im),ur:Math.min(5,parent.ur),val:null,eff:null,role:'',targetNum:null,targetDone:0,deadline:'',deadlineDate:null,daysLeft:null,overdue:false,done:false,doneAt:null,touchedAt:null,estimateMinutes:null,actualMinutes:null,recur:false,parentId:pid,scale:parent.scale,slot:''};
     applySuggestions(node,t); node.scale=parent.scale; return node;
   });
   state.nodes.splice(idx+1,0,...newNodes);
@@ -1177,8 +1378,11 @@ async function aiDecompose(id, n){
 /* ============ 持久化 ============ */
 function saveMeta(){ try{localStorage.setItem(LS_META,JSON.stringify(state.meta||{}));}catch(e){} }
 function loadMeta(){
-  try{const s=localStorage.getItem(LS_META); if(s) state.meta={weekReviews:[],bannerDismissedWeek:'',...JSON.parse(s)};}catch(e){}
-  if(!state.meta) state.meta={weekReviews:[],bannerDismissedWeek:''};
+  try{
+    const s=localStorage.getItem(LS_META);
+    if(s) state.meta={weekReviews:[],monthReviews:[],quarterReviews:[],bannerDismissedWeek:'',dailyCompletions:{},...JSON.parse(s)};
+  }catch(e){}
+  if(!state.meta) state.meta={weekReviews:[],monthReviews:[],quarterReviews:[],bannerDismissedWeek:'',dailyCompletions:{}};
 }
 function save(){
   try{
@@ -1218,10 +1422,32 @@ function weekRange(d){
   const end=new Date(start); end.setDate(end.getDate()+7);
   return {start,end,key:weekKey(d)};
 }
-function computeWeekStats(){
+function periodKey(cycle,d){
+  if(cycle==='week') return weekKey(d);
+  const t=d?new Date(d):today0();
+  if(cycle==='month') return t.getFullYear()+'-'+pad2(t.getMonth()+1);
+  const q=Math.floor(t.getMonth()/3)+1;
+  return t.getFullYear()+'-Q'+q;
+}
+function periodRange(cycle){
+  if(cycle==='week'){ const r=weekRange(); return {...r,cycle:'week',label:'本周'}; }
+  const t=today0();
+  if(cycle==='month'){
+    const start=new Date(t.getFullYear(),t.getMonth(),1);
+    const end=new Date(t.getFullYear(),t.getMonth()+1,1);
+    return {start,end,key:periodKey('month'),cycle:'month',label:'本月'};
+  }
+  const q=Math.floor(t.getMonth()/3);
+  const start=new Date(t.getFullYear(),q*3,1);
+  const end=new Date(t.getFullYear(),q*3+3,1);
+  return {start,end,key:periodKey('quarter'),cycle:'quarter',label:'本季'};
+}
+const REVIEW_STORE={week:'weekReviews',month:'monthReviews',quarter:'quarterReviews'};
+function computePeriodStats(cycle){
+  cycle=cycle||'week';
   computeTree(state.nodes);
   ensureAllEstimates();
-  const {start,end}=weekRange();
+  const {start,end,label}=periodRange(cycle);
   const leaves=state.nodes.filter(n=>n.parentId&&n._children.length===0);
   const completed=leaves.filter(n=>{
     if(!n.done) return false;
@@ -1252,18 +1478,20 @@ function computeWeekStats(){
   });
   const goldMoved=!!(goldCompleted.length||goldTouched.length);
   const goldDetail=goldMoved
-    ? `金线本周有动静：完成 ${goldCompleted.length} 项`+(goldTouched.length?` · 触碰 ${goldTouched.length} 次`:'')+
-      (goldCompleted.length?'\n· '+goldCompleted.map(n=>n.text).join('\n· '):'')
-    : (topId?`金线「${(byId(topId)||{}).text||'—'}」本周尚无完成/触碰记录。`:'尚未选出金线任务。');
+  ? `${label}金线有动静：完成 ${goldCompleted.length} 项`+(goldTouched.length?` · 触碰 ${goldTouched.length} 次`:'')+
+    (goldCompleted.length?'\n· '+goldCompleted.map(n=>n.text).join('\n· '):'')
+  : (topId?`金线「${(byId(topId)||{}).text||'—'}」${label}尚无完成/触碰记录。`:'尚未选出金线任务。');
   const completedTexts=completed.map(n=>n.text);
+  const okrNodes=state.nodes.filter(n=>(n.role==='KR'||n.role==='O'||n.targetNum)&&n.parentId);
   let estSum=0, actSum=0;
   completed.forEach(n=>{ estSum+=n.estimateMinutes||0; actSum+=n.actualMinutes||0; });
   return {
-    total,byCat,corePct,coreVsFire,leafProg:lp,quickWins,
-    pending:leaves.filter(n=>!n.done).length,range:{start,end},
-    completedTexts,goldMoved,goldDetail,goldCompleted,goldTouched,estSum,actSum,
+    cycle,total,byCat,corePct,coreVsFire,leafProg:lp,quickWins,
+    pending:leaves.filter(n=>!n.done).length,range:{start,end},label,
+    completedTexts,goldMoved,goldDetail,goldCompleted,goldTouched,estSum,actSum,okrNodes,
   };
 }
+function computeWeekStats(){ return computePeriodStats('week'); }
 function autoWeekDraft(st, last){
   const wins=last.wins||(st.completedTexts.length?'· '+st.completedTexts.join('\n· '):'');
   const gold=last.gold||(st.goldDetail||'');
@@ -1312,7 +1540,6 @@ function addMicroAction(id){
   if(last){ last.scale='day'; last.ur=Math.max(last.ur,4); if(!last.slot) last.slot='h1'; }
   save(); afterChange();
 }
-function pad2(n){ return n<10?'0'+n:''+n; }
 function icsStamp(d){
   const x=new Date(d);
   return x.getFullYear()+pad2(x.getMonth()+1)+pad2(x.getDate())+'T'+pad2(x.getHours())+pad2(x.getMinutes())+pad2(x.getSeconds());
@@ -1337,7 +1564,7 @@ function exportICS(){
 }
 function exportBackup(){
   const payload={
-    app:'goalflow',version:6,exportedAt:new Date().toISOString(),
+    app:'goalflow',version:7,exportedAt:new Date().toISOString(),
     viewMode:state.viewMode,
     nodes:serializeNodes(state.nodes),meta:state.meta||{}
   };
@@ -1366,62 +1593,88 @@ function importBackup(file){
   };
   reader.readAsText(file);
 }
-function openWeekReview(){
-  const overlay=document.getElementById('weekReviewModal');
-  const wk=weekKey();
-  const last=(state.meta.weekReviews||[]).find(r=>r.week===wk)||{};
-  const st=computeWeekStats();
-  const draft=autoWeekDraft(st,last);
-  const ritual=[
-    {k:'pause_done',label:'开场 · 暂停 10 秒',hint:'闭眼深呼吸，把注意力从噪音里收回来。',type:'check',checked:!!last.pause_done},
-    {k:'gold',label:'① 金线（★ 最重要）本周推进了什么？',hint:'下方已预填系统观察，可删改。',type:'area',def:draft.gold},
-    {k:'core',label:'② 核心 vs 救火（重要不紧急 vs 紧急项）',hint:'对照分析页计数，可补充感受。',type:'area',def:draft.core},
-    {k:'wins',label:'③ 本周小赢（自动汇集已完成叶子）',hint:'可删减或补充。',type:'area',def:draft.wins},
-    {k:'block',label:'④ 下周保护的一个深潜块（2h+）',hint:'写清何时、做什么、如何不被打断。',type:'area'},
-    {k:'commit',label:'封坛 · 下周一句承诺',hint:'只承诺一件事，越少越能守住。',type:'area'},
+function ritualTemplate(cycle,draft,last){
+  if(cycle==='month') return [
+    {k:'highlight',label:'① 本月高光时刻',hint:'自动汇集完成叶子，可删改。',type:'area',def:last.highlight||draft.wins},
+    {k:'lesson',label:'② 本月最大教训',type:'area'},
+    {k:'theme',label:'③ 下月一个主题词',type:'area'},
   ];
+  if(cycle==='quarter') return [
+    {k:'okr',label:'① OKR / KR 得分（0–10）',hint:'对照左侧度量条与 KR 进度。',type:'area'},
+    {k:'align',label:'② 与年度目标对齐了吗？',type:'area'},
+    {k:'bet',label:'③ 下季一个战略赌注',type:'area'},
+  ];
+  return [
+    {k:'pause_done',label:'开场 · 暂停 10 秒',hint:'闭眼深呼吸。',type:'check',checked:!!last.pause_done},
+    {k:'gold',label:'① 金线推进？',hint:'周回顾 · 三问',type:'area',def:draft.gold},
+    {k:'core',label:'② 核心投入几成？',hint:'对照核心 vs 救火',type:'area',def:draft.core},
+    {k:'block',label:'③ 下周深潜块？',hint:'何时 · 做什么 · 如何守住',type:'area',def:last.block||''},
+    {k:'wins',label:'附加 · 本周小赢',type:'area',def:draft.wins},
+    {k:'commit',label:'封坛 · 一句承诺',type:'area'},
+  ];
+}
+function reviewCycleLabel(c){ return c==='week'?'周回顾':c==='month'?'月回顾':'季回顾'; }
+function openReview(cycle){
+  cycle=cycle||'week';
+  const overlay=document.getElementById('weekReviewModal');
+  const pr=periodRange(cycle);
+  const store=REVIEW_STORE[cycle];
+  const last=(state.meta[store]||[]).find(r=>(r.period||r.week)===pr.key)||{};
+  const st=computePeriodStats(cycle);
+  const draft=autoWeekDraft(st,last);
+  const ritual=ritualTemplate(cycle,draft,last);
   const lp=st.leafProg;
+  const okrHtml=(st.okrNodes&&st.okrNodes.length)?`<div class="wr-bars-title">OKR · 习惯进度</div><ul class="wr-okr">${st.okrNodes.slice(0,8).map(n=>{
+    const mp=metricProgress(n); if(!mp) return '';
+    const pace=paceStatus(n);
+    return `<li>${esc(n.text)} · ${mp.done}/${mp.tgt}（${mp.pct}%）${pace?` · 节奏 Δ${pace.ahead>=0?'+':''}${pace.ahead}`:''}</li>`;
+  }).join('')}</ul>`:'';
   overlay.classList.add('show');
   overlay.innerHTML=`<div class="modal modal-wide" role="dialog">
     <div class="modal-head">
       <div class="mh-ic">📋</div>
-      <div><div class="mh-tt">周回顾仪式</div><div class="mh-sub">分析 → 反思 → 承诺 · 周起始 ${wk}</div></div>
+      <div><div class="mh-tt">${reviewCycleLabel(cycle)}</div><div class="mh-sub">分析 → 仪式 · ${pr.label} · ${pr.key}</div></div>
       <span class="mh-x" id="wrClose">×</span>
     </div>
+    <div class="wr-cycle">
+      <button type="button" class="wr-ctab${cycle==='week'?' on':''}" data-cycle="week">周</button>
+      <button type="button" class="wr-ctab${cycle==='month'?' on':''}" data-cycle="month">月</button>
+      <button type="button" class="wr-ctab${cycle==='quarter'?' on':''}" data-cycle="quarter">季</button>
+    </div>
     <div class="wr-tabs">
-      <button type="button" class="wr-tab on" data-tab="stats">📊 本周分析</button>
-      <button type="button" class="wr-tab" data-tab="ritual">🕯 固定仪式</button>
+      <button type="button" class="wr-tab on" data-tab="stats">📊 ${pr.label}分析</button>
+      <button type="button" class="wr-tab" data-tab="ritual">🕯 仪式模板</button>
     </div>
     <div class="wr-pane on" data-pane="stats">
       <div class="wr-stats-grid">
-        <div class="wr-stat"><div class="wr-k">本周完成（叶子）</div><div class="wr-v">${st.total}</div><div class="wr-h">仅统计勾选完成且带时间戳的叶子</div></div>
-        <div class="wr-stat"><div class="wr-k">核心象限占比</div><div class="wr-v gold">${st.corePct}%</div><div class="wr-h">完成项里「重要不紧急」</div></div>
-        <div class="wr-stat"><div class="wr-k">待办叶子</div><div class="wr-v">${st.pending}</div><div class="wr-h">含 ⚡快速赢 ${st.quickWins} 项</div></div>
-        <div class="wr-stat"><div class="wr-k">全树叶子进度</div><div class="wr-v">${lp?lp.pct:0}%</div><div class="wr-h">${lp?lp.done+'/'+lp.total:'—'}（仅叶子计完成）</div></div>
+        <div class="wr-stat"><div class="wr-k">${pr.label}完成（叶子）</div><div class="wr-v">${st.total}</div><div class="wr-h">带完成时间戳的叶子</div></div>
+        <div class="wr-stat"><div class="wr-k">核心象限占比</div><div class="wr-v gold">${st.corePct}%</div><div class="wr-h">完成项里重要不紧急</div></div>
+        <div class="wr-stat"><div class="wr-k">待办叶子</div><div class="wr-v">${st.pending}</div><div class="wr-h">⚡快速赢 ${st.quickWins}</div></div>
+        <div class="wr-stat"><div class="wr-k">全树叶子</div><div class="wr-v">${lp?lp.pct:0}%</div><div class="wr-h">${lp?lp.done+'/'+lp.total:'—'}</div></div>
       </div>
-      <div class="wr-gold ${st.goldMoved?'ok':'warn'}">${st.goldMoved?'★ 金线本周有推进/触碰':'○ 金线本周尚无完成记录'} · ${esc((st.goldDetail||'').split('\n')[0])}</div>
-      <div class="wr-bars-title">核心 vs 救火（本周完成计数）</div>
-      <div class="wr-bar-row"><span class="wr-lbl">核心投入</span><div class="wr-bar"><i style="width:${st.coreVsFire.corePct}%;background:${PALETTE_UR[0]}"></i></div><span class="wr-num">${st.coreVsFire.core} 项</span></div>
-      <div class="wr-bar-row"><span class="wr-lbl">救火紧急</span><div class="wr-bar"><i style="width:${st.coreVsFire.firePct}%;background:${PALETTE_UR[4]}"></i></div><span class="wr-num">${st.coreVsFire.fire} 项</span></div>
-      ${st.estSum?`<div class="wr-h" style="margin:8px 0">预估 ${st.estSum} 分 vs 实计 ${st.actSum} 分（已完成叶子）</div>`:''}
-      <div class="wr-bars-title">本周完成 · 按四象限分布</div>
-      ${st.total?weekStatsBarsHtml(st):'<div class="wr-empty">本周尚无可统计的叶子完成（完成后会自动记录时间戳）。</div>'}
-      ${st.completedTexts.length?`<div class="wr-done-list"><div class="wr-bars-title">已完成叶子列表</div><ul>${st.completedTexts.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:''}
+      <div class="wr-gold ${st.goldMoved?'ok':'warn'}">${st.goldMoved?'★ 金线有推进':'○ 金线待激活'} · ${esc((st.goldDetail||'').split('\n')[0])}</div>
+      <div class="wr-bars-title">核心 vs 救火</div>
+      <div class="wr-bar-row"><span class="wr-lbl">核心</span><div class="wr-bar"><i style="width:${st.coreVsFire.corePct}%;background:${PALETTE_UR[0]}"></i></div><span class="wr-num">${st.coreVsFire.core}</span></div>
+      <div class="wr-bar-row"><span class="wr-lbl">救火</span><div class="wr-bar"><i style="width:${st.coreVsFire.firePct}%;background:${PALETTE_UR[4]}"></i></div><span class="wr-num">${st.coreVsFire.fire}</span></div>
+      ${okrHtml}
+      ${st.estSum?`<div class="wr-h" style="margin:8px 0">预估 ${st.estSum} 分 · 实计 ${st.actSum} 分</div>`:''}
+      <div class="wr-bars-title">完成 · 四象限</div>
+      ${st.total?weekStatsBarsHtml(st):'<div class="wr-empty">该周期尚无完成记录。</div>'}
+      ${st.completedTexts.length?`<div class="wr-done-list"><ul>${st.completedTexts.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:''}
     </div>
     <div class="wr-pane" data-pane="ritual">
-      <div class="chat wr-ritual">
-        ${ritual.map(q=>{
-          if(q.type==='check') return `<label class="wr-check"><input type="checkbox" data-k="${q.k}" ${q.checked?'checked':''}><span><b>${q.label}</b><br><span class="wr-hint">${q.hint}</span></span></label>`;
-          return `<label class="wr-field"><span class="wr-fl">${q.label}</span><span class="wr-hint">${q.hint}</span>
-            <textarea data-k="${q.k}" rows="2">${esc(last[q.k]||q.def||'')}</textarea></label>`;
-        }).join('')}
-      </div>
+      <div class="chat wr-ritual">${ritual.map(q=>{
+        if(q.type==='check') return `<label class="wr-check"><input type="checkbox" data-k="${q.k}" ${q.checked?'checked':''}><span><b>${q.label}</b><br><span class="wr-hint">${q.hint||''}</span></span></label>`;
+        return `<label class="wr-field"><span class="wr-fl">${q.label}</span>${q.hint?`<span class="wr-hint">${q.hint}</span>`:''}
+          <textarea data-k="${q.k}" rows="2">${esc(last[q.k]||q.def||'')}</textarea></label>`;
+      }).join('')}</div>
     </div>
     <div class="modal-foot">
-      <button class="${BTN.primary || 'gf-btn gf-btn--primary'}" id="wrSave">保存本周回顾</button>
+      <button class="${BTN.primary || 'gf-btn gf-btn--primary'}" id="wrSave">保存${reviewCycleLabel(cycle)}</button>
       <button class="${BTN.ghost || 'gf-btn gf-btn--ghost'}" id="wrCancel">取消</button>
     </div>
   </div>`;
+  overlay.querySelectorAll('.wr-ctab').forEach(b=> b.onclick=()=>openReview(b.dataset.cycle));
   overlay.querySelectorAll('.wr-tab').forEach(btn=>{
     btn.onclick=()=>{
       overlay.querySelectorAll('.wr-tab').forEach(b=>b.classList.toggle('on',b===btn));
@@ -1431,16 +1684,19 @@ function openWeekReview(){
   overlay.querySelector('#wrClose').onclick=closeWeekReview;
   overlay.querySelector('#wrCancel').onclick=closeWeekReview;
   overlay.querySelector('#wrSave').onclick=()=>{
-    const entry={week:wk,savedAt:new Date().toISOString(),statsSnapshot:{total:st.total,corePct:st.corePct,byCat:st.byCat}};
+    const entry={cycle,period:pr.key,week:cycle==='week'?pr.key:undefined,savedAt:new Date().toISOString(),
+      statsSnapshot:{total:st.total,corePct:st.corePct,byCat:st.byCat}};
     overlay.querySelectorAll('textarea[data-k]').forEach(ta=>{ entry[ta.dataset.k]=ta.value.trim(); });
     overlay.querySelectorAll('input[type=checkbox][data-k]').forEach(cb=>{ entry[cb.dataset.k]=cb.checked; });
-    state.meta.weekReviews=(state.meta.weekReviews||[]).filter(r=>r.week!==wk);
-    state.meta.weekReviews.push(entry);
+    const arr=state.meta[store]||[];
+    state.meta[store]=arr.filter(r=>(r.period||r.week)!==pr.key);
+    state.meta[store].push(entry);
     saveMeta(); closeWeekReview(); renderReviewBanner();
-    alert('周回顾已保存（仅存于本机）');
+    alert(reviewCycleLabel(cycle)+'已保存（本机）');
   };
   overlay.onclick=e=>{ if(e.target===overlay) closeWeekReview(); };
 }
+function openWeekReview(){ openReview('week'); }
 function closeWeekReview(){
   const overlay=document.getElementById('weekReviewModal');
   overlay.classList.remove('show'); overlay.innerHTML='';
@@ -1457,7 +1713,8 @@ function renderSidebar(){
     if(sp) sp.textContent='';
     return;
   }
-  const kids=(t.children||[]);
+  computeTree(state.nodes);
+  const kids=t._children||[];
   const shown=kids.slice(0,8);
   el.innerHTML='<div class="si dim root">▾ '+esc(t.text)+'</div>'+
     shown.map(c=>'<div class="si dim child">· '+esc(c.text)+'</div>').join('')+
@@ -1469,6 +1726,7 @@ function afterChange(){
   ensureAllEstimates();
   renderHero(); renderQuadrant(); renderCanvas(); renderFocus(); renderRhythm(); renderSmart();
   renderTreeEditor(); renderProgress(); renderReviewBanner(); renderSidebar();
+  renderMetricsStrip(); renderPomoBar();
 }
 function doParse(){
   const raw=document.getElementById('input').value.trim();
@@ -1561,9 +1819,14 @@ if(typeof document!=='undefined'){
       b.onclick=()=>{ state.viewMode=b.dataset.view||'sankey';
         document.querySelectorAll('#viewbar button').forEach(x=>x.classList.toggle('on',x===b));
         const sub=document.getElementById('canvasSub');
-        if(sub) sub.textContent=state.viewMode==='network'
-          ? '节点 = 目标 · 连线 = 父子关系 · 半径 ≈ 重要度'
-          : '条带宽度 = 重要性 · 颜色冷暖 = 紧急性 · 金色发光 = 当下最重要';
+        const subs={
+          sankey:'条带宽度 = 重要性 · 颜色 = 紧急性 · 金色 = Top1',
+          network:'节点 = 目标 · 连线 = 父子 · 半径 ≈ 重要度',
+          kanban:'看板 = 四象限列 · 卡片可点选高亮',
+          heatmap:'365 天叶子完成热力（越深越多）',
+          mindmap:'脑图 = 目标树层次 · 百分比 = 子树/指标进度',
+        };
+        if(sub) sub.textContent=subs[state.viewMode]||subs.sankey;
         renderCanvas();
       };
     });
@@ -1610,7 +1873,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     parseText, parseDeadline, focusScore, category, applySuggestions, computeTree, recomputeSchedule,
     treeOrder, pickTop, pickRanked, leafProgress, subtreeProgress, urColor, buildView, sankeyLayout,
     wrapLabel, inferScale, smartEval, smartQuestions, decomposeSuggestions, serializeNodes, weekKey,
-    computeWeekStats, ensureVE, isQuickWin, inferRecur, parseEstimateMinutes, backlogLanes, exportICS, nodesToIndentedText,
+    computeWeekStats, computePeriodStats, ensureVE, isQuickWin, inferRecur, parseEstimateMinutes, metricProgress, paceStatus, backlogLanes, exportICS, nodesToIndentedText, periodKey,
     GoalFlowTheme: typeof GoalFlowTheme !== 'undefined' ? GoalFlowTheme : GF,
   };
 }

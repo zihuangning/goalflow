@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta name="color-scheme" content="light dark">
 <title>目标流 · GoalFlow</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script>try{var d=document.documentElement;d.dataset.theme=localStorage.getItem('goalflow.theme')||'linear';d.dataset.mode=localStorage.getItem('goalflow.mode')||'dark'}catch(e){document.documentElement.dataset.theme='linear';document.documentElement.dataset.mode='dark'}</script>
-<link rel="stylesheet" href="assets/css/main.css?v=5.2">
+<link rel="stylesheet" href="assets/css/main.css?v=5.3">
 </head>
 <body>
 <div class="app-shell">
@@ -56,7 +57,7 @@
       </div>
       <div class="spacer"></div>
       <div class="topbar-actions">
-        <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnWeekReview" title="周回顾仪式 + 本周分析">📋 周回顾</button>
+        <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnWeekReview" title="周/月/季回顾 + 统计">📋 回顾</button>
         <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnExportIcs" title="导出带期限叶子为 ICS（本地文件）">📅 ICS</button>
         <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnExportJson" title="备份目标数据">💾 备份</button>
         <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnImportJson" title="从 JSON 恢复">📂 恢复</button>
@@ -82,9 +83,11 @@
 
       <div class="hero-wrap" id="heroWrap">
         <div class="hero-eyebrow">FOCUS · 当下河流</div>
+        <div id="metricsStrip" class="metrics-wrap" style="display:none"></div>
         <div class="hero empty" id="hero">
           <div class="hero-main">载入目标后，这里会显示「当下最重要」的一件事。</div>
         </div>
+        <div class="pomo-bar" id="pomoBar" aria-live="polite"></div>
       </div>
 
       <div class="wrap">
@@ -107,7 +110,7 @@
               <p><b>时间尺度缩放</b>：右上角像地图一样可切换 年度总览 / 每月 / 每周 / 每日，看清不同时间颗粒度下的精力重点；下方「全年精力节奏」把一年拆成 12 个月，看精力在哪几个月扎堆。</p>
               <p><b>四象限校准</b>：图下方把任务按「重要 / 紧急」铺成四象限，直接把卡片拖到目标象限即可重设优先级，与流图、英雄卡实时联动。</p>
               <p><b>SMART 智能对话</b>：左栏「SMART 体检」会检查每个目标是否够具体、可衡量、有期限；点「对话拆解」可让助手逐项提问补齐，或一键拆成子任务。</p>
-              <p><b>执行闭环（v4.3）</b>：桑基+关系图 · V/E 矩阵 · 树形内联编辑 · 预估/实计时长与日容量 · Backlog 泳道 · 周回顾自动预填 · 📅 ICS 导出（仅期限叶子）。</p>
+              <p><b>执行闭环（v5.3）</b>：桑基/关系/看板/脑图/365热力 · OKR·KR（<code>KR:</code>、<code>3/12</code>、习惯打卡联动）· 周月季回顾 · Top1 番茄 25′ · 叶子%与重要度分。</p>
             </details>
             <div class="hint">层级用缩进 / 编号(1. 1.1) / 项目符号(- •)。首行自动作为「目标根」。日期如「周五前 / 本周内 / 3月15日 / 月底」会被自动识别为期限；「每天 / 每周 / 每月 / 今年」会被识别为时间尺度。</div>
           </div>
@@ -143,8 +146,11 @@
               </div>
               <div class="spacer-min"></div>
               <div class="viewbar" id="viewbar" title="切换可视化视角">
-                <button type="button" data-view="sankey" class="on">桑基流</button>
-                <button type="button" data-view="network">关系图</button>
+                <button type="button" data-view="sankey" class="on">桑基</button>
+                <button type="button" data-view="network">关系</button>
+                <button type="button" data-view="kanban">看板</button>
+                <button type="button" data-view="mindmap">脑图</button>
+                <button type="button" data-view="heatmap">热力</button>
               </div>
               <div class="zoombar" id="zoombar">
                 <button data-scale="all" class="on">年度总览</button>
@@ -160,6 +166,7 @@
             <div class="rhythm" id="rhythm"></div>
             <div class="canvas-wrap" id="canvasWrap">
               <svg id="diagram-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+              <div id="vizAlt" class="viz-alt"></div>
               <button type="button" class="gf-btn gf-btn--primary gf-btn--cool ex-btn" id="btnExport">导出 PNG</button>
             </div>
             <div class="legend">
@@ -199,8 +206,8 @@
 <!-- 周回顾弹窗 -->
 <div class="modal-mask" id="weekReviewModal"></div>
 
-<script src="assets/js/gf-tokens.js?v=5.2"></script>
-<script src="assets/js/gf-demos.js?v=5.2"></script>
-<script src="assets/js/app.js?v=5.2"></script>
+<script src="assets/js/gf-tokens.js?v=5.3"></script>
+<script src="assets/js/gf-demos.js?v=5.3"></script>
+<script src="assets/js/app.js?v=5.3"></script>
 </body>
 </html>
