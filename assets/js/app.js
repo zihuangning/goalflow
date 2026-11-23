@@ -1525,17 +1525,27 @@ if(typeof document!=='undefined'){
     document.getElementById('todayLine').textContent=
       `今天 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 星期${wd}`;
     initDemoSelect();
-    // 主题切换（gf-tokens.js 提供 GoalFlowTheme.THEMES / setTheme）
+    // 主题切换（gf-tokens.js 提供 GoalFlowTheme.THEMES / setTheme；含旧缓存兜底）
     const thSel=document.getElementById('themeSelect');
-    if(thSel && GF.THEMES){
+    if(thSel){
       thSel.value=GF.theme||'linear';
-      thSel.onchange=()=>GF.setTheme(thSel.value);
+      thSel.onchange=()=>{
+        if(GF.setTheme){ GF.setTheme(thSel.value); return; }
+        try{localStorage.setItem('goalflow.theme',thSel.value);}catch(e){}
+        location.reload();
+      };
     }
-    // 明暗模式切换
+    // 明暗模式切换（含旧缓存兜底：无 GF.toggleMode 时也能生效）
     const mt=document.getElementById('modeToggle');
-    if(mt && GF.toggleMode){
-      mt.textContent=(GF.mode==='light')?'☀':'☾';
-      mt.onclick=()=>GF.toggleMode();
+    if(mt){
+      const curMode=(GF.mode||document.documentElement.dataset.mode||'dark');
+      mt.textContent=(curMode==='light')?'☀':'☾';
+      mt.onclick=()=>{
+        if(GF.toggleMode){ GF.toggleMode(); return; }
+        const next=(curMode==='light')?'dark':'light';
+        try{localStorage.setItem('goalflow.mode',next);}catch(e){}
+        location.reload();
+      };
     }
     // 侧栏 / 图标轨的周回顾入口
     ['sideWeekReview','railWeekReview'].forEach(id=>{

@@ -9,14 +9,15 @@
 - 两个独立维度：`<html data-theme="linear" data-mode="dark">`，存储键 `goalflow.theme` + `goalflow.mode`
 - CSS：`:root` = 结构 token + `linear` dark；`[data-theme="x"]` 覆盖各主题 dark；`[data-theme="x"][data-mode="light"]` 覆盖各主题 light（只改颜色 token，结构 token 不动）
 - JS：`gf-tokens.js` 的 `THEMES[t].dark/.light` 双套色板（`PALETTE_UR` / `COLORS` / `noise`），加载时按 theme+mode 摊平到顶层，`app.js` 零感知
-- 切换：`#themeSelect` → `setTheme()`；侧栏底部 `#modeToggle`（☾/☀）→ `toggleMode()`；均写存储后 reload
+- 切换：顶栏 `.topbar-theme` 内 `#themeSelect` → `setTheme()`、`#modeToggle`（☾/☀）→ `toggleMode()`；均写存储后 reload（app.js 绑定含旧缓存兜底，无 GF 方法时直接写 localStorage 后 reload）
+- 缓存破除：资源引用带 `?v=版本` 查询串（inline-bundle.mjs 正则已兼容），改版本号即可强制刷新
 - 防闪烁：`<head>` 内联 bootstrap 提前写入 `data-theme` + `data-mode`（打包脚本依赖尾部三 script 连续，勿拆分）
 - 新增主题：`tokens.css` 加 dark + light 两个覆盖块、`gf-tokens.js` `THEMES` 加双套色板、`index.html` 下拉加 option，四处即可
 - light 模式注意：gold 调深（如 `#d4a017`）保对比；`body` 去纹理仅渐变
 
 ## 布局（v5.1 · app shell）
 
-参考 `demos/01-linear`：左侧 **52px 图标轨 `.rail`**（logo / 锚点导航 / 周回顾◔ / demos 链接）+ **230px 侧栏 `.side`**（工作流 1-4 锚点、目标树 `#sideTree` + 进度 `#sideProg`、底部主题选择 + 明暗切换）+ 主区 `.main`（顶栏 + `.main-scroll` 滚动容器）。`body{overflow:hidden}`，仅主区滚动；≤900px 隐藏 rail/side。面板锚点 id：`panelInput/panelTree/panelSmart/canvasPanel/quadPanel/focusPanel`。
+参考 `demos/01-linear`：左侧 **52px 图标轨 `.rail`**（logo / 锚点导航 / 周回顾◔ / demos 链接）+ **230px 侧栏 `.side`**（工作流 1-4 锚点、目标树 `#sideTree` + 进度 `#sideProg`）+ 主区 `.main`（顶栏含 `.topbar-theme` 主题/明暗控件 + `.main-scroll` 滚动容器）。`body{overflow:hidden}`，仅主区滚动；≤900px 隐藏 rail/side。面板锚点 id：`panelInput/panelTree/panelSmart/canvasPanel/quadPanel/focusPanel`。
 
 ## 目录
 

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script>try{var d=document.documentElement;d.dataset.theme=localStorage.getItem('goalflow.theme')||'linear';d.dataset.mode=localStorage.getItem('goalflow.mode')||'dark'}catch(e){document.documentElement.dataset.theme='linear';document.documentElement.dataset.mode='dark'}</script>
-<link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="assets/css/main.css?v=5.2">
 </head>
 <body>
 <div class="app-shell">
@@ -45,14 +45,6 @@
     <button type="button" class="si" id="sideWeekReview">◔ 周回顾仪式</button>
     <div class="slabel">目标树 <span class="sprog" id="sideProg"></span></div>
     <div class="side-tree" id="sideTree"><div class="si dim">解析后在此显示目标树</div></div>
-    <div class="side-foot">
-      <select id="themeSelect" class="gf-input gf-select" title="界面主题" aria-label="界面主题">
-        <option value="linear">Linear</option>
-        <option value="raycast">Raycast 玻璃 · 预览</option>
-        <option value="rpg">RPG 游戏 · 预览</option>
-      </select>
-      <button type="button" class="gf-btn" id="modeToggle" title="切换深色 / 浅色">☾</button>
-    </div>
   </aside>
 
   <!-- 右：主内容 -->
@@ -69,6 +61,14 @@
         <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnExportJson" title="备份目标数据">💾 备份</button>
         <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnImportJson" title="从 JSON 恢复">📂 恢复</button>
         <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+        <span class="topbar-theme">
+          <select id="themeSelect" class="gf-input gf-select" title="界面主题" aria-label="界面主题">
+            <option value="linear">Linear</option>
+            <option value="raycast">Raycast 玻璃 · 预览</option>
+            <option value="rpg">RPG 游戏 · 预览</option>
+          </select>
+          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost mode-btn" id="modeToggle" title="切换深色 / 浅色">☾</button>
+        </span>
       </div>
       <div class="today-chip" id="todayLine"></div>
     </header>
@@ -199,8 +199,8 @@
 <!-- 周回顾弹窗 -->
 <div class="modal-mask" id="weekReviewModal"></div>
 
-<script src="assets/js/gf-tokens.js"></script>
-<script src="assets/js/gf-demos.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/gf-tokens.js?v=5.2"></script>
+<script src="assets/js/gf-demos.js?v=5.2"></script>
+<script src="assets/js/app.js?v=5.2"></script>
 </body>
 </html>

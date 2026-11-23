@@ -31,8 +31,8 @@
 | 顶栏 | 进度、备份/恢复、周回顾 |
 
 ## Visual (v5.1 · app shell + 主题×明暗)
-- 布局：参考 demos/01-linear — `.app-shell` = 52px 图标轨 `.rail`（logo/锚点/周回顾◔/demos 链接）+ 230px 侧栏 `.side`（工作流 1-4 锚点、目标树 `#sideTree`+`#sideProg`、底部 `#themeSelect`+`#modeToggle`）+ 主区 `.main`（顶栏 + `.main-scroll`）；`body{overflow:hidden}` 仅主区滚动；≤900px 隐藏 rail/side
-- 主题机制（双维度）：`<html data-theme data-mode>`；存储 `goalflow.theme` + `goalflow.mode`；`tokens.css` `:root`=linear dark，`[data-theme]`=各主题 dark，`[data-theme][data-mode='light']`=各主题 light；`gf-tokens.js` `THEMES[t].dark/.light` 双套色板摊平到顶层（app.js 零感知）；`#modeToggle` ☾/☀ 切换；head bootstrap 防闪烁写两个 attr
+- 布局：参考 demos/01-linear — `.app-shell` = 52px 图标轨 `.rail`（logo/锚点/周回顾◔/demos 链接）+ 230px 侧栏 `.side`（工作流 1-4 锚点、目标树 `#sideTree`+`#sideProg`）+ 主区 `.main`（顶栏含 `.topbar-theme` = `#themeSelect`+`#modeToggle` ☾/☀，+ `.main-scroll`）；`body{overflow:hidden}` 仅主区滚动；≤900px 隐藏 rail/side
+- 主题机制（双维度）：`<html data-theme data-mode>`；存储 `goalflow.theme` + `goalflow.mode`；`tokens.css` `:root`=linear dark，`[data-theme]`=各主题 dark，`[data-theme][data-mode='light']`=各主题 light；`gf-tokens.js` `THEMES[t].dark/.light` 双套色板摊平到顶层（app.js 零感知）；head bootstrap 防闪烁写两个 attr；app.js 绑定带旧缓存兜底；资源引用带 `?v=` 版本串破缓存（inline-bundle.mjs 正则已兼容）
 - 视觉：实体面板 `#131417`+1px 边、iris `#5e6ad2`、金 `#e8b84a`（light 下 `#d4a017`）；Inter + JetBrains Mono；步骤 1-4 `.idx` iris 描边徽章；英雄卡 2px 金左边线；zoombar 选中白底黑字
 - 进入：body `.is-ready` 淡入；尊重 `prefers-reduced-motion`
 

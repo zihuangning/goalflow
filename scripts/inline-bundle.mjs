@@ -31,12 +31,12 @@ function bundle() {
   const appJs = fs.readFileSync(path.join(root, 'assets/js/app.js'), 'utf8');
 
   html = html.replace(
-    /<link rel="stylesheet" href="assets\/css\/main\.css">\s*/i,
+    /<link rel="stylesheet" href="assets\/css\/main\.css(\?[^"]*)?">\s*/i,
     `<style>\n${css}\n</style>\n`
   );
 
   html = html.replace(
-    /<script src="assets\/js\/gf-tokens\.js"><\/script>\s*<script src="assets\/js\/gf-demos\.js"><\/script>\s*<script src="assets\/js\/app\.js"><\/script>/i,
+    /<script src="assets\/js\/gf-tokens\.js(\?[^"]*)?"><\/script>\s*<script src="assets\/js\/gf-demos\.js(\?[^"]*)?"><\/script>\s*<script src="assets\/js\/app\.js(\?[^"]*)?"><\/script>/i,
     `<script>\n${tokensJs}\n${demosJs}\n${appJs}\n</script>`
   );
 
