@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script>try{var d=document.documentElement;d.dataset.theme=localStorage.getItem('goalflow.theme')||'linear';d.dataset.mode=localStorage.getItem('goalflow.mode')||'dark'}catch(e){document.documentElement.dataset.theme='linear';document.documentElement.dataset.mode='dark'}</script>
-<link rel="stylesheet" href="assets/css/main.css?v=5.3">
+<link rel="stylesheet" href="assets/css/main.css?v=5.6">
 </head>
 <body>
 <div class="app-shell">
@@ -21,7 +21,8 @@
         <path d="M3 7c4 0 4 5 8 5s4-5 8-5"/><path d="M3 16c4 0 4-4 8-4s4 4 8 4"/>
       </svg>
     </div>
-    <a class="ric on" href="#heroWrap" title="当下河流">◉</a>
+    <a class="ric on" href="#todayPanel" title="今日行动">☀</a>
+    <a class="ric" href="#heroWrap" title="当下最重要">◉</a>
     <a class="ric" href="#canvasPanel" title="精力流向图">▦</a>
     <a class="ric" href="#quadPanel" title="四象限校准">◧</a>
     <a class="ric" href="#focusPanel" title="聚焦清单">▤</a>
@@ -34,7 +35,9 @@
     <div class="side-ws">
       <span class="ws-dot"></span>
       <div class="ws-tx"><b>目标流 · GoalFlow</b><p>本地工作区 · 数据不出机</p></div>
+      <div class="wf-bar" id="wfBar" aria-label="多目标工作流切换"></div>
     </div>
+    <a class="si today-nav" href="#todayPanel"><span class="sidx">☀</span>今日行动</a>
     <div class="slabel">工作流</div>
     <a class="si" href="#panelInput"><span class="sidx">1</span>输入目标</a>
     <a class="si" href="#panelTree"><span class="sidx">2</span>树形维护</a>
@@ -51,7 +54,7 @@
   <!-- 右：主内容 -->
   <div class="main">
     <header class="topbar">
-      <span class="crumb">目标流 <i>/</i> <b>当下河流</b></span>
+      <span class="crumb">目标流 <i>/</i> <b id="crumbSection">今日行动</b></span>
       <div class="progress-chip" id="progressChip" style="display:none" title="叶子任务完成度">
         <span id="progressLbl">进度</span><span class="bar"><i id="progressFill" style="width:0%"></i></span>
       </div>
@@ -89,6 +92,23 @@
         </div>
         <div class="pomo-bar" id="pomoBar" aria-live="polite"></div>
       </div>
+
+      <section class="panel today-panel" id="todayPanel">
+        <div class="today-head">
+          <div class="today-head-row">
+            <h2><span class="idx">☀</span> 今日行动</h2>
+            <div class="today-alarm-bar" id="todayAlarmBar"></div>
+          </div>
+          <p class="hint" id="todayHint">解析或载入示例后，系统会把「今天能做完的叶子」收敛到这里——先看 MIT，再按时段与微习惯执行。</p>
+        </div>
+        <div id="todayCapacity"></div>
+        <div class="today-grid">
+          <div class="today-block" id="todayMit"></div>
+          <div class="today-block today-slots-wrap" id="todaySlots"></div>
+          <div class="today-block" id="todayMicro"></div>
+        </div>
+        <div class="today-checklist" id="todayChecklist"></div>
+      </section>
 
       <div class="wrap">
         <!-- 左栏：输入 + 校准 + 智能拆解 -->
@@ -205,9 +225,11 @@
 <div class="modal-mask" id="smartModal"></div>
 <!-- 周回顾弹窗 -->
 <div class="modal-mask" id="weekReviewModal"></div>
+<!-- 项目（目标流）元信息 -->
+<div class="modal-mask" id="workflowMetaModal"></div>
 
-<script src="assets/js/gf-tokens.js?v=5.3"></script>
-<script src="assets/js/gf-demos.js?v=5.3"></script>
-<script src="assets/js/app.js?v=5.3"></script>
+<script src="assets/js/gf-tokens.js?v=5.6"></script>
+<script src="assets/js/gf-demos.js?v=5.6"></script>
+<script src="assets/js/app.js?v=5.6"></script>
 </body>
 </html>

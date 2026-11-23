@@ -15,6 +15,7 @@ const BTN = GF.BTN || {};
 const LS_KEY = STORAGE.nodes || 'goalfocus.v4';
 const LS_KEY_LEGACY = STORAGE.nodesLegacy || 'goalfocus.v3';
 const LS_META = STORAGE.meta || 'goalfocus.meta.v1';
+const LS_WORKFLOWS = 'goalfocus.workflows.v2';
 const LLM_KEY_STORAGE = STORAGE.llmKey || 'gf_llm_key';
 const SCALES=[
   {key:'day',  label:'每日', short:'今日'},
@@ -454,9 +455,238 @@ function sankeyLayout(vis){
 
 /* ============ 渲染 SVG（桑基流图） ============ */
 let state={nodes:[], topId:null, scale:'all', viewMode:'sankey', quadQuickWin:false,
-  pomo:{active:false,endAt:0,nodeId:null,minutes:25},
-  meta:{weekReviews:[],monthReviews:[],quarterReviews:[],bannerDismissedWeek:'',dailyCompletions:{}}};
+  workflows:[], activeWorkflowId:null,
+  pomo:{active:false,endAt:0,nodeId:null,minutes:25,wfId:null},
+  meta:{weekReviews:[],monthReviews:[],quarterReviews:[],bannerDismissedWeek:'',dailyCompletions:{},alarmFired:{}}};
 const byId=id=>state.nodes.find(n=>n.id===id);
+function newWorkflowId(){ return 'wf_'+Math.random().toString(36).slice(2,11); }
+function workflowById(id){ return (state.workflows||[]).find(w=>w.id===id); }
+function normalizeWorkflowMeta(w){
+  if(!w||typeof w!=='object') return;
+  w.name=(w.name==null?'':String(w.name));
+  if(!Array.isArray(w.tags)) w.tags=[];
+  else w.tags=w.tags.map(t=>String(t).trim()).filter(Boolean);
+  w.startDate=w.startDate!=null?String(w.startDate):'';
+  w.endDate=w.endDate!=null?String(w.endDate):'';
+  w.description=w.description!=null?String(w.description):'';
+  w.color=w.color!=null?String(w.color):'';
+}
+function ensureWorkflows(){
+  if(!state.workflows||!state.workflows.length){
+    const wf={id:newWorkflowId(),name:'默认目标',nodes:state.nodes||[],topId:state.topId||null,tags:[],startDate:'',endDate:'',description:''};
+    normalizeWorkflowMeta(wf);
+    state.workflows=[wf];
+    state.activeWorkflowId=state.workflows[0].id;
+  }
+  state.workflows.forEach(w=>{
+    if(w.nodes===undefined) w.nodes=[];
+    normalizeWorkflowMeta(w);
+  });
+  if(!state.activeWorkflowId) state.activeWorkflowId=state.workflows[0].id;
+  if(!workflowById(state.activeWorkflowId)) state.activeWorkflowId=state.workflows[0].id;
+}
+function parseTagsInput(str){
+  return String(str||'').split(/[，,\s]+/).map(s=>s.trim()).filter(Boolean);
+}
+function flushActiveWorkflow(){
+  ensureWorkflows();
+  const w=workflowById(state.activeWorkflowId);
+  if(!w) return;
+  w.nodes=state.nodes;
+  w.topId=state.topId;
+}
+function applyActiveWorkflow(){
+  ensureWorkflows();
+  const w=workflowById(state.activeWorkflowId);
+  if(!w) return;
+  state.nodes=w.nodes||[];
+  state.topId=w.topId||null;
+  if(state.nodes.length) recomputeSchedule(state.nodes);
+}
+function switchWorkflow(id){
+  if(!id||id===state.activeWorkflowId) return;
+  flushActiveWorkflow();
+  state.activeWorkflowId=id;
+  applyActiveWorkflow();
+  syncTreeToInput();
+  save();
+  afterChange();
+}
+function createWorkflow(meta){
+  flushActiveWorkflow();
+  meta=meta||{};
+  const wf={
+    id:newWorkflowId(),
+    name:(String(meta.name||'新项目').trim())||'新项目',
+    tags:Array.isArray(meta.tags)?meta.tags:parseTagsInput(meta.tags),
+    startDate:String(meta.startDate||''),
+    endDate:String(meta.endDate||''),
+    description:String(meta.description||''),
+    color:meta.color||'',
+    nodes:[],topId:null,
+  };
+  normalizeWorkflowMeta(wf);
+  state.workflows.push(wf);
+  state.activeWorkflowId=wf.id;
+  state.nodes=[];
+  state.topId=null;
+  save();
+  afterChange();
+  syncTreeToInput();
+}
+function updateWorkflowMeta(id,meta){
+  const w=workflowById(id);
+  if(!w) return;
+  meta=meta||{};
+  if(meta.name!=null) w.name=String(meta.name).trim()||w.name;
+  if(meta.tags!=null) w.tags=Array.isArray(meta.tags)?meta.tags:parseTagsInput(meta.tags);
+  if(meta.startDate!=null) w.startDate=String(meta.startDate);
+  if(meta.endDate!=null) w.endDate=String(meta.endDate);
+  if(meta.description!=null) w.description=String(meta.description);
+  if(meta.color!=null) w.color=String(meta.color);
+  normalizeWorkflowMeta(w);
+  save();
+  afterChange();
+}
+function deleteWorkflow(id){
+  if(!id) return;
+  ensureWorkflows();
+  if(state.workflows.length<=1){
+    alert('至少保留一个项目（目标流），不能全部删除。');
+    return;
+  }
+  const w=workflowById(id);
+  if(!w) return;
+  if(!confirm(`确定删除项目「${w.name}」？其目标树也会删除，且不可撤销。`)) return;
+  state.workflows=state.workflows.filter(x=>x.id!==id);
+  if(state.activeWorkflowId===id){
+    state.activeWorkflowId=state.workflows[0].id;
+    applyActiveWorkflow();
+  }
+  save();
+  afterChange();
+  syncTreeToInput();
+}
+function openWorkflowMetaModal(mode,wfId){
+  const overlay=document.getElementById('workflowMetaModal');
+  if(!overlay) return;
+  ensureWorkflows();
+  const isNew=mode==='create';
+  const w= isNew ? null : workflowById(wfId||state.activeWorkflowId);
+  const name=isNew?'':(w&&w.name||'');
+  const tags=isNew?'':((w&&w.tags)||[]).join(', ');
+  const sd=isNew?'':(w&&w.startDate||'');
+  const ed=isNew?'':(w&&w.endDate||'');
+  const desc=isNew?'':(w&&w.description||'');
+  overlay.innerHTML=`<div class="modal" role="dialog">
+    <div class="modal-head">
+      <div class="mh-ic">📁</div>
+      <div><div class="mh-tt">${isNew?'新建项目':'项目设置'}</div><div class="mh-sub">项目 = 一棵目标树 / 一个工作流，可长期维护</div></div>
+      <div class="mh-x" id="wfmClose">×</div>
+    </div>
+    <div class="wfm-body">
+      <label class="wfm-row"><span>项目名称</span><input id="wfmName" class="gf-input" value="${esc(name)}" placeholder="如：副业收入 / 2026 健康"></label>
+      <label class="wfm-row"><span>标签（逗号分隔）</span><input id="wfmTags" class="gf-input" value="${esc(tags)}" placeholder="工作, 成长, 家庭"></label>
+      <div class="wfm-2col">
+        <label class="wfm-row"><span>开始日期</span><input id="wfmStart" type="date" class="gf-input" value="${esc(sd)}"></label>
+        <label class="wfm-row"><span>结束日期</span><input id="wfmEnd" type="date" class="gf-input" value="${esc(ed)}"></label>
+      </div>
+      <label class="wfm-row"><span>备注</span><textarea id="wfmDesc" class="gf-input" rows="3" placeholder="项目背景、成功标准…">${esc(desc)}</textarea></label>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="${BTN.primary||'gf-btn gf-btn--primary'}" id="wfmSave">${isNew?'创建项目':'保存'}</button>
+      ${!isNew&&w?'<button type="button" class="gf-btn gf-btn--ghost" id="wfmDelete">删除项目</button>':''}
+      <button type="button" class="${BTN.ghost||'gf-btn gf-btn--ghost'}" id="wfmCancel">取消</button>
+    </div>
+  </div>`;
+  overlay.classList.add('show');
+  const close=()=>{ overlay.classList.remove('show'); overlay.innerHTML=''; };
+  overlay.querySelector('#wfmClose').onclick=close;
+  overlay.querySelector('#wfmCancel').onclick=close;
+  overlay.querySelector('#wfmSave').onclick=()=>{
+    const v=(id)=>overlay.querySelector(id)?overlay.querySelector(id).value.trim():'';
+    const meta={name:v('#wfmName'),tags:parseTagsInput(v('#wfmTags')),startDate:v('#wfmStart'),endDate:v('#wfmEnd'),description:v('#wfmDesc')};
+    if(isNew){
+      createWorkflow(meta);
+      close();
+      return;
+    }
+    const id=wfId||state.activeWorkflowId;
+    updateWorkflowMeta(id,meta);
+    close();
+  };
+  const del=overlay.querySelector('#wfmDelete');
+  if(del&&w) del.onclick=()=>{ close(); deleteWorkflow(w.id); };
+  overlay.onclick=e=>{ if(e.target===overlay) close(); };
+}
+function nodeInWorkflow(wfId,nodeId){
+  const w=workflowById(wfId);
+  if(!w||!w.nodes) return null;
+  return w.nodes.find(n=>n.id===nodeId)||null;
+}
+function setNodeDoneInWorkflow(wfId,nodeId,checked){
+  const w=workflowById(wfId);
+  if(!w) return;
+  const n=w.nodes&&w.nodes.find(x=>x.id===nodeId);
+  if(!n) return;
+  const bakNodes=state.nodes, bakTop=state.topId;
+  state.nodes=w.nodes;
+  state.topId=w.topId;
+  setNodeDone(n,checked);
+  w.nodes=state.nodes;
+  w.topId=state.topId;
+  if(state.activeWorkflowId!==wfId){ state.nodes=bakNodes; state.topId=bakTop; }
+  save();
+}
+function todayRemindValue(n){
+  if(!n||!n.remindAt) return '';
+  const d=new Date(+n.remindAt);
+  if(dateKey(d)!==dateKey()) return '';
+  return pad2(d.getHours())+':'+pad2(d.getMinutes());
+}
+function setNodeRemind(wfId,nodeId,timeStr){
+  const n=nodeInWorkflow(wfId,nodeId);
+  if(!n) return;
+  if(!timeStr){ n.remindAt=null; save(); return; }
+  const p=String(timeStr).split(':');
+  const hh=+p[0]||0, mm=+p[1]||0;
+  const d=today0();
+  d.setHours(clamp(hh,0,23),clamp(mm,0,59),0,0);
+  n.remindAt=d.getTime();
+  save();
+}
+function requestAlarmPermission(){
+  if(typeof Notification==='undefined'){ alert('当前浏览器不支持桌面通知'); return Promise.resolve(false); }
+  if(Notification.permission==='granted') return Promise.resolve(true);
+  if(Notification.permission==='denied'){ alert('通知已被拒绝，请在浏览器站点设置中允许通知'); return Promise.resolve(false); }
+  return Notification.requestPermission().then(p=>p==='granted');
+}
+function tickReminders(){
+  ensureWorkflows();
+  flushActiveWorkflow();
+  const now=Date.now();
+  const dk=dateKey();
+  if(!state.meta) state.meta={};
+  if(!state.meta.alarmFired) state.meta.alarmFired={};
+  let dirty=false;
+  state.workflows.forEach(wf=>{
+    (wf.nodes||[]).forEach(n=>{
+      if(!n.remindAt||n.done) return;
+      const ra=+n.remindAt;
+      if(ra>now||now-ra>120000) return;
+      const key=dk+'|'+wf.id+'|'+n.id;
+      if(state.meta.alarmFired[key]) return;
+      state.meta.alarmFired[key]=true;
+      dirty=true;
+      const title='⏰ '+n.text;
+      const body=(wf.name?'['+wf.name+'] ':'')+(n.estimateMinutes?('约 '+n.estimateMinutes+' 分钟'):'该行动了');
+      if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
+        try{ new Notification(title,{body,tag:key}); }catch(e){}
+      }
+    });
+  });
+  if(dirty) saveMeta();
+}
 
 function normalizeNode(n){
   if(n.slot==null) n.slot='';
@@ -464,6 +694,7 @@ function normalizeNode(n){
   if(n.doneAt!=null && typeof n.doneAt==='string') n.doneAt=+new Date(n.doneAt);
   if(n.recur==null) n.recur=inferRecur(n.text,n.scale);
   if(n.touchedAt!=null && typeof n.touchedAt==='string') n.touchedAt=+new Date(n.touchedAt);
+  if(n.remindAt!=null && typeof n.remindAt==='string') n.remindAt=+new Date(n.remindAt);
   ensureVE(n);
   ensureMetrics(n);
   return n;
@@ -475,6 +706,7 @@ function serializeNodes(nodes){
     deadlineDate:n.deadlineDate?n.deadlineDate.getTime():null,
     daysLeft:n.daysLeft,overdue:!!n.overdue,done:!!n.done,doneAt:n.doneAt||null,
     touchedAt:n.touchedAt||null,estimateMinutes:n.estimateMinutes??null,actualMinutes:n.actualMinutes??null,
+    remindAt:n.remindAt??null,
     recur:!!n.recur,scale:n.scale||null,
     parentId:n.parentId,slot:n.slot||''
   }));
@@ -1125,6 +1357,229 @@ function renderRhythm(){
   box.innerHTML=html;
 }
 
+/* ============ 今日行动（执行台 · 跨工作流聚合） ============ */
+function todayExecutionPoolFor(nodes){
+  if(!nodes||!nodes.length) return [];
+  computeTree(nodes);
+  const leaves=nodes.filter(n=>n.parentId&&n._children.length===0&&!n.done);
+  if(!leaves.length) return [];
+  const vis=buildView(nodes,'day');
+  const topIds=new Set(pickRanked(vis,5).map(n=>n.id));
+  const pool=leaves.filter(n=>{
+    if(topIds.has(n.id)) return true;
+    if(n.scale==='day') return true;
+    if(n.recur||n.role==='habit') return true;
+    if(n.daysLeft!=null&&n.daysLeft<=1) return true;
+    if(n.overdue) return true;
+    if(n.slot) return true;
+    if((n.estimateMinutes||99)<=10) return true;
+    if(isQuickWin(n)) return true;
+    return false;
+  });
+  const seen=new Set();
+  const out=[];
+  pool.sort((a,b)=>{
+    const at=topIds.has(a.id)?0:1, bt=topIds.has(b.id)?0:1;
+    if(at!==bt) return at-bt;
+    const ah=a.recur||a.role==='habit', bh=b.recur||b.role==='habit';
+    if(ah!==bh) return ah?-1:1;
+    return focusScore(b)-focusScore(a);
+  }).forEach(n=>{ if(!seen.has(n.id)){ seen.add(n.id); out.push(n); } });
+  return out;
+}
+function todayAggregatedPool(){
+  ensureWorkflows();
+  flushActiveWorkflow();
+  const items=[];
+  state.workflows.forEach(wf=>{
+    const nodes=wf.nodes||[];
+    if(!nodes.length) return;
+    recomputeSchedule(nodes);
+    const vis=buildView(nodes,'day');
+    const wfTop=pickTop(vis)||pickTop(nodes);
+    const pool=todayExecutionPoolFor(nodes);
+    pool.forEach(n=>{
+      items.push({
+        node:n, wfId:wf.id, wfName:wf.name||'目标流',
+        isWfTop:!!(wfTop&&n.id===wfTop.id),
+      });
+    });
+    if(wf.id===state.activeWorkflowId&&wfTop){
+      state.topId=wfTop.id;
+      wf.topId=wfTop.id;
+    }
+  });
+  const seen=new Set();
+  const out=[];
+  items.sort((a,b)=>{
+    if(a.isWfTop!==b.isWfTop) return a.isWfTop?-1:1;
+    return focusScore(b.node)-focusScore(a.node);
+  }).forEach(x=>{
+    const k=x.wfId+'|'+x.node.id;
+    if(!seen.has(k)){ seen.add(k); out.push(x); }
+  });
+  return out;
+}
+function dayPlanFeasibilityAll(){
+  ensureWorkflows();
+  flushActiveWorkflow();
+  let est=0, count=0;
+  state.workflows.forEach(wf=>{
+    const nodes=wf.nodes||[];
+    if(!nodes.length) return;
+    computeTree(nodes);
+    const leaves=nodes.filter(n=>n.parentId&&!n.done&&n._children.length===0);
+    leaves.filter(n=>n.scale==='day'||(n.deadlineDate&&n.daysLeft!=null&&n.daysLeft<=1)).forEach(n=>{
+      ensureEstimate(n,true);
+      est+=(n.estimateMinutes||0);
+      count++;
+    });
+  });
+  return {est,act:0,count,over:est>DAY_CAPACITY_MIN,cap:DAY_CAPACITY_MIN};
+}
+function todayRowHtml(entry,opts){
+  opts=opts||{};
+  const n=entry.node||entry;
+  const wfId=entry.wfId||state.activeWorkflowId||'';
+  const wfName=entry.wfName||'';
+  const isWfTop=!!entry.isWfTop;
+  const habit=n.recur||n.role==='habit';
+  const isMicro=(n.estimateMinutes||99)<=10;
+  const slot=n.slot?(DAY_SLOTS.find(s=>s[0]===n.slot)||['',''])[1]:'';
+  const remind=todayRemindValue(n);
+  const est=n.estimateMinutes??'';
+  return `<div class="today-row${isWfTop?' is-top':''}${habit?' is-habit':''}" data-id="${n.id}" data-wf="${wfId}">
+    <label class="today-check"><input type="checkbox" data-done="${n.id}" data-wf="${wfId}" aria-label="完成"></label>
+    <div class="today-txt"><b>${isWfTop?'★ ':''}${habit?'🔁 ':''}${isMicro?'🫳 ':''}${esc(n.text)}</b>
+      ${wfName?`<span class="today-meta wf-tag">${esc(wfName)}</span>`:''}
+      ${slot?`<span class="today-meta">🕐 ${esc(slot)}</span>`:''}
+      ${n.daysLeft!=null?`<span class="today-meta">${n.overdue?'逾期':'剩'}${Math.abs(n.daysLeft)}天</span>`:''}
+    </div>
+    <div class="today-timing">
+      <label class="today-time-lbl" title="今日闹钟提醒">⏰</label>
+      <input type="time" class="today-remind" data-remind="${n.id}" data-wf="${wfId}" value="${remind}" title="设置今日提醒时间">
+      <input type="number" class="today-est" min="1" max="999" step="5" data-est="${n.id}" data-wf="${wfId}" value="${est}" placeholder="分" title="计划时长（分钟）">
+    </div>
+    <div class="today-acts">
+      ${opts.micro!==false?`<button type="button" class="gf-btn gf-btn--sm" data-micro="${n.id}" data-wf="${wfId}" title="5分钟微动作">🫳</button>`:''}
+      ${isWfTop||opts.pomo?`<button type="button" class="gf-btn gf-btn--sm gf-btn--primary" data-pomo="${n.id}" data-wf="${wfId}">🍅</button>`:''}
+    </div>
+  </div>`;
+}
+function bindTodayPanel(root){
+  if(!root) return;
+  root.querySelectorAll('input[data-done]').forEach(cb=>{
+    cb.onchange=()=>{ setNodeDoneInWorkflow(cb.dataset.wf,cb.dataset.done,cb.checked); afterChange(); };
+  });
+  root.querySelectorAll('input[data-remind]').forEach(inp=>{
+    inp.onchange=()=>{ setNodeRemind(inp.dataset.wf,inp.dataset.remind,inp.value); tickReminders(); };
+  });
+  root.querySelectorAll('input[data-est]').forEach(inp=>{
+    inp.onchange=()=>{
+      const n=nodeInWorkflow(inp.dataset.wf,inp.dataset.est);
+      if(!n) return;
+      n.estimateMinutes=inp.value?clamp(+inp.value,1,999):null;
+      save(); afterChange();
+    };
+  });
+  root.querySelectorAll('[data-micro]').forEach(b=> b.onclick=()=>{
+    const prev=state.activeWorkflowId;
+    if(b.dataset.wf&&b.dataset.wf!==state.activeWorkflowId) switchWorkflow(b.dataset.wf);
+    addMicroAction(b.dataset.micro);
+    if(prev!==state.activeWorkflowId) switchWorkflow(prev);
+  });
+  root.querySelectorAll('[data-pomo]').forEach(b=> b.onclick=()=>{
+    if(b.dataset.wf) state.pomo.wfId=b.dataset.wf;
+    if(b.dataset.wf&&b.dataset.wf!==state.activeWorkflowId) switchWorkflow(b.dataset.wf);
+    state.topId=b.dataset.pomo;
+    const w=workflowById(b.dataset.wf); if(w) w.topId=b.dataset.pomo;
+    startPomo(25);
+    save();
+  });
+}
+function renderTodayAlarmBar(){
+  const bar=document.getElementById('todayAlarmBar');
+  if(!bar) return;
+  const perm=typeof Notification!=='undefined'?Notification.permission:'unsupported';
+  const tag=perm==='granted'?'通知已开启':(perm==='denied'?'通知已关闭':perm==='unsupported'?'不支持通知':'可开启桌面提醒');
+  bar.innerHTML=`<span class="today-alarm-st">${tag}</span>
+    <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnEnableAlarm">🔔 开启提醒</button>`;
+  const btn=document.getElementById('btnEnableAlarm');
+  if(btn) btn.onclick=()=>requestAlarmPermission().then(ok=>{ if(ok) renderTodayAlarmBar(); });
+}
+function renderTodayPanel(){
+  const mit=document.getElementById('todayMit');
+  const slots=document.getElementById('todaySlots');
+  const micro=document.getElementById('todayMicro');
+  const list=document.getElementById('todayChecklist');
+  const cap=document.getElementById('todayCapacity');
+  const hint=document.getElementById('todayHint');
+  if(!mit||!list) return;
+  ensureWorkflows();
+  flushActiveWorkflow();
+  const wfCount=state.workflows.filter(w=>(w.nodes||[]).length).length;
+  if(!wfCount){
+    mit.innerHTML='<div class="hint">先在各目标流中输入并解析，今日行动会汇总所有工作流的待行动。</div>';
+    if(slots) slots.innerHTML=''; if(micro) micro.innerHTML=''; list.innerHTML=''; if(cap) cap.innerHTML='';
+    renderTodayAlarmBar();
+    return;
+  }
+  const pool=todayAggregatedPool();
+  const mitEntry=pool.find(x=>x.isWfTop)||pool[0]||null;
+  const d=dayPlanFeasibilityAll();
+  if(cap){
+    const pct=Math.min(100,Math.round(d.est/d.cap*100));
+    cap.innerHTML=`<div class="day-capacity${d.over?' over':''}">
+      <span>今日可做完性（${wfCount} 个工作流）</span><span class="dc-bar"><i style="width:${pct}%"></i></span>
+      <span class="dc-num">预估 ${d.est} 分 · ${d.count} 项</span><span class="dc-tag">${d.over?'超负荷':'可承载'}</span>
+    </div>`;
+  }
+  if(hint) hint.textContent=`跨 ${wfCount} 个目标流汇总 ${pool.length} 项 · 可设 ⏰ 今日提醒与计划时长 · 勾选计入完成热力。`;
+  renderTodayAlarmBar();
+  if(mitEntry){
+    mit.innerHTML=`<div class="today-block-h">MIT · 各流最重要之一</div>`+todayRowHtml(mitEntry,{micro:true,pomo:true});
+  } else mit.innerHTML='<div class="hint">暂无 MIT</div>';
+  if(slots){
+    const bySlot={};
+    pool.forEach(ent=>{
+      const n=ent.node;
+      const k=n.slot||(n.scale==='day'||n.recur?'h1':'');
+      if(!k) return;
+      if(!bySlot[k]) bySlot[k]=[];
+      bySlot[k].push(ent);
+    });
+    let sh='<div class="today-block-h">按日时段（跨工作流）</div><div class="today-slot-grid">';
+    DAY_SLOTS.filter(s=>s[0]).forEach(([k,l])=>{
+      const items=bySlot[k]||[];
+      sh+=`<div class="today-slot"><div class="today-slot-h">${l}</div><div class="today-slot-body">`;
+      if(items.length){
+        items.slice(0,4).forEach(ent=>{
+          const t=ent.node.text;
+          const tag=ent.wfName?` · ${ent.wfName}`:'';
+          sh+=`<div class="today-slot-item">${esc(t.length>18?t.slice(0,18)+'…':t)}<span class="muted">${esc(tag)}</span></div>`;
+        });
+      } else sh+=`<span class="muted">—</span>`;
+      sh+='</div></div>';
+    });
+    sh+='</div>';
+    slots.innerHTML=sh;
+  }
+  const habits=pool.filter(ent=>ent.node.recur||ent.node.role==='habit'||(ent.node.estimateMinutes||99)<=10);
+  if(micro){
+    micro.innerHTML=`<div class="today-block-h">微习惯 · 快速赢（≤10 分 / 打卡）</div>`+
+      (habits.length?habits.slice(0,8).map(ent=>todayRowHtml(ent)).join(''):'<div class="hint">在树里写「每天…」或估时≤10分</div>');
+  }
+  list.innerHTML=`<div class="today-block-h">今日行动清单 <span class="cnt">${pool.length}</span></div>`+
+    (pool.length?pool.map(ent=>todayRowHtml(ent)).join(''):'<div class="hint">给任务加「今天」、尺度「每日」或钉时段</div>');
+  bindTodayPanel(mit); bindTodayPanel(micro); bindTodayPanel(list);
+}
+function scrollToToday(){
+  const el=document.getElementById('todayPanel');
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  const crumb=document.getElementById('crumbSection');
+  if(crumb) crumb.textContent='今日行动';
+}
+
 /* ============ 聚焦清单（按尺度过滤） ============ */
 function renderFocus(){
   const box=document.getElementById('todayFocus');
@@ -1386,11 +1841,68 @@ function loadMeta(){
 }
 function save(){
   try{
+    flushActiveWorkflow();
     localStorage.setItem(LS_KEY,JSON.stringify(serializeNodes(state.nodes)));
+    ensureWorkflows();
+    localStorage.setItem(LS_WORKFLOWS,JSON.stringify({
+      activeWorkflowId:state.activeWorkflowId,
+      workflows:state.workflows.map(w=>({
+        id:w.id,name:w.name||'项目',topId:w.topId||null,
+        tags:w.tags||[],startDate:w.startDate||'',endDate:w.endDate||'',description:w.description||'',
+        color:w.color||'',
+        nodes:serializeNodes(w.nodes||[]),
+      })),
+    }));
     saveMeta();
   }catch(e){}
 }
 function load(){
+  loadMeta();
+  try{
+    const ws=localStorage.getItem(LS_WORKFLOWS);
+    if(ws){
+      const data=JSON.parse(ws);
+      if(data.workflows&&Array.isArray(data.workflows)&&data.workflows.length){
+        state.workflows=data.workflows.map(w=>{
+          const wf={
+            id:w.id||newWorkflowId(),
+            name:w.name||'目标流',
+            topId:w.topId||null,
+            tags:w.tags,startDate:w.startDate,endDate:w.endDate,description:w.description,color:w.color,
+            nodes:(w.nodes||[]).map(normalizeNode),
+          };
+          normalizeWorkflowMeta(wf);
+          return wf;
+        });
+        state.activeWorkflowId=data.activeWorkflowId||state.workflows[0].id;
+        applyActiveWorkflow();
+        return true;
+      }
+    }
+  }catch(e){}
+  try{
+    const wsv1=localStorage.getItem('goalfocus.workflows.v1');
+    if(wsv1){
+      const data=JSON.parse(wsv1);
+      if(data.workflows&&Array.isArray(data.workflows)&&data.workflows.length){
+        state.workflows=data.workflows.map(w=>{
+          const wf={
+            id:w.id||newWorkflowId(),
+            name:w.name||'目标流',
+            topId:w.topId||null,
+            tags:[],startDate:'',endDate:'',description:'',
+            nodes:(w.nodes||[]).map(normalizeNode),
+          };
+          normalizeWorkflowMeta(wf);
+          return wf;
+        });
+        state.activeWorkflowId=data.activeWorkflowId||state.workflows[0].id;
+        applyActiveWorkflow();
+        save();
+        return true;
+      }
+    }
+  }catch(e){}
   try{
     let s=localStorage.getItem(LS_KEY);
     if(!s) s=localStorage.getItem(LS_KEY_LEGACY);
@@ -1398,13 +1910,16 @@ function load(){
       const n=JSON.parse(s);
       if(Array.isArray(n)&&n.length){
         state.nodes=n.map(normalizeNode);
+        state.workflows=[];
+        state.activeWorkflowId=null;
+        ensureWorkflows();
         recomputeSchedule(state.nodes);
-        loadMeta();
+        save();
         return true;
       }
     }
   }catch(e){}
-  loadMeta();
+  ensureWorkflows();
   return false;
 }
 
@@ -1563,9 +2078,17 @@ function exportICS(){
   a.click();
 }
 function exportBackup(){
+  flushActiveWorkflow();
+  ensureWorkflows();
   const payload={
-    app:'goalflow',version:7,exportedAt:new Date().toISOString(),
+    app:'goalflow',version:8,exportedAt:new Date().toISOString(),
     viewMode:state.viewMode,
+    activeWorkflowId:state.activeWorkflowId,
+    workflows:state.workflows.map(w=>({
+      id:w.id,name:w.name,topId:w.topId||null,
+      tags:w.tags||[],startDate:w.startDate||'',endDate:w.endDate||'',description:w.description||'',color:w.color||'',
+      nodes:serializeNodes(w.nodes||[]),
+    })),
     nodes:serializeNodes(state.nodes),meta:state.meta||{}
   };
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
@@ -1582,13 +2105,33 @@ function importBackup(file){
       let nodes=data;
       if(data&&data.nodes) nodes=data.nodes;
       if(!Array.isArray(nodes)||!nodes.length){ alert('未找到有效目标数据'); return; }
-      if(!confirm('恢复将覆盖当前目标树，是否继续？')) return;
-      state.nodes=nodes.map(normalizeNode);
+      if(!confirm('恢复将覆盖当前全部目标流，是否继续？')) return;
+      if(data.workflows&&Array.isArray(data.workflows)&&data.workflows.length){
+        state.workflows=data.workflows.map(w=>{
+          const wf={
+            id:w.id||newWorkflowId(),
+            name:w.name||'目标流',
+            topId:w.topId||null,
+            tags:w.tags,startDate:w.startDate,endDate:w.endDate,description:w.description,color:w.color,
+            nodes:(w.nodes||[]).map(normalizeNode),
+          };
+          normalizeWorkflowMeta(wf);
+          return wf;
+        });
+        state.activeWorkflowId=data.activeWorkflowId||state.workflows[0].id;
+        applyActiveWorkflow();
+      }else{
+        state.nodes=nodes.map(normalizeNode);
+        state.workflows=[];
+        state.activeWorkflowId=null;
+        ensureWorkflows();
+        recomputeSchedule(state.nodes);
+      }
       if(data.meta) state.meta={...state.meta,...data.meta};
       if(data.viewMode) state.viewMode=data.viewMode;
-      recomputeSchedule(state.nodes);
       save(); afterChange();
-      alert('已恢复 '+state.nodes.length+' 条节点');
+      const wc=state.workflows.length;
+      alert('已恢复 '+wc+' 个工作流 · 当前流 '+state.nodes.length+' 条节点');
     }catch(e){ alert('JSON 解析失败'); }
   };
   reader.readAsText(file);
@@ -1723,15 +2266,22 @@ function renderSidebar(){
   if(sp) sp.textContent=lp?lp.pct+'%':'';
 }
 function afterChange(){
+  ensureWorkflows();
   ensureAllEstimates();
+  renderWorkflowBar();
   renderHero(); renderQuadrant(); renderCanvas(); renderFocus(); renderRhythm(); renderSmart();
   renderTreeEditor(); renderProgress(); renderReviewBanner(); renderSidebar();
-  renderMetricsStrip(); renderPomoBar();
+  renderMetricsStrip(); renderPomoBar(); renderTodayPanel();
+  tickReminders();
 }
 function doParse(){
   const raw=document.getElementById('input').value.trim();
   if(!raw){alert('请先输入目标文本');return;}
-  state.nodes=parseText(raw); save(); afterChange();
+  ensureWorkflows();
+  state.nodes=parseText(raw);
+  flushActiveWorkflow();
+  save(); afterChange();
+  scrollToToday();
 }
 function initDemoSelect(){
   const sel=document.getElementById('demoSelect');
@@ -1749,10 +2299,41 @@ function loadDemo(){
   doParse();
 }
 function clearAll(){
-  if(!confirm('清空当前目标与本地保存？'))return;
-  state.nodes=[]; state.topId=null; document.getElementById('input').value='';
-  try{localStorage.removeItem(LS_KEY);}catch(e){}
-  renderHero(); renderQuadrant(); renderCanvas(); renderFocus(); renderRhythm(); renderSmart();
+  if(!confirm('清空全部目标流与本地保存？'))return;
+  state.nodes=[]; state.topId=null;
+  const wf={id:newWorkflowId(),name:'默认目标',nodes:[],topId:null,tags:[],startDate:'',endDate:'',description:''};
+  normalizeWorkflowMeta(wf);
+  state.workflows=[wf];
+  state.activeWorkflowId=state.workflows[0].id;
+  const ta=document.getElementById('input'); if(ta) ta.value='';
+  try{localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_WORKFLOWS);}catch(e){}
+  save(); afterChange();
+}
+function renderWorkflowBar(){
+  const bar=document.getElementById('wfBar');
+  if(!bar) return;
+  ensureWorkflows();
+  flushActiveWorkflow();
+  const opts=state.workflows.map(w=>{
+    const n=(w.nodes||[]).length;
+    const label=(w.name||'未命名')+(w.tags&&w.tags.length?` [${w.tags.slice(0,2).join(',')}]`:'');
+    return `<option value="${esc(w.id)}"${w.id===state.activeWorkflowId?' selected':''}>${esc(label)}${n?` (${n})`:''}</option>`;
+  }).join('');
+  bar.innerHTML=`<select class="gf-input gf-select wf-select" id="wfSelect" title="切换项目（目标流）">${opts}</select>
+    <button type="button" class="gf-btn gf-btn--sm wf-add" id="wfAdd" title="新建项目">＋</button>
+    <button type="button" class="gf-btn gf-btn--sm wf-edit" id="wfEdit" title="项目设置：名称 / 标签 / 时间段">✎</button>`;
+  const sel=document.getElementById('wfSelect');
+  if(sel) sel.onchange=()=>switchWorkflow(sel.value);
+  const add=document.getElementById('wfAdd');
+  if(add) add.onclick=()=>openWorkflowMetaModal('create');
+  const ed=document.getElementById('wfEdit');
+  if(ed) ed.onclick=()=>openWorkflowMetaModal('edit');
+  const ws=document.querySelector('.ws-tx p');
+  if(ws){
+    const w=workflowById(state.activeWorkflowId);
+    const t=(w&&w.tags&&w.tags.length)?` · ${w.tags.join(' / ')}`:'';
+    ws.textContent=w?`项目：${w.name}${t} · 今日行动跨项目`:'本地工作区 · 数据不出机';
+  }
 }
 function exportPNG(){
   const svg=document.getElementById('diagram-svg');
@@ -1863,6 +2444,8 @@ if(typeof document!=='undefined'){
     fin.onchange=()=>{ if(fin.files&&fin.files[0]) importBackup(fin.files[0]); fin.value=''; };
     if(load()) afterChange();
     else afterChange();
+    setInterval(tickReminders,30000);
+    tickReminders();
     requestAnimationFrame(()=>{ document.body.classList.add('is-ready'); });
   })();
 }

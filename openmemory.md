@@ -8,8 +8,8 @@
 ## Architecture
 - **入口:** `index.html` + `assets/css/main.css` + `assets/js/{gf-tokens,gf-demos,app}.js`
 - **设计系统:** `gf-` 前缀组件；`docs/DESIGN-SYSTEM.md`
-- **状态:** `state.nodes` 目标树；`state.meta` 周回顾等元数据
-- **持久化:** `goalfocus.v4`（节点 JSON）；`goalfocus.meta.v1`；兼容 `goalfocus.v3`
+- **状态:** `state.workflows[]` **项目**（目标流）：`id/name/tags[]/startDate/endDate/description/color + nodes/topId`；`state.activeWorkflowId`；`state.nodes` 为当前流镜像；`state.meta` 周回顾等
+- **持久化:** `goalfocus.workflows.v2`（全部项目含元信息；自动迁移 v1 与单树）；`goalfocus.v4`（当前流节点兼容）；`goalfocus.meta.v1`
 - **核心算法:** `parseText` → `focusScore` / `pickRanked` → `buildView` + `sankeyLayout`
 - **测试钩子:** `module.exports` 导出纯函数
 
@@ -19,6 +19,8 @@
 ## Components
 | 区域 | 作用 |
 |------|------|
+| 今日行动 `#todayPanel` | **跨工作流**汇总 MIT/时段/微习惯/清单；叶子 `remindAt` 桌面提醒、行内预估时长；`#todayAlarmBar` |
+| 多项目 `#wfBar` | 切换/＋新建/**✎ 项目设置**（名称、标签、起止日期、备注、删除）；树维护与解析仅作用于当前项目；`#workflowMetaModal` |
 | 英雄卡 + 执行栈 | Top1 + #2/#3 候选 |
 | 精力流向图 | 年/月/周/日缩放、聚焦模式 |
 | 四象限 + V/E 矩阵 | 拖拽校准；价值/费力；⚡快速赢筛选；叶子：时段、微动作、SMART |
@@ -49,4 +51,5 @@
 - 节点字段：`val`/`eff`/`recur`/`doneAt`（v4.2）
 - 例行任务在无期限时按尺度展开到节奏条 + 日 slot
 - 微动作子节点默认 `scale: day`、可选 `slot`（h0–h6）
-- 备份 JSON：`{ app, version, nodes, meta }`
+- 节点字段补充：`remindAt`（今日提醒时间戳）
+- 备份 JSON v8：`{ workflows, activeWorkflowId, nodes, meta }`（v7 仅单树可导入）
