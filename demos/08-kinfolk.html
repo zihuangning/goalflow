@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>08 Kinfolk 风 · GoalFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#fbfaf7;--ink:#1c1a17;--muted:#8a857c;--terra:#b5542d;--line:#e5e1d8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.7}
+.mast{max-width:1160px;margin:0 auto;padding:26px 40px;display:flex;align-items:baseline;border-bottom:1px solid var(--ink)}
+.mast h1{font-family:Cormorant,serif;font-size:22px;font-weight:600;letter-spacing:.28em;text-transform:uppercase}
+.mast nav{margin-left:auto;display:flex;gap:26px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.mast nav a{color:inherit;text-decoration:none}
+.hero{max-width:1160px;margin:0 auto;padding:96px 40px 80px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end}
+@media(max-width:820px){.hero{grid-template-columns:1fr;gap:40px;padding:56px 24px}}
+.kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--terra);margin-bottom:22px}
+h2.display{font-family:Cormorant,serif;font-size:clamp(3rem,6.5vw,5rem);font-weight:500;line-height:1.04;letter-spacing:-.01em}
+.hero .right{padding-bottom:10px}
+.hero .right p{color:#4c4740;max-width:38ch;margin-bottom:26px}
+.rule-link{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:3px}
+/* the one thing, as a pull quote */
+.pull{max-width:1160px;margin:0 auto;padding:70px 40px;border-top:1px solid var(--line);display:grid;grid-template-columns:120px 1fr;gap:60px}
+@media(max-width:820px){.pull{grid-template-columns:1fr;gap:20px;padding:56px 24px}}
+.num{font-family:Cormorant,serif;font-size:15px;color:var(--muted);letter-spacing:.1em}
+.pull blockquote{font-family:Cormorant,serif;font-size:clamp(1.6rem,3.4vw,2.5rem);font-weight:500;line-height:1.3;max-width:22ch}
+.pull blockquote em{color:var(--terra);font-style:normal}
+.pull .attr{margin-top:22px;font-size:12px;color:var(--muted);letter-spacing:.08em}
+/* ink river */
+.river{max-width:1160px;margin:0 auto;padding:0 40px 70px}
+.river svg{display:block;width:100%}
+.river .cap{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+/* columns */
+.cols{max-width:1160px;margin:0 auto;padding:70px 40px 100px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);gap:60px}
+@media(max-width:820px){.cols{grid-template-columns:1fr;gap:40px;padding:56px 24px}}
+.col .n{font-family:Cormorant,serif;font-size:13px;color:var(--terra);margin-bottom:14px}
+.col h3{font-family:Cormorant,serif;font-size:22px;font-weight:600;margin-bottom:12px;line-height:1.25}
+.col p{font-size:13.5px;color:#4c4740;line-height:1.8}
+footer{border-top:1px solid var(--ink)}
+footer .in{max-width:1160px;margin:0 auto;padding:26px 40px;display:flex;justify-content:space-between;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+footer a{color:var(--ink);text-decoration:none}
+</style>
+</head>
+<body>
+<header class="mast">
+  <h1>GoalFlow</h1>
+  <nav><a href="../index.html">应用</a><a href="index.html">全部风格</a><a href="05-stripe.html">下一篇</a></nav>
+</header>
+<section class="hero">
+  <div>
+    <p class="kicker">Issue 08 · 精力的形状</p>
+    <h2 class="display">一年，其实<br>只有一条河。</h2>
+  </div>
+  <div class="right">
+    <p>我们不缺待办清单，缺的是一张能看懂自己精力去向的地图。GoalFlow 把目标画成桑基河：带宽是重要，色温是紧急。金色那条支流，是算法替你选出的此刻。</p>
+    <a class="rule-link" href="../index.html">进入应用</a>
+  </div>
+</section>
+<section class="pull">
+  <span class="num">№ 01</span>
+  <div>
+    <blockquote>“读完《影响力》第三章，写出三条可用的销售话术。”<br><em>—— 本周的金色支流</em></blockquote>
+    <p class="attr">重要不紧急 · 预估 45 分钟 · 期限：周五前 · 父级：销售方法论</p>
+  </div>
+</section>
+<section class="river">
+  <svg viewBox="0 0 1160 200" preserveAspectRatio="none">
+    <path d="M0,55 C320,50 700,72 1160,60" fill="none" stroke="#1c1a17" stroke-width="26" stroke-opacity=".12" stroke-linecap="round"/>
+    <path d="M0,120 C320,118 700,140 1160,132" fill="none" stroke="#1c1a17" stroke-width="12" stroke-opacity=".08" stroke-linecap="round"/>
+    <path d="M0,168 C320,166 700,178 1160,174" fill="none" stroke="#b5542d" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="1160" cy="174" r="5" fill="#b5542d"/>
+  </svg>
+  <div class="cap"><span>图：本周精力流向 · 墨宽即重要</span><span>赤陶细线 = 当下唯一主线</span></div>
+</section>
+<section class="cols">
+  <div class="col"><p class="n">№ 02</p><h3>算法替你回答「先做哪件」</h3><p>重要度 ×10 加期限临近加权，从整棵目标树中取出唯一一件事。它不说谎：逾期的会变烫，战略主线会被提醒提前投入。</p></div>
+  <div class="col"><p class="n">№ 03</p><h3>四象限，用拖的</h3><p>校准优先级不该是填表劳动。把卡片拖进象限，河流、英雄卡、聚焦清单一同改写，像挪动版面里的一个色块。</p></div>
+  <div class="col"><p class="n">№ 04</p><h3>周一的回顾仪式</h3><p>两分钟对齐：完成了哪些叶子、核心与救火的比例、下周的深潜块。数据留在本地，仪式留给自己。</p></div>
+</section>
+<footer><div class="in"><span>GoalFlow · 2026</span><a href="index.html">风格索引</a><span>本地 · 无账号</span></div></footer>
+</body>
+</html>

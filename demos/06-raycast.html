@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 Raycast 风 · GoalFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--glass:rgba(24,24,32,.82);--line:rgba(255,255,255,.09);--text:#ececf1;--muted:#8e8e9a;--accent:#ff6363;--violet:#8a63ff;--gold:#e8b84a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,-apple-system,sans-serif;min-height:100vh;display:grid;place-items:center;color:var(--text);font-size:14px;
+background:
+ radial-gradient(ellipse 70% 60% at 15% 20%,#3b2d5e 0%,transparent 55%),
+ radial-gradient(ellipse 60% 55% at 85% 75%,#1e3a5f 0%,transparent 55%),
+ radial-gradient(ellipse 40% 40% at 70% 15%,#5e2d4a 0%,transparent 60%),
+ #12121a}
+.wall-hint{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.35);font-size:12px;letter-spacing:.04em}
+.wall-hint a{color:rgba(255,255,255,.55)}
+/* panel */
+.panel{width:min(660px,92vw);background:var(--glass);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(28px);box-shadow:0 40px 100px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.3);overflow:hidden}
+.search{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.search .ic{color:var(--accent);font-size:17px}
+.search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:16px;font-family:inherit}
+.search input::placeholder{color:var(--muted)}
+.search .esc{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:2px 6px}
+.list{padding:8px}
+.group{font-size:10.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:10px 12px 5px}
+.item{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:9px}
+.item .ic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.item .tt{line-height:1.35}
+.item .ss{font-size:11.5px;color:var(--muted)}
+.item .kbd{margin-left:auto;display:flex;gap:4px}
+kbd{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:5px;padding:2px 6px}
+.item.sel{background:linear-gradient(90deg,rgba(232,184,74,.16),rgba(232,184,74,.05));box-shadow:inset 0 0 0 1px rgba(232,184,74,.35)}
+.item.sel .ic{background:rgba(232,184,74,.2)}
+.i-gold{background:rgba(232,184,74,.15);color:var(--gold)}
+.i-red{background:rgba(255,99,99,.15);color:var(--accent)}
+.i-violet{background:rgba(138,99,255,.15);color:var(--violet)}
+.i-blue{background:rgba(99,179,255,.13);color:#63b3ff}
+.i-green{background:rgba(99,220,150,.12);color:#63dc96}
+/* mini river strip inside panel */
+.strip{border-top:1px solid var(--line);padding:10px 18px 12px;display:flex;align-items:center;gap:14px}
+.strip svg{flex:1;display:block}
+.strip .sl{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.strip .sl b{color:var(--gold);font-weight:500}
+/* action bar */
+.actions{display:flex;align-items:center;gap:16px;border-top:1px solid var(--line);padding:9px 18px;background:rgba(0,0,0,.25)}
+.actions .a{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.actions .a b{color:var(--text);font-weight:500}
+.actions .right{margin-left:auto}
+.actions a{color:#63b3ff;text-decoration:none;font-size:12px}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="search"><span class="ic">🌊</span><input value="当下最重要" readonly><span class="esc">esc</span></div>
+  <div class="list">
+    <p class="group">GoalFlow · 算法结果</p>
+    <div class="item sel">
+      <span class="ic i-gold">★</span>
+      <div><p class="tt">开始「读完《影响力》第三章并写 3 条话术」</p><p class="ss">当下最重要 · 重要不紧急 · 45 分钟 · 周五前</p></div>
+      <span class="kbd"><kbd>↵</kbd></span>
+    </div>
+    <p class="group">其他动作</p>
+    <div class="item"><span class="ic i-red">🔥</span><div><p class="tt">处理救火项：客户 A 报价修订</p><p class="ss">重要且紧急 · 明天到期</p></div><span class="kbd"><kbd>⌘</kbd><kbd>1</kbd></span></div>
+    <div class="item"><span class="ic i-violet">▦</span><div><p class="tt">打开四象限校准</p><p class="ss">拖拽任务卡重设重要 / 紧急</p></div><span class="kbd"><kbd>⌘</kbd><kbd>2</kbd></span></div>
+    <div class="item"><span class="ic i-blue">◔</span><div><p class="tt">开始周回顾仪式</p><p class="ss">自动预填：完成叶子 12 · 核心 5 · 救火 2</p></div><span class="kbd"><kbd>⌘</kbd><kbd>3</kbd></span></div>
+    <div class="item"><span class="ic i-green">📅</span><div><p class="tt">导出期限叶子为 ICS</p><p class="ss">本地文件，导入任意日历</p></div><span class="kbd"><kbd>⌘</kbd><kbd>E</kbd></span></div>
+  </div>
+  <div class="strip">
+    <span class="sl">本周河流</span>
+    <svg viewBox="0 0 400 30" height="30" preserveAspectRatio="none">
+      <path d="M0,6 C130,6 260,8 400,7 L400,14 C260,15 130,13 0,13 Z" fill="rgba(138,99,255,.45)"/>
+      <path d="M0,19 C130,19 260,23 400,22 L400,27 C260,28 130,24 0,24 Z" fill="rgba(232,184,74,.8)"/>
+    </svg>
+    <span class="sl"><b>★</b> 金色主线已锁定</span>
+  </div>
+  <div class="actions">
+    <span class="a"><b>开始专注</b><kbd>↵</kbd></span>
+    <span class="a">延后<kbd>⌘D</kbd></span>
+    <span class="a">标记完成<kbd>⌘↵</kbd></span>
+    <span class="right"><a href="../index.html">打开完整应用 ↗</a></span>
+  </div>
+</div>
+<p class="wall-hint">Demo 06 · Raycast 风命令面板 · <a href="index.html">返回风格索引</a></p>
+</body>
+</html>

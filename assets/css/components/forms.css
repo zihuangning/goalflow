@@ -1,0 +1,86 @@
+/* 表单控件 */
+.gf-input,
+textarea,
+.chat-input input {
+  width: 100%;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.65;
+  outline: none;
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.22);
+  transition: 0.15s;
+}
+
+textarea {
+  height: 150px;
+  resize: vertical;
+  padding: 11px 12px;
+}
+
+.gf-input:focus,
+textarea:focus,
+.chat-input input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+textarea::placeholder,
+.gf-input::placeholder {
+  color: var(--muted-2);
+}
+
+.chat-input input { width: auto; flex: 1; }
+
+.gf-input--grow {
+  flex: 1;
+  min-width: 140px;
+  width: auto;
+  font-size: 12px;
+  padding: 7px 10px;
+}
+
+select.gf-input,
+.gf-select {
+  width: auto;
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 52%, calc(100% - 11px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+
+.gf-select--demo {
+  flex: 1;
+  min-width: 168px;
+  max-width: 100%;
+  font-size: 12px;
+  padding: 7px 28px 7px 10px;
+}
+
+.demo-bar {
+  align-items: stretch;
+}
+
+.hint,
+.gf-hint {
+  font-size: 11.5px;
+  color: var(--muted-2);
+  margin-top: 10px;
+  line-height: 1.7;
+}
+
+.btns,
+.gf-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 11px;
+}

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02 Things 风 · GoalFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ffffff;--side:#f4f4f5;--line:#e8e8ea;--text:#1d1d1f;--muted:#86868b;--blue:#2f7cf6;--gold:#f0b429;--red:#ff3b30}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,-apple-system,"SF Pro Text",sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden;font-size:14px}
+/* mac sidebar */
+.side{width:260px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0}
+.lights{display:flex;gap:7px;padding:14px 16px}
+.lights i{width:11px;height:11px;border-radius:50%}
+.lights i:nth-child(1){background:#ff5f57}.lights i:nth-child(2){background:#febc2e}.lights i:nth-child(3){background:#28c840}
+.snav{padding:8px}
+.si{display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:7px;color:var(--text);font-size:13.5px}
+.si.on{background:#e4e4e7}
+.si .ic{width:18px;text-align:center;font-size:13px}
+.si .n{margin-left:auto;font-size:11px;color:var(--muted)}
+.slabel{font-size:11px;color:var(--muted);padding:14px 12px 4px;font-weight:600;letter-spacing:.02em}
+/* main */
+.main{flex:1;overflow:auto}
+.inner{max-width:640px;margin:0 auto;padding:36px 32px 80px}
+.crumbs{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.back{font-size:13px;color:var(--muted);text-decoration:none}
+h1{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:2px}
+.date{color:var(--muted);font-size:13px;margin-bottom:28px}
+/* hero starred task */
+.hero{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(180deg,#fffdf6,#fff);border:1px solid #f3e3b3;border-radius:12px;padding:16px 18px;margin-bottom:30px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(240,180,41,.08)}
+.hero .star{color:var(--gold);font-size:16px;line-height:1.4}
+.hero .t{font-size:15.5px;font-weight:600;line-height:1.45}
+.hero .s{font-size:12.5px;color:var(--muted);margin-top:4px}
+.hero .tag{display:inline-block;font-size:11px;color:#9a7412;background:#fdf3d7;border-radius:5px;padding:2px 7px;margin-top:8px;margin-right:6px}
+/* task rows */
+.group{margin-bottom:26px}
+.gt{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;padding-left:4px}
+.row{display:flex;align-items:flex-start;gap:11px;padding:9px 6px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.cb{width:17px;height:17px;border:1.5px solid #c7c7cc;border-radius:50%;margin-top:2px;flex-shrink:0}
+.row.gold .cb{border-color:var(--gold)}
+.row .tt{line-height:1.4}
+.row .ss{font-size:12px;color:var(--muted);margin-top:2px}
+.row .meta{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap;padding-top:2px}
+.row .meta.hot{color:var(--red)}
+/* sankey block */
+.flowcard{border:1px solid var(--line);border-radius:12px;padding:18px;margin:6px 0 30px}
+.flowcard .ft{font-size:13px;font-weight:600;margin-bottom:2px}
+.flowcard .fs{font-size:12px;color:var(--muted);margin-bottom:8px}
+.seg{display:flex;font-size:11px;color:var(--muted);justify-content:space-between;margin-top:6px}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:#fff;border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:500;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--blue);border:1px solid #cfe0fc}
+.ctas{display:flex;gap:10px;margin-top:34px}
+.progress{height:4px;background:#eee;border-radius:2px;overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;width:34%;background:var(--blue);border-radius:2px}
+</style>
+</head>
+<body>
+<aside class="side">
+  <div class="lights"><i></i><i></i><i></i></div>
+  <nav class="snav">
+    <div class="si on"><span class="ic">★</span>今天<span class="n">3</span></div>
+    <div class="si"><span class="ic">▦</span>即将到来</div>
+    <div class="si"><span class="ic">⧉</span>任何一天<span class="n">12</span></div>
+    <div class="si"><span class="ic">⌂</span>某天</div>
+    <div class="slabel">项目</div>
+    <div class="si"><span class="ic">🌊</span>今年月入 5 万<span class="n">34%</span></div>
+    <div class="si"><span class="ic">📕</span>销售方法论</div>
+    <div class="si"><span class="ic">🤝</span>客户跟进</div>
+    <div class="si"><span class="ic">🏃</span>身体与精力</div>
+    <div class="slabel">区域</div>
+    <div class="si"><span class="ic">◔</span>周回顾</div>
+    <div class="si"><a class="back" href="index.html" style="padding:0">← 全部风格</a></div>
+  </nav>
+</aside>
+<main class="main"><div class="inner">
+  <h1>今天</h1>
+  <p class="date">11月23日 周一 · 叶子任务完成 34%</p>
+  <section class="hero">
+    <span class="star">★</span>
+    <div>
+      <p class="t">读完《影响力》第三章，写出 3 条可用销售话术</p>
+      <p class="s">算法判定：战略主线该提前投入了 · 来自「销售方法论」</p>
+      <span class="tag">当下最重要</span><span class="tag">约 45 分钟</span>
+    </div>
+  </section>
+  <section class="group">
+    <p class="gt">今日其余</p>
+    <div class="row"><span class="cb"></span><div><p class="tt">客户 A 报价修订</p><p class="ss">重要且紧急</p></div><span class="meta hot">周五前</span></div>
+    <div class="row"><span class="cb"></span><div><p class="tt">周四提案 PPT 收尾</p></div><span class="meta">1.5h</span></div>
+  </section>
+  <section class="flowcard">
+    <p class="ft">本周精力流向</p>
+    <p class="fs">带宽 = 重要度 · 色温 = 紧急度</p>
+    <svg viewBox="0 0 600 130" width="100%" preserveAspectRatio="none" style="display:block">
+      <path d="M0,25 C200,25 300,32 600,28 L600,50 C300,54 200,47 0,47 Z" fill="#dce8fd"/>
+      <path d="M0,62 C200,62 300,80 600,74 L600,90 C300,96 200,78 0,78 Z" fill="#fdeaea"/>
+      <path d="M0,100 C200,100 300,112 600,108 L600,120 C300,124 200,112 0,112 Z" fill="#fbeec9"/>
+    </svg>
+    <div class="seg"><span>销售方法论 42%</span><span>客户跟进 22%</span><span>★ 金色河线</span></div>
+  </section>
+  <section class="group">
+    <p class="gt">今年目标 · 月入 5 万</p>
+    <div class="progress"><i></i></div>
+  </section>
+  <div class="ctas">
+    <a class="btn" href="../index.html">打开 GoalFlow</a>
+    <a class="btn ghost" href="index.html">看其他风格</a>
+  </div>
+</div></main>
+</body>
+</html>

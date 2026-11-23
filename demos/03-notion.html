@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 Notion 风 · GoalFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--side:#f7f7f5;--line:#ededeb;--text:#37352f;--muted:#9b9a97;--gold:#9a6a00;--goldbg:#fbf3db;--red:#eb5757;--blue:#337ea9}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,ui-sans-serif,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden;font-size:14px}
+.side{width:248px;background:var(--side);border-right:1px solid var(--line);padding:10px 8px;flex-shrink:0;overflow:auto}
+.ws{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;font-weight:600;font-size:13.5px}
+.ws .lg{width:22px;height:22px;border-radius:5px;background:#37352f;color:#fff;display:grid;place-items:center;font-size:11px}
+.ws .chk{margin-left:auto;color:var(--muted);font-weight:400;font-size:11px}
+.si{display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:6px;color:#5f5e5b;font-size:13.5px;cursor:default}
+.si .tw{color:var(--muted);font-size:9px;width:12px}
+.si:hover{background:#eeeeec}
+.si.on{background:#eeeeec;color:var(--text)}
+.sl{font-size:11px;color:var(--muted);padding:14px 10px 4px;font-weight:500}
+.main{flex:1;overflow:auto}
+.dochead{display:flex;align-items:center;gap:8px;padding:12px 20px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
+.dochead b{color:var(--text);font-weight:500}
+.dochead .r{margin-left:auto;display:flex;gap:16px;font-size:13px;align-items:center}
+.dochead a{color:var(--muted);text-decoration:none}
+.doc{max-width:708px;margin:0 auto;padding:52px 32px 120px}
+.emoji{font-size:62px;line-height:1;margin-bottom:14px}
+h1{font-size:38px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px}
+.props{border-bottom:1px solid var(--line);padding:12px 0 16px;margin-bottom:26px}
+.prop{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:4px 0;color:var(--muted)}
+.prop .k{width:120px;flex-shrink:0}
+.prop .v{color:var(--text)}
+.sel{background:#fdecc8;color:#9a6a00;border-radius:4px;padding:1px 8px}
+.sel.b{background:#d3e5ef;color:#183347}
+.sel.r{background:#fdebec;color:#a33}
+/* callout = hero */
+.callout{display:flex;gap:14px;background:var(--goldbg);border-radius:8px;padding:18px 20px;margin:0 0 26px}
+.callout .ic{font-size:20px}
+.callout .ct{font-size:16px;font-weight:600;color:#574315;line-height:1.5}
+.callout .cs{font-size:13px;color:#8a7a55;margin-top:6px;line-height:1.6}
+/* toggle / headings */
+h2{font-size:22px;font-weight:600;margin:34px 0 10px;display:flex;align-items:center;gap:8px}
+h2 .tw{font-size:12px;color:var(--muted)}
+p.body{line-height:1.75;color:#454440;font-size:15px;margin-bottom:10px}
+.hint{color:var(--muted);font-size:13px;line-height:1.7}
+/* table view */
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+th{font-size:12px;color:var(--muted);font-weight:500;text-align:left;padding:8px 10px;border:1px solid var(--line);background:#fafafa}
+td{padding:9px 10px;border:1px solid var(--line)}
+td.gold{background:#fffdf4}
+.star{color:#d4a017}
+.tabs{display:inline-flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:-1px}
+.tabs span{font-size:13px;padding:6px 12px;color:var(--muted);border:1px solid transparent;border-bottom:none;border-radius:6px 6px 0 0}
+.tabs .on{color:var(--text);border-color:var(--line);background:#fff;font-weight:500}
+a.app{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(51,126,169,.3)}
+</style>
+</head>
+<body>
+<aside class="side">
+  <div class="ws"><span class="lg">G</span>史贵昌的工作台<span class="chk">⇄</span></div>
+  <div class="sl">收藏</div>
+  <div class="si on"><span class="tw">▾</span>🌊 2026 目标流</div>
+  <div class="si" style="padding-left:29px">📕 销售方法论</div>
+  <div class="si" style="padding-left:29px">🤝 客户跟进看板</div>
+  <div class="si" style="padding-left:29px">🏃 身体与精力</div>
+  <div class="sl">仪式</div>
+  <div class="si"><span class="tw"></span>◔ 周回顾（每周一）</div>
+  <div class="si"><span class="tw"></span>⇩ Backlog 泳道</div>
+  <div class="sl">其他</div>
+  <div class="si"><a href="index.html" style="color:var(--muted);text-decoration:none;font-size:13px">← 全部风格</a></div>
+</aside>
+<main class="main">
+  <div class="dochead"><span>🌊</span><b>2026 目标流</b><span>/ 当下河流</span><div class="r"><span>已同步到本地</span><a href="../index.html">打开应用 ↗</a></div></div>
+  <div class="doc">
+    <div class="emoji">🌊</div>
+    <h1>2026 目标流</h1>
+    <div class="props">
+      <div class="prop"><span class="k">📅 当前尺度</span><span class="v sel">每周</span><span class="v">年度 / 每月 / 每日</span></div>
+      <div class="prop"><span class="k">◎ 叶子完成度</span><span class="v">34%（12 / 35）</span></div>
+      <div class="prop"><span class="k">🔥 核心 vs 救火</span><span class="v"><span class="sel b">核心 5</span> <span class="sel r">救火 2</span></span></div>
+    </div>
+    <div class="callout">
+      <span class="ic">⭐</span>
+      <div>
+        <p class="ct">当下最重要：读完《影响力》第三章，写出 3 条可用销售话术</p>
+        <p class="cs">算法说明 — 重要度 ×10 + 期限临近加权，从整棵目标树里选出唯一一件此刻最该动手的事。父级「销售方法论」是重要不紧急的战略主线。</p>
+      </div>
+    </div>
+    <p class="body">把整段年度目标粘进来，自动解析成目标树并画成桑基河：<b>带子越宽越重要，颜色越暖越紧急</b>。精力错配，一眼看见。</p>
+    <h2><span class="tw">▾</span>本周精力流向</h2>
+    <svg viewBox="0 0 640 150" width="100%" preserveAspectRatio="none" style="display:block;border:1px solid var(--line);border-radius:8px;background:#fdfdfc">
+      <path d="M0,28 C220,28 320,36 640,32 L640,58 C320,62 220,54 0,54 Z" fill="#e3e2de"/>
+      <path d="M0,72 C220,72 320,88 640,84 L640,102 C320,106 220,90 0,90 Z" fill="#fdebec"/>
+      <path d="M0,118 C220,118 320,130 640,126 L640,140 C320,144 220,132 0,132 Z" fill="#f6e3b4"/>
+    </svg>
+    <p class="hint" style="margin-top:8px">带宽 = 重要度 · 色温 = 紧急度 · 金色 = 算法锁定的当下主线</p>
+    <h2><span class="tw">▾</span>四象限 · 任务库</h2>
+    <div class="tabs"><span class="on">表格</span><span>看板</span><span>日历</span></div>
+    <table>
+      <tr><th style="width:36%">任务</th><th>象限</th><th>预估</th><th>期限</th><th></th></tr>
+      <tr><td class="gold"><span class="star">★</span> 读完《影响力》第三章</td><td><span class="sel b">重要不紧急</span></td><td>45m</td><td>周五前</td><td>⋯</td></tr>
+      <tr><td>客户 A 报价修订</td><td><span class="sel r">重要且紧急</span></td><td>30m</td><td>明天</td><td>⋯</td></tr>
+      <tr><td>搭建话术库 v1</td><td><span class="sel b">重要不紧急</span></td><td>2h</td><td>本月</td><td>⋯</td></tr>
+      <tr><td>整理发票报销</td><td>紧急不重要</td><td>20m</td><td>本周</td><td>⋯</td></tr>
+    </table>
+    <p class="body" style="margin-top:26px">→ <a class="app" href="../index.html">在完整应用里拖拽校准</a>，象限、流图、英雄卡实时联动。</p>
+  </div>
+</main>
+</body>
+</html>

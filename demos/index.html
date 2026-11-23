@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoalFlow · 10 套产品化视觉方向</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0f13;--card:#15171d;--card2:#1a1d24;--text:#e8eaf0;--muted:#7d8590;--gold:#e8b84a;--teal:#3fb9b3;--line:#242832}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:clamp(24px,4vw,56px)}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 0%,rgba(63,185,179,.07),transparent),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(232,184,74,.05),transparent);pointer-events:none}
+.wrap{max-width:1200px;margin:0 auto;position:relative}
+header{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+h1{font-family:"Noto Serif SC",serif;font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:600}
+.tag{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--teal);border:1px solid rgba(63,185,179,.3);padding:4px 10px;border-radius:6px}
+.lead{color:var(--muted);max-width:64ch;line-height:1.7;margin:12px 0 6px;font-size:15px}
+.meta{font-size:13px;color:var(--muted);margin-bottom:36px}
+.meta a{color:var(--gold);text-decoration:none}.meta a:hover{text-decoration:underline}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+a.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s,background .15s}
+a.card:hover{border-color:#3a4150;background:var(--card2);transform:translateY(-2px)}
+.row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.num{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted)}
+.ref{font-size:11px;color:var(--teal);background:rgba(63,185,179,.1);padding:3px 8px;border-radius:5px}
+.card h2{font-size:16px;font-weight:600;margin-bottom:6px}
+.card p{font-size:13px;color:var(--muted);line-height:1.55;flex:1}
+.sw{display:flex;gap:5px;margin-top:14px}
+.sw i{width:22px;height:6px;border-radius:3px}
+footer{margin-top:48px;font-size:12px;color:var(--muted);text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>GoalFlow 视觉方向实验室</h1><span class="tag">10 directions · v2</span></header>
+  <p class="lead">同一个产品内核——「当下最重要」英雄卡 × 桑基精力河 × 四象限校准 × 周回顾——套进十个公认设计优秀的效率产品语言里。每页为自包含静态稿，直接打开对比。</p>
+  <p class="meta"><a href="../index.html">← 返回正式应用</a> · 建议 100% 缩放下全屏查看</p>
+  <div class="grid">
+    <a class="card" href="01-linear.html"><div class="row"><span class="num">01</span><span class="ref">参考 Linear</span></div><h2>深色工作台</h2><p>Icon rail + 侧栏 + issue 式英雄卡（GOA-101 · P1 旗帜 · 状态药丸），⌘K 命令面板气质，细 1px 分隔线。</p><div class="sw"><i style="background:#0b0c10;border:1px solid #333"></i><i style="background:#5e6ad2"></i><i style="background:#e8b84a"></i></div></a>
+    <a class="card" href="02-things.html"><div class="row"><span class="num">02</span><span class="ref">参考 Things 3</span></div><h2>Mac 原生纯净</h2><p>白底 + 交通灯侧栏，「今天」大标题，圆形勾选、星标英雄任务，系统蓝点缀，大面积留白。</p><div class="sw"><i style="background:#fff;border:1px solid #ddd"></i><i style="background:#2f7cf6"></i><i style="background:#f5c518"></i></div></a>
+    <a class="card" href="03-notion.html"><div class="row"><span class="num">03</span><span class="ref">参考 Notion</span></div><h2>文档工作台</h2><p>浅灰侧栏页面树 + 居中 700px 文档流，emoji 大标题、callout 英雄块、表格视图四象限。</p><div class="sw"><i style="background:#ffffff;border:1px solid #ddd"></i><i style="background:#f7f7f5"></i><i style="background:#eb5757"></i></div></a>
+    <a class="card" href="04-sunsama.html"><div class="row"><span class="num">04</span><span class="ref">参考 Sunsama</span></div><h2>平静日计划</h2><p>温暖纸感米白，左任务列 + 右时间轴日历并排，衬线日期标题，赤陶色深潜时间块。</p><div class="sw"><i style="background:#f7f4ef"></i><i style="background:#c96f4a"></i><i style="background:#7a917e"></i></div></a>
+    <a class="card" href="05-stripe.html"><div class="row"><span class="num">05</span><span class="ref">参考 Stripe</span></div><h2>营销落地页</h2><p>深藏青 hero + 斜切彩条，超大 display 标题，玻璃拟态产品 mock 悬浮，三列特性栅格。</p><div class="sw"><i style="background:#0a2540"></i><i style="background:#635bff"></i><i style="background:#00d4ff"></i></div></a>
+    <a class="card" href="06-raycast.html"><div class="row"><span class="num">06</span><span class="ref">参考 Raycast</span></div><h2>命令面板</h2><p>模糊壁纸上的居中单面板：搜索框 + 动作列表 + kbd 快捷键，英雄任务就是第一个选中项。</p><div class="sw"><i style="background:#1b1b26"></i><i style="background:#ff6363"></i><i style="background:#8a63ff"></i></div></a>
+    <a class="card" href="07-amie.html"><div class="row"><span class="num">07</span><span class="ref">参考 Amie</span></div><h2>日历时间块</h2><p>左任务 chip 列 + 右周日历网格，彩色圆角时间块，河流化作底部能量曲线，轻快现代。</p><div class="sw"><i style="background:#fdfcf9"></i><i style="background:#e879a9"></i><i style="background:#7c8cf8"></i></div></a>
+    <a class="card" href="08-kinfolk.html"><div class="row"><span class="num">08</span><span class="ref">参考 Kinfolk</span></div><h2>高端编辑杂志</h2><p>巨幅负空间 + 细衬线刊名，编号栏目、脚注排版，河流退成一道手绘墨线，赤陶一点。</p><div class="sw"><i style="background:#fbfaf7;border:1px solid #ddd"></i><i style="background:#1c1a17"></i><i style="background:#b5542d"></i></div></a>
+    <a class="card" href="09-vercel.html"><div class="row"><span class="num">09</span><span class="ref">参考 Vercel / Geist</span></div><h2>精密仪表格</h2><p>纯黑底 bento 网格：渐变边框英雄卡、等宽绿数字、蓝青渐变流带，工程感状态点。</p><div class="sw"><i style="background:#000;border:1px solid #333"></i><i style="background:#007cf0"></i><i style="background:#00dfd8"></i></div></a>
+    <a class="card" href="10-rpg.html"><div class="row"><span class="num">10</span><span class="ref">参考 Habitica / 游戏化</span></div><h2>主线任务 RPG</h2><p>深紫黑 + 鎏金：等级 XP 条、连胜火焰、主线任务卷轴卡、支线列表，河流是能量流。</p><div class="sw"><i style="background:#17121f"></i><i style="background:#f5c518"></i><i style="background:#a78bfa"></i></div></a>
+  </div>
+  <footer>每套均映射 GoalFlow 核心语义：金色 = 当下最重要 · 带宽 = 重要 · 色温 = 紧急<br>静态视觉稿，不含业务逻辑 · GoalFlow 2026</footer>
+</div>
+</body>
+</html>

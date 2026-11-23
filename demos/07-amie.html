@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Amie 风 · GoalFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fdfcf9;--line:#eeeae2;--text:#2b2926;--muted:#a39c90;--pink:#e879a9;--violet:#7c8cf8;--green:#4fbf8b;--amber:#e8a33d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+.top{display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--line);background:#fff}
+.logo{font-weight:700;font-size:16px}
+.logo i{color:var(--pink);font-style:normal}
+.pillbtn{border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:12.5px;color:var(--muted);background:#fff;text-decoration:none}
+.top .grow{flex:1}
+.wk{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600}
+.wk span{color:var(--muted);font-weight:400;font-size:12.5px}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--violet));color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600}
+.shell{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 61px)}
+@media(max-width:860px){.shell{grid-template-columns:1fr}}
+.todos{border-right:1px solid var(--line);padding:20px;background:#fff}
+.todos h2{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline}
+.todos h2 span{color:var(--pink);text-transform:none;letter-spacing:0;font-size:12px}
+.td{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid var(--line);margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.td.hero{background:linear-gradient(135deg,#fdf4e3,#fcedf4);border-color:#f0dcc0}
+.td .cb{width:16px;height:16px;border:1.5px solid #d8d2c6;border-radius:5px;margin-top:2px;flex-shrink:0}
+.td.hero .cb{border-color:var(--amber)}
+.td .tt{font-size:13.5px;font-weight:500;line-height:1.4}
+.td .ss{display:flex;gap:6px;margin-top:6px}
+.pill{font-size:10.5px;padding:2px 8px;border-radius:99px;font-weight:600}
+.p-am{background:#fdf4e3;color:#b07817}
+.p-pk{background:#fcedf4;color:#c44d83}
+.p-vi{background:#eef0fe;color:#5a6cd6}
+.p-gr{background:#e8f7f0;color:#358a61}
+.drag{margin-top:14px;padding:12px;border:1.5px dashed var(--line);border-radius:12px;text-align:center;font-size:12.5px;color:var(--muted)}
+/* calendar */
+.cal{padding:20px;overflow:auto}
+.calhead{display:flex;gap:0;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:0}
+.dcol{flex:1;text-align:center}
+.dcol .dw{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.dcol .dn{width:30px;height:30px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;font-weight:600;margin-top:4px}
+.dcol.today .dn{background:var(--pink);color:#fff}
+.cgrid{display:grid;grid-template-columns:44px repeat(5,1fr);position:relative}
+.hcol span{display:block;height:52px;font-size:10px;color:var(--muted);text-align:right;padding-right:8px;transform:translateY(-6px)}
+.col{border-left:1px solid var(--line);position:relative;height:468px;background:repeating-linear-gradient(0deg,transparent,transparent 51px,var(--line) 51px,var(--line) 52px)}
+.ev{position:absolute;left:5px;right:5px;border-radius:9px;padding:6px 8px;font-size:11px;line-height:1.3;font-weight:500}
+.ev.pink{background:#fcedf4;border-left:3px solid var(--pink);color:#a33d6d}
+.ev.violet{background:#eef0fe;border-left:3px solid var(--violet);color:#4a5bb8}
+.ev.green{background:#e8f7f0;border-left:3px solid var(--green);color:#2f7a55}
+.ev.amber{background:#fdf4e3;border-left:3px solid var(--amber);color:#9a6512;box-shadow:0 4px 14px rgba(232,163,61,.25)}
+.ev small{display:block;font-weight:400;opacity:.75;font-size:10px;margin-top:2px}
+/* energy strip */
+.energy{margin:0 20px 20px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 18px}
+.energy .et{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:6px}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="logo">Goal<i>Flow</i></span>
+  <a class="pillbtn" href="index.html">← 风格</a>
+  <div class="grow"></div>
+  <div class="wk">11月23日–29日 <span>第 48 周</span></div>
+  <div class="av">史</div>
+</header>
+<div class="shell">
+  <aside class="todos">
+    <h2>待安排 <span>拖进日历 →</span></h2>
+    <div class="td hero"><span class="cb"></span><div><p class="tt">★ 读完《影响力》第三章，写 3 条话术</p><div class="ss"><span class="pill p-am">当下最重要</span><span class="pill p-pk">深潜 45m</span></div></div></div>
+    <div class="td"><span class="cb"></span><div><p class="tt">客户 A 报价修订</p><div class="ss"><span class="pill p-pk">紧急</span></div></div></div>
+    <div class="td"><span class="cb"></span><div><p class="tt">提案 PPT 收尾</p><div class="ss"><span class="pill p-vi">1.5h</span></div></div></div>
+    <div class="td"><span class="cb"></span><div><p class="tt">晚间散步</p><div class="ss"><span class="pill p-gr">例行</span></div></div></div>
+    <div class="drag">⇩ Backlog：上周未完成 3 项</div>
+  </aside>
+  <main class="cal">
+    <div class="calhead">
+      <div style="width:44px;flex:none"></div>
+      <div class="dcol"><p class="dw">一</p><span class="dn">23</span></div>
+      <div class="dcol today"><p class="dw">二</p><span class="dn">24</span></div>
+      <div class="dcol"><p class="dw">三</p><span class="dn">25</span></div>
+      <div class="dcol"><p class="dw">四</p><span class="dn">26</span></div>
+      <div class="dcol"><p class="dw">五</p><span class="dn">27</span></div>
+    </div>
+    <div class="cgrid">
+      <div class="hcol"><span>9:00</span><span>10:00</span><span>11:00</span><span>12:00</span><span>13:00</span><span>14:00</span><span>15:00</span><span>16:00</span><span>17:00</span></div>
+      <div class="col">
+        <div class="ev green" style="top:4px;height:48px">晨会<small>9:00</small></div>
+        <div class="ev pink" style="top:108px;height:50px">午饭散步</div>
+      </div>
+      <div class="col" style="background:rgba(232,121,169,.03)">
+        <div class="ev amber" style="top:56px;height:76px">★ 深潜：《影响力》ch.3<small>10:00–11:15 · 当下最重要</small></div>
+        <div class="ev violet" style="top:160px;height:50px">客户 A 电话</div>
+      </div>
+      <div class="col">
+        <div class="ev violet" style="top:56px;height:100px">提案 PPT 收尾</div>
+      </div>
+      <div class="col">
+        <div class="ev pink" style="top:4px;height:48px">提案评审<small>9:00</small></div>
+        <div class="ev amber" style="top:212px;height:66px">★ 深潜：话术库 v1</div>
+      </div>
+      <div class="col">
+        <div class="ev green" style="top:316px;height:50px">周回顾仪式 ◔</div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="energy">
+  <div class="et"><span>本周精力河流</span><span>带宽 = 重要 · <b style="color:var(--amber)">金色 = 当下主线</b></span></div>
+  <svg viewBox="0 0 900 52" width="100%" preserveAspectRatio="none" style="display:block">
+    <path d="M0,8 C250,8 500,12 900,10 L900,24 C500,26 250,22 0,22 Z" fill="#eef0fe"/>
+    <path d="M0,30 C250,30 500,36 900,33 L900,42 C500,45 250,39 0,39 Z" fill="#fcedf4"/>
+    <path d="M0,46 C250,46 500,50 900,48 L900,52 C500,52 250,50 0,50 Z" fill="#f0c877"/>
+  </svg>
+</div>
+</body>
+</html>

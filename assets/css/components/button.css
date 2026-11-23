@@ -1,0 +1,108 @@
+/**
+ * 按钮 · .gf-btn + 修饰符（Linear 风：小圆角、1px 细边、近乎无投影）
+ * HTML: class="gf-btn gf-btn--primary gf-btn--sm"
+ * 兼容旧版: .primary / .ghost / .small / .ai / .cool 仍作用于 button 元素
+ */
+
+.gf-btn,
+button {
+  cursor: pointer;
+  border: 1px solid var(--stroke);
+  background: var(--panel-strong);
+  color: var(--ink);
+  border-radius: var(--btn-radius);
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: 0.15s;
+  font-family: inherit;
+  line-height: 1.35;
+}
+
+.gf-btn:hover,
+button:hover {
+  border-color: var(--muted-2);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--panel-strong) 70%, var(--ink) 4%);
+}
+
+.gf-btn:focus-visible,
+button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 2px;
+}
+
+/* 尺寸 */
+.gf-btn--sm,
+button.small {
+  padding: 4px 9px;
+  font-size: 11.5px;
+}
+
+.gf-btn--sm.gf-btn--pill,
+.topbar-actions .gf-btn--sm,
+.topbar-actions button.small {
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+}
+
+/* 变体 */
+.gf-btn--primary,
+button.primary {
+  background: linear-gradient(145deg, var(--gold-soft), var(--gold));
+  color: var(--btn-on-gold);
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(232, 184, 74, 0.22);
+}
+
+.gf-btn--primary:hover,
+button.primary:hover {
+  filter: brightness(1.07);
+  color: #120c04;
+  border-color: transparent;
+  background: linear-gradient(145deg, var(--gold-soft), var(--gold));
+}
+
+.gf-btn--cool,
+button.primary.cool {
+  background: linear-gradient(145deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000));
+  color: #fff;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.gf-btn--cool:hover,
+button.primary.cool:hover {
+  color: #fff;
+  border-color: transparent;
+}
+
+.gf-btn--ghost,
+button.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.gf-btn--ghost:hover,
+button.ghost:hover {
+  background: var(--panel-strong);
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.gf-btn--ai,
+button.ai {
+  background: linear-gradient(145deg, var(--accent-2), var(--accent));
+  color: var(--btn-on-dark);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+/* 域内迷你按钮（四象限等） */
+.gf-btn--mini {
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  border-radius: 6px;
+}

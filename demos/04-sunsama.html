@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 Sunsama 风 · GoalFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f4ef;--panel:#fffdf9;--line:#e9e2d6;--text:#3d3833;--muted:#9c9184;--terra:#c96f4a;--sage:#7a917e;--gold:#c9a227;--blue:#6b8cae}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+.top{display:flex;align-items:center;gap:18px;padding:16px 28px}
+.logo{display:flex;align-items:center;gap:10px;font-family:Newsreader,serif;font-size:19px;font-weight:600}
+.logo .m{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--terra),#e09a6d);display:grid;place-items:center;color:#fff;font-size:14px}
+.top .mid{margin:0 auto;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.top .mid b{color:var(--text);font-weight:500}
+.av{width:30px;height:30px;border-radius:50%;background:var(--sage);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600}
+.back{font-size:12.5px;color:var(--muted);text-decoration:none}
+.shell{max-width:1180px;margin:0 auto;padding:8px 28px 60px;display:grid;grid-template-columns:400px 1fr;gap:20px}
+@media(max-width:900px){.shell{grid-template-columns:1fr}}
+.datebar{display:flex;align-items:baseline;gap:10px;margin:10px 0 18px}
+.datebar h1{font-family:Newsreader,serif;font-size:30px;font-weight:500;letter-spacing:-.01em}
+.datebar .dow{color:var(--muted);font-size:14px}
+.datebar .nav{margin-left:auto;display:flex;gap:6px}
+.datebar .nav span{width:28px;height:28px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;color:var(--muted);background:var(--panel)}
+/* task column */
+.tcol{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.tcol .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.tcol .h b{font-size:13px;font-weight:600}
+.tcol .h span{font-size:12px;color:var(--muted)}
+.tk{display:flex;gap:11px;padding:11px 10px;border-radius:10px;align-items:flex-start}
+.tk:hover{background:#faf6ee}
+.tk .cb{width:17px;height:17px;border:1.5px solid #cfc4b2;border-radius:50%;margin-top:2px;flex-shrink:0}
+.tk .tt{font-size:14px;line-height:1.45}
+.tk .ss{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.ch{font-size:11px;padding:2px 8px;border-radius:99px;background:#f3ede1;color:#8a7a63}
+.ch.terra{background:#fbe9e0;color:var(--terra)}
+.ch.gold{background:#faf3d9;color:#9a7a12}
+.tk .est{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.tk.hero{background:linear-gradient(135deg,#fdf8ec,#fbf1df);border:1px solid #eadfc4}
+.tk.hero .cb{border-color:var(--gold)}
+.add{margin-top:8px;padding:10px;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:10px;text-align:center}
+/* calendar */
+.ccol{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column}
+.ccol .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ccol .h b{font-size:13px;font-weight:600}
+.grid7{display:grid;grid-template-columns:34px 1fr;gap:0;flex:1}
+.hours{display:flex;flex-direction:column}
+.hours span{height:44px;font-size:10px;color:var(--muted);text-align:right;padding-right:8px;transform:translateY(-5px)}
+.lanes{position:relative;border-left:1px solid var(--line);background:repeating-linear-gradient(0deg,transparent,transparent 43px,var(--line) 43px,var(--line) 44px)}
+.block{position:absolute;left:8px;right:8px;border-radius:8px;padding:6px 10px;font-size:11.5px;line-height:1.35}
+.block.deep{background:#fbe9e0;border-left:3px solid var(--terra);color:#8c4a2f}
+.block.meet{background:#e7eef5;border-left:3px solid var(--blue);color:#3f5a75}
+.block.admin{background:#eef1e8;border-left:3px solid var(--sage);color:#55684a}
+/* energy river */
+.energy{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.energy .et{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo"><span class="m">G</span>GoalFlow · 日计划</div>
+  <div class="mid"><span>‹</span><b>今天</b><span>›</span><span style="color:var(--line)">|</span><span>11月23日</span></div>
+  <a class="back" href="index.html">全部风格</a>
+  <div class="av">史</div>
+</header>
+<div class="shell">
+  <div>
+    <div class="datebar"><h1>周一</h1><span class="dow">11月23日 · 计划 6.2h / 8h</span><div class="nav"><span>☾</span></div></div>
+    <div class="tcol">
+      <div class="h"><b>今日任务</b><span>5 项 · 按河流排序</span></div>
+      <div class="tk hero"><span class="cb"></span><div><p class="tt">读完《影响力》第三章，写 3 条话术</p><div class="ss"><span class="ch gold">★ 当下最重要</span><span class="ch terra">深潜</span></div></div><span class="est">45m</span></div>
+      <div class="tk"><span class="cb"></span><div><p class="tt">客户 A 报价修订</p><div class="ss"><span class="ch">重要且紧急</span></div></div><span class="est">30m</span></div>
+      <div class="tk"><span class="cb"></span><div><p class="tt">周四提案 PPT 收尾</p></div><span class="est">1.5h</span></div>
+      <div class="tk"><span class="cb"></span><div><p class="tt">回复两个潜在客户微信</p></div><span class="est">25m</span></div>
+      <div class="tk"><span class="cb"></span><div><p class="tt">晚间散步 30 分钟</p><div class="ss"><span class="ch">身体与精力</span></div></div><span class="est">30m</span></div>
+      <div class="add">＋ 从 Backlog 拖入今日</div>
+    </div>
+    <p style="margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.7">🌅 晨间仪式已完成 · <a href="../index.html" style="color:var(--terra);text-decoration:none">在 GoalFlow 中查看全年河流 →</a></p>
+  </div>
+  <div class="ccol">
+    <div class="h"><b>时间轴</b><span style="font-size:12px;color:var(--muted)">拖到格子里 = 安排深潜块</span></div>
+    <div class="grid7">
+      <div class="hours"><span>9:00</span><span>10:00</span><span>11:00</span><span>12:00</span><span>13:00</span><span>14:00</span><span>15:00</span><span>16:00</span><span>17:00</span></div>
+      <div class="lanes" style="height:396px">
+        <div class="block meet" style="top:0px;height:40px">9:30 晨会</div>
+        <div class="block deep" style="top:52px;height:84px">★ 深潜：《影响力》第三章 + 话术 ×3<span style="opacity:.7"><br>10:00 – 11:15</span></div>
+        <div class="block admin" style="top:148px;height:40px">12:00 午饭 · 散步</div>
+        <div class="block meet" style="top:196px;height:40px">14:00 客户 A 电话</div>
+        <div class="block deep" style="top:244px;height:62px">提案 PPT 收尾</div>
+      </div>
+    </div>
+    <div class="energy">
+      <div class="et"><span>本周精力河流（预览）</span><span>金色 = 当下主线</span></div>
+      <svg viewBox="0 0 600 46" width="100%" preserveAspectRatio="none" style="display:block">
+        <path d="M0,10 C150,10 300,14 600,12 L600,24 C300,26 150,22 0,22 Z" fill="#ead9c2"/>
+        <path d="M0,30 C150,30 300,36 600,34 L600,42 C300,44 150,38 0,38 Z" fill="#f0c9a8" opacity=".9"/>
+      </svg>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,313 @@
+/**
+ * GoalFlow 设计令牌（唯一色值源 · CSS）
+ * JS 侧请同步 assets/js/gf-tokens.js
+ *
+ * 主题机制（v5 · 2026-11）：
+ *   :root              = 结构 token + 默认主题「linear」全部颜色（无 JS 时即为 Linear 深色）
+ *   [data-theme="…"]   = 其他主题仅覆盖颜色 token（raycast / rpg 预览）
+ *   主题由 gf-tokens.js 在 <head> 内同步写入 <html data-theme>，避免闪烁。
+ *   新增主题：在此追加 [data-theme="x"] 覆盖块 + gf-tokens.js THEMES 注册 JS 色板。
+ */
+
+/* ===== 结构 token（跨主题共享） ===== */
+:root {
+  /* 圆角与间距 */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+  --space-1: 6px;
+  --space-2: 12px;
+  --space-3: 18px;
+  --space-4: 26px;
+
+  /* 字体 */
+  --font-ui: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-display: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* 按钮 */
+  --btn-radius: 6px;
+  --btn-on-dark: #0b0c10;
+  --btn-on-gold: #1a1206;
+}
+
+/* ===== 默认主题：linear（参考 Linear 深色工作台） ===== */
+:root,
+[data-theme='linear'] {
+  /* 页面背景（整段 background 值，主题可换成多层渐变壁纸） */
+  --body-bg: linear-gradient(175deg, #0b0c10 0%, #08090c 100%);
+  --grain-opacity: 0;
+
+  /* 背景层级 */
+  --bg0: #08090c;
+  --bg1: #0b0c10;
+  --bg2: #131417;
+
+  /* 表面与描边（Linear：实体面板 + 1px 细边，不用玻璃模糊） */
+  --panel: #131417;
+  --panel-strong: #17181d;
+  --stroke: #23252b;
+  --stroke-soft: #1b1d23;
+
+  /* 文字 */
+  --ink: #d7d9e0;
+  --ink-2: #a6aab5;
+  --muted: #6b7280;
+  --muted-2: #4b5160;
+
+  /* 品牌强调：Linear iris 紫 + 青 */
+  --accent: #5e6ad2;
+  --accent-2: #3fb9b3;
+  --accent-soft: rgba(94, 106, 210, 0.14);
+  --gold: #e8b84a;
+  --gold-soft: #f5d78a;
+  --gold-deep: #c4922e;
+
+  /* 阴影（收敛，Linear 近乎无投影） */
+  --shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.28);
+
+  /* 紧急度色阶 ur1(冷静) → ur5(火急) */
+  --ur1: #5e6ad2;
+  --ur2: #3fb9b3;
+  --ur3: #4cb782;
+  --ur4: #e09a4f;
+  --ur5: #eb5757;
+
+  /* 四象限语义色（与 JS CAT 一致） */
+  --quad-now: var(--ur5);
+  --quad-core: var(--ur1);
+  --quad-distract: var(--ur4);
+  --quad-noise: #7c8295;
+
+  /* 步骤标注徽章（1/2/3/4 · Linear 风格 iris 描边） */
+  --idx-bg: rgba(94, 106, 210, 0.14);
+  --idx-ink: #9aa3ec;
+  --idx-border: rgba(94, 106, 210, 0.38);
+
+  /* 顶栏 */
+  --topbar-bg: rgba(11, 12, 16, 0.88);
+
+  /* 分段控件选中态（Linear 标志性白底主按钮） */
+  --seg-on-bg: #e8eaf0;
+  --seg-on-ink: #111216;
+
+  /* 英雄卡（当下最重要） */
+  --hero-border: rgba(232, 184, 74, 0.35);
+  --hero-glow: 0 0 40px rgba(232, 184, 74, 0.05);
+}
+
+/* ===== 预览主题：raycast（命令面板玻璃感 · 预留兼容） ===== */
+[data-theme='raycast'] {
+  --body-bg:
+    radial-gradient(ellipse 70% 60% at 15% 10%, rgba(59, 45, 94, 0.55), transparent 55%),
+    radial-gradient(ellipse 60% 55% at 85% 90%, rgba(30, 58, 95, 0.5), transparent 55%),
+    linear-gradient(170deg, #14141d 0%, #0f0f16 100%);
+  --grain-opacity: 0;
+
+  --bg0: #0f0f16;
+  --bg1: #14141d;
+  --bg2: #1b1b26;
+  --panel: rgba(27, 27, 38, 0.92);
+  --panel-strong: rgba(255, 255, 255, 0.06);
+  --stroke: rgba(255, 255, 255, 0.1);
+  --stroke-soft: rgba(255, 255, 255, 0.06);
+
+  --ink: #ececf1;
+  --ink-2: #b9b9c6;
+  --muted: #8e8e9a;
+  --muted-2: #62626e;
+
+  --accent: #ff6363;
+  --accent-2: #8a63ff;
+  --accent-soft: rgba(255, 99, 99, 0.14);
+
+  --ur1: #8a63ff;
+  --ur2: #63b3ff;
+  --ur3: #63dc96;
+  --ur4: #e8b84a;
+  --ur5: #ff6363;
+  --quad-noise: #8e8e9a;
+
+  --idx-bg: rgba(255, 99, 99, 0.14);
+  --idx-ink: #ff9c9c;
+  --idx-border: rgba(255, 99, 99, 0.38);
+
+  --topbar-bg: rgba(15, 15, 22, 0.82);
+  --seg-on-bg: rgba(255, 255, 255, 0.12);
+  --seg-on-ink: #ececf1;
+
+  --hero-border: rgba(232, 184, 74, 0.35);
+  --hero-glow: 0 0 40px rgba(232, 184, 74, 0.05);
+}
+
+/* ===== 预览主题：rpg（游戏化主线任务 · 预留兼容） ===== */
+[data-theme='rpg'] {
+  --body-bg:
+    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(167, 139, 250, 0.14), transparent 60%),
+    linear-gradient(175deg, #17121f 0%, #120e1a 100%);
+  --grain-opacity: 0;
+
+  --bg0: #120e1a;
+  --bg1: #17121f;
+  --bg2: #211a2e;
+  --panel: #211a2e;
+  --panel-strong: #2a2138;
+  --stroke: #372c4a;
+  --stroke-soft: #2c2340;
+
+  --ink: #efeaf7;
+  --ink-2: #c3b8d9;
+  --muted: #9a8fb0;
+  --muted-2: #6a5f80;
+
+  --accent: #a78bfa;
+  --accent-2: #4ade80;
+  --accent-soft: rgba(167, 139, 250, 0.14);
+  --gold: #f5c518;
+  --gold-soft: #ffe27a;
+  --gold-deep: #c29a10;
+
+  --ur1: #a78bfa;
+  --ur2: #60a5fa;
+  --ur3: #4ade80;
+  --ur4: #fb923c;
+  --ur5: #f87171;
+  --quad-noise: #8a7fa0;
+
+  --idx-bg: rgba(245, 197, 24, 0.14);
+  --idx-ink: #f5c518;
+  --idx-border: rgba(245, 197, 24, 0.4);
+
+  --topbar-bg: rgba(18, 14, 26, 0.9);
+  --seg-on-bg: #f5c518;
+  --seg-on-ink: #17121f;
+
+  --hero-border: rgba(245, 197, 24, 0.42);
+  --hero-glow: 0 0 48px rgba(245, 197, 24, 0.08);
+}
+
+/* ================= 浅色模式（data-mode="light" · 每主题一套） ================= */
+
+/* linear · 浅色（Linear light 工作区） */
+[data-theme='linear'][data-mode='light'] {
+  --body-bg: linear-gradient(175deg, #fafafb 0%, #f2f3f5 100%);
+  --grain-opacity: 0;
+  --bg0: #f2f3f5;
+  --bg1: #fafafb;
+  --bg2: #ffffff;
+  --panel: #ffffff;
+  --panel-strong: #f4f4f7;
+  --stroke: #e2e3e8;
+  --stroke-soft: #eaeaee;
+  --ink: #1f2430;
+  --ink-2: #4a5160;
+  --muted: #6b7280;
+  --muted-2: #9aa0ae;
+  --accent: #5e6ad2;
+  --accent-2: #2ea8a0;
+  --accent-soft: rgba(94, 106, 210, 0.08);
+  --gold: #d4a017;
+  --gold-soft: #e8c558;
+  --gold-deep: #a87e0e;
+  --shadow: 0 16px 40px rgba(31, 36, 48, 0.12);
+  --shadow-soft: 0 4px 14px rgba(31, 36, 48, 0.07);
+  --ur1: #5a64d0;
+  --ur2: #2ea8a0;
+  --ur3: #3da06e;
+  --ur4: #d08a35;
+  --ur5: #e04848;
+  --quad-noise: #9aa0ae;
+  --idx-bg: rgba(94, 106, 210, 0.1);
+  --idx-ink: #4f5bc0;
+  --idx-border: rgba(94, 106, 210, 0.32);
+  --topbar-bg: rgba(250, 250, 251, 0.88);
+  --seg-on-bg: #1f2430;
+  --seg-on-ink: #fafafb;
+  --hero-border: rgba(212, 160, 23, 0.45);
+  --hero-glow: 0 0 32px rgba(212, 160, 23, 0.07);
+}
+
+/* raycast · 浅色（浅玻璃壁纸） */
+[data-theme='raycast'][data-mode='light'] {
+  --body-bg:
+    radial-gradient(70% 60% at 15% 10%, rgba(216, 205, 240, 0.5), transparent 55%),
+    radial-gradient(60% 55% at 85% 90%, rgba(205, 220, 240, 0.55), transparent 55%),
+    linear-gradient(170deg, #faf9fc 0%, #f2f1f6 100%);
+  --grain-opacity: 0;
+  --bg0: #f2f1f6;
+  --bg1: #faf9fc;
+  --bg2: #ffffff;
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-strong: rgba(20, 20, 30, 0.05);
+  --stroke: rgba(20, 20, 35, 0.12);
+  --stroke-soft: rgba(20, 20, 35, 0.07);
+  --ink: #221f2e;
+  --ink-2: #524e63;
+  --muted: #7d7a8c;
+  --muted-2: #a5a2b2;
+  --accent: #e04848;
+  --accent-2: #7a52e8;
+  --accent-soft: rgba(224, 72, 72, 0.08);
+  --gold: #d4a017;
+  --gold-soft: #e8c558;
+  --gold-deep: #a87e0e;
+  --shadow: 0 16px 40px rgba(34, 31, 46, 0.14);
+  --shadow-soft: 0 4px 14px rgba(34, 31, 46, 0.08);
+  --ur1: #7a52e8;
+  --ur2: #4a9ae8;
+  --ur3: #35b578;
+  --ur4: #d4a017;
+  --ur5: #e04848;
+  --quad-noise: #a5a2b2;
+  --idx-bg: rgba(224, 72, 72, 0.1);
+  --idx-ink: #c23838;
+  --idx-border: rgba(224, 72, 72, 0.32);
+  --topbar-bg: rgba(250, 249, 252, 0.85);
+  --seg-on-bg: #221f2e;
+  --seg-on-ink: #faf9fc;
+  --hero-border: rgba(212, 160, 23, 0.45);
+  --hero-glow: 0 0 32px rgba(212, 160, 23, 0.07);
+}
+
+/* rpg · 浅色（浅紫金冒险手账） */
+[data-theme='rpg'][data-mode='light'] {
+  --body-bg:
+    radial-gradient(60% 40% at 50% -10%, rgba(167, 139, 250, 0.18), transparent 60%),
+    linear-gradient(175deg, #faf8fd 0%, #f3eff9 100%);
+  --grain-opacity: 0;
+  --bg0: #f3eff9;
+  --bg1: #faf8fd;
+  --bg2: #ffffff;
+  --panel: #ffffff;
+  --panel-strong: #f5f1fb;
+  --stroke: #e4dcf0;
+  --stroke-soft: #ece5f5;
+  --ink: #2a2138;
+  --ink-2: #57496e;
+  --muted: #8578a0;
+  --muted-2: #a89cc0;
+  --accent: #7c5cd6;
+  --accent-2: #2fa35c;
+  --accent-soft: rgba(124, 92, 214, 0.1);
+  --gold: #d4a017;
+  --gold-soft: #e8c558;
+  --gold-deep: #a87e0e;
+  --shadow: 0 16px 40px rgba(42, 33, 56, 0.13);
+  --shadow-soft: 0 4px 14px rgba(42, 33, 56, 0.08);
+  --ur1: #8a6ae0;
+  --ur2: #4a8ae0;
+  --ur3: #2fa35c;
+  --ur4: #e07830;
+  --ur5: #e04848;
+  --quad-noise: #a89cc0;
+  --idx-bg: rgba(212, 160, 23, 0.12);
+  --idx-ink: #a87e0e;
+  --idx-border: rgba(212, 160, 23, 0.4);
+  --topbar-bg: rgba(250, 248, 253, 0.9);
+  --seg-on-bg: #2a2138;
+  --seg-on-ink: #faf8fd;
+  --hero-border: rgba(212, 160, 23, 0.5);
+  --hero-glow: 0 0 36px rgba(212, 160, 23, 0.1);
+}

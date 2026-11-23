@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 游戏化 RPG · GoalFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#17121f;--panel:#211a2e;--panel2:#2a2138;--line:#372c4a;--text:#efeaf7;--muted:#9a8fb0;--gold:#f5c518;--violet:#a78bfa;--red:#f87171;--green:#4ade80}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;background-image:radial-gradient(ellipse 60% 40% at 50% -10%,rgba(167,139,250,.12),transparent)}
+.wrap{max-width:880px;margin:0 auto;padding:24px 20px 80px}
+.player{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 20px;flex-wrap:wrap}
+.avatar{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--violet),#6d4fc2);display:grid;place-items:center;font-size:22px;box-shadow:0 0 0 2px var(--line),0 0 24px rgba(167,139,250,.35)}
+.pinfo{flex:1;min-width:200px}
+.pname{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+.lv{font-family:"JetBrains Mono",monospace;font-size:10px;background:var(--violet);color:#17121f;padding:2px 8px;border-radius:5px;font-weight:700}
+.xpbar{height:8px;background:var(--panel2);border-radius:99px;margin-top:8px;overflow:hidden}
+.xpbar i{display:block;height:100%;width:68%;background:linear-gradient(90deg,var(--violet),#c4b5fd);border-radius:99px}
+.xptext{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);margin-top:5px}
+.stat{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+.stat b{color:var(--text)}
+.flame{color:var(--red)}
+.back{font-size:12px;color:var(--muted);text-decoration:none}
+/* main quest */
+.quest{margin-top:22px;border-radius:18px;padding:1.5px;background:linear-gradient(120deg,var(--gold),#8a6a10 60%,var(--gold));box-shadow:0 0 50px rgba(245,197,24,.12)}
+.quest .in{background:linear-gradient(180deg,#241c33,#1d1729);border-radius:17px;padding:24px}
+.qtag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.12em;color:#17121f;background:var(--gold);padding:4px 12px;border-radius:99px}
+.quest h1{font-size:clamp(1.3rem,3vw,1.75rem);font-weight:800;letter-spacing:-.01em;margin:14px 0 8px;line-height:1.35}
+.quest .lore{color:var(--muted);font-size:13px;line-height:1.7;max-width:52ch}
+.rewards{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.rw{font-family:"JetBrains Mono",monospace;font-size:11px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 10px;color:var(--muted)}
+.rw b{color:var(--gold)}
+.accept{display:inline-block;margin-top:20px;background:var(--gold);color:#17121f;font-weight:800;font-size:14px;padding:13px 30px;border-radius:12px;text-decoration:none;box-shadow:0 4px 0 #8a6a10}
+.accept:active{transform:translateY(2px);box-shadow:0 2px 0 #8a6a10}
+/* side quests */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.panel h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between}
+.sq{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.sq:last-child{border:none}
+.sq .ic{width:30px;height:30px;border-radius:9px;background:var(--panel2);display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.sq .tt{font-size:13px;font-weight:500;line-height:1.35}
+.sq .xp{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--green);white-space:nowrap}
+.sq.hot .ic{background:rgba(248,113,113,.15)}
+/* energy river */
+.river{margin-top:22px}
+.river svg{display:block;width:100%}
+.river .cap{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);margin-top:8px}
+footer{margin-top:32px;text-align:center;font-size:12px;color:var(--muted)}
+footer a{color:var(--violet);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="player">
+    <div class="avatar">🧙</div>
+    <div class="pinfo">
+      <div class="pname">史贵昌 <span class="lv">LV.12</span></div>
+      <div class="xpbar"><i></i></div>
+      <p class="xptext">XP 3,420 / 5,000 · 距 Lv.13 还差 1,580</p>
+    </div>
+    <div class="stat"><span class="flame">🔥</span> 连续深潜 <b>6 天</b></div>
+    <div class="stat">🍃 叶子完成 <b>34%</b></div>
+    <a class="back" href="index.html">全部风格</a>
+  </div>
+  <section class="quest"><div class="in">
+    <span class="qtag">★ 主线任务 · 今日限定</span>
+    <h1>读完《影响力》第三章，写出 3 条可用销售话术</h1>
+    <p class="lore">世界线提示：你的「销售方法论」主线已经 5 天没有推进了。趁它还没变成月末的火情，今天就投入一个深潜块。算法已为你锁定这条金色支流。</p>
+    <div class="rewards">
+      <span class="rw">奖励 <b>+240 XP</b></span>
+      <span class="rw">预估 <b>45 分钟</b></span>
+      <span class="rw">期限 <b>周五前</b></span>
+      <span class="rw">连胜 <b>🔥+1</b></span>
+    </div>
+    <a class="accept" href="../index.html">接受任务</a>
+  </div></section>
+  <div class="grid">
+    <div class="panel"><h3>支线任务 <span>本周</span></h3>
+      <div class="sq hot"><span class="ic">🔥</span><p class="tt">客户 A 报价修订<small style="display:block;color:var(--muted)">重要且紧急 · 明天到期</small></p><span class="xp">+120 XP</span></div>
+      <div class="sq"><span class="ic">📊</span><p class="tt">周四提案 PPT 收尾</p><span class="xp">+150 XP</span></div>
+      <div class="sq"><span class="ic">🏃</span><p class="tt">晚间散步 30 分钟（例行）</p><span class="xp">+40 XP</span></div>
+    </div>
+    <div class="panel"><h3>本周战报 <span>自动预填</span></h3>
+      <div class="sq"><span class="ic">🍃</span><p class="tt">完成叶子 ×12</p><span class="xp">+1,180 XP</span></div>
+      <div class="sq"><span class="ic">⚔️</span><p class="tt">核心 vs 救火 · 5 : 2</p><span class="xp">比例健康</span></div>
+      <div class="sq"><span class="ic">⭐</span><p class="tt">金线触碰 ×3</p><span class="xp">主线推进中</span></div>
+    </div>
+  </div>
+  <div class="river panel">
+    <h3 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">精力之河 · 本周</h3>
+    <svg viewBox="0 0 880 120" preserveAspectRatio="none">
+      <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a78bfa" stop-opacity=".8"/><stop offset="1" stop-color="#a78bfa" stop-opacity=".2"/></linearGradient></defs>
+      <path d="M0,25 C280,25 520,35 880,30 L880,62 C520,67 280,57 0,57 Z" fill="url(#rg)"/>
+      <path d="M0,82 C280,82 520,96 880,92 L880,104 C520,108 280,96 0,96 Z" fill="#f5c518" opacity=".85"/>
+      <text x="10" y="18" font-family="JetBrains Mono" font-size="10" fill="#9a8fb0">战略主线 42%</text>
+      <text x="870" y="86" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#f5c518">★ 金色能量流</text>
+    </svg>
+    <div class="cap"><span>MANA FLOW — WEEK 48</span><span><a href="../index.html" style="color:var(--gold);text-decoration:none">进入完整地图 ↗</a></span></div>
+  </div>
+  <footer>Demo 10 · 游戏化 RPG · 数据只存在本地存档</footer>
+</div>
+</body>
+</html>
