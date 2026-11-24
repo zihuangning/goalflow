@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
   <meta name="color-scheme" content="light dark">
   <title>目标流 · GoalFlow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +12,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
   <script>try { var d = document.documentElement; d.dataset.theme = localStorage.getItem('goalflow.theme') || 'linear'; d.dataset.mode = localStorage.getItem('goalflow.mode') || 'dark' } catch (e) { document.documentElement.dataset.theme = 'linear'; document.documentElement.dataset.mode = 'dark' }</script>
-  <link rel="stylesheet" href="assets/css/main.css?v=6.3">
+  <link rel="stylesheet" href="assets/css/main.css?v=6.9">
 </head>
 
 <body>
@@ -75,7 +75,11 @@
           <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnImportJson" title="从 JSON 恢复">📂
             恢复</button>
           <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnSettings"
+            title="基础设置：每周可投入天数 × 每天小时，用于时间预算与超支警告">⚙ 设置</button>
           <span class="topbar-theme">
+            <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnThemeCycle"
+              title="切换界面主题（Linear / Raycast / RPG）">◈</button>
             <select id="themeSelect" class="gf-input gf-select" title="界面主题" aria-label="界面主题">
               <option value="linear">Linear</option>
               <option value="raycast">Raycast 玻璃 · 预览</option>
@@ -89,12 +93,6 @@
       </header>
 
       <div class="main-scroll">
-        <div class="review-banner" id="reviewBanner">
-          <span>本周还未做周回顾——花 2 分钟对齐「做了啥、核心投入、下周深潜块」。</span>
-          <button type="button" class="gf-btn gf-btn--sm gf-btn--primary" id="btnReviewBanner">开始周回顾</button>
-          <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnDismissBanner">稍后</button>
-        </div>
-
         <!-- ══ 视图 1：今日行动（默认主页） ══ -->
         <section class="view on" id="view-today" data-view="today">
           <div class="hero-wrap" id="heroWrap">
@@ -107,7 +105,8 @@
             <div class="pomo-bar" id="pomoBar" aria-live="polite"></div>
           </div>
 
-          <section class="panel today-panel" id="todayPanel">
+          <!-- 区 1 · 执行：现在做什么（唯一动作路径） -->
+          <section class="panel today-panel zone-exec" id="todayPanel">
             <div class="today-head">
               <div class="today-head-row">
                 <h2><span class="idx">☀</span> 今日行动</h2>
@@ -115,32 +114,59 @@
               </div>
               <p class="hint" id="todayHint">解析或载入示例后，系统会把「今天能做完的叶子」收敛到这里——先看 MIT，再按时段与微习惯执行。</p>
             </div>
-            <div id="onboardCard"></div>
-        <div id="todayBackupBar"></div>
-        <div id="todayBurnout"></div>
-        <div id="todayCapacity"></div>
-            <div id="todayScore"></div>
+            <!-- v6.7 流程指示器：展示收件箱→MIT→时段→完成的流转关系 -->
+            <div class="flow-indicator" id="flowIndicator" style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin:0 0 10px;background:var(--bg1);border-radius:var(--radius-sm);font-size:11px;color:var(--muted);border:1px solid var(--stroke-soft)">
+              <span>📥 收件箱</span><span style="color:var(--stroke)">→</span>
+              <span>🎯 MIT</span><span style="color:var(--stroke)">→</span>
+              <span>🕐 时段</span><span style="color:var(--stroke)">→</span>
+              <span>✅ 完成</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted-2)">执行流</span>
+            </div>
             <div id="todayRocks"></div>
-            <div id="todayStale"></div>
-            <div id="todayEnergy"></div>
-            <div id="todayAudit"></div>
+            <div id="inboxPanel"></div>
             <div class="today-grid">
               <div class="today-block" id="todayMit"></div>
               <div class="today-block today-slots-wrap" id="todaySlots"></div>
               <div class="today-block" id="todayMicro"></div>
             </div>
-            <div id="todayParked"></div>
-            <div id="inboxPanel"></div>
             <div class="today-checklist" id="todayChecklist"></div>
           </section>
 
-          <!-- 聚焦清单 -->
-          <div class="view-inner">
-            <div class="panel focus-box" id="focusPanel">
-              <h2><span class="idx">4</span> 聚焦清单（具象化行动）</h2>
+          <!-- 区 2 · 状态：一行紧凑反馈（默认折叠） -->
+          <details class="zone zone-status" id="zoneStatus">
+            <summary>📊 今日状态 <span class="zone-sum" id="statusSum"></span></summary>
+            <div class="zone-body">
+              <div id="todayCapacity"></div>
+              <div id="todayScore"></div>
+              <div id="todayEnergy"></div>
+              <div id="todayAudit"></div>
+            </div>
+          </details>
+
+          <!-- 区 3 · 提醒：需要关注（默认折叠 + 角标） -->
+          <details class="zone zone-attention" id="zoneAttention">
+            <summary>🔔 需要关注 <span class="zone-badge" id="attentionBadge"></span></summary>
+            <div class="zone-body">
+              <div class="review-banner" id="reviewBanner">
+                <span>本周还未做周回顾——花 2 分钟对齐「做了啥、核心投入、下周深潜块」。</span>
+                <button type="button" class="gf-btn gf-btn--sm gf-btn--primary" id="btnReviewBanner">开始周回顾</button>
+                <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnDismissBanner">稍后</button>
+              </div>
+              <div id="onboardCard"></div>
+              <div id="todayBackupBar"></div>
+              <div id="todayBurnout"></div>
+              <div id="todayStale"></div>
+              <div id="todayParked"></div>
+            </div>
+          </details>
+
+          <!-- 备选与 Backlog（降级折叠，去除与 hero/执行清单的重复） -->
+          <details class="zone zone-focus" id="zoneFocus">
+            <summary>🗂 备选与 Backlog（聚焦清单）</summary>
+            <div class="zone-body">
               <div id="todayFocus"></div>
             </div>
-          </div>
+          </details>
         </section>
 
         <!-- ══ 视图 2：目标规划（输入 / 树形 / SMART） ══ -->
@@ -207,7 +233,8 @@
               <div class="canvas-head">
                 <div>
                   <div class="ttl">精力流向图</div>
-                  <div class="sub" id="canvasSub">条带宽度 = 重要性 · 颜色冷暖 = 紧急性 · 金色发光 = 当下最重要<span class="m-only">（手机端可左右滑动查看全图）</span></div>
+                  <div class="sub" id="canvasSub">条带宽度 = 重要性 · 颜色冷暖 = 紧急性 · 金色发光 = 当下最重要<span
+                      class="m-only">（手机端可左右滑动查看全图）</span></div>
                 </div>
                 <div class="spacer-min"></div>
                 <div class="viewbar" id="viewbar" title="切换可视化视角">
@@ -216,12 +243,14 @@
                   <button type="button" data-view="kanban">看板</button>
                   <button type="button" data-view="mindmap">脑图</button>
                   <button type="button" data-view="heatmap">热力</button>
+                  <button type="button" data-view="calendar">日历</button>
                 </div>
                 <div class="zoombar" id="zoombar">
                   <button data-scale="all" class="on">年度总览</button>
                   <button data-scale="month">每月</button>
                   <button data-scale="week">每周</button>
                   <button data-scale="day">每日</button>
+                  <button id="btnFitWidth" class="m-only" title="把图缩放到屏幕宽度（再点一次恢复原始尺寸）">↔ 适应宽度</button>
                 </div>
               </div>
               <div class="canvas-opt">
@@ -268,32 +297,37 @@
     </div>
   </div>
 
-<!-- 底部 tab（≤900px 移动端主导航，复用 [data-nav] 切换） -->
-<nav class="mtab" aria-label="移动端主导航">
-  <button type="button" class="mtab-btn on" data-nav="today"><span class="mtab-ic">☀</span>今日</button>
-  <button type="button" class="mtab-btn" data-nav="plan"><span class="mtab-ic">🎯</span>规划</button>
-  <button type="button" class="mtab-btn" data-nav="insights"><span class="mtab-ic">📊</span>洞察</button>
-  <button type="button" class="mtab-btn" id="mtabWeekReview"><span class="mtab-ic">◔</span>回顾</button>
-</nav>
+  <!-- 底部 tab（≤900px 移动端主导航，复用 [data-nav] 切换） -->
+  <nav class="mtab" aria-label="移动端主导航">
+    <button type="button" class="mtab-btn on" data-nav="today"><span class="mtab-ic">☀</span>今日</button>
+    <button type="button" class="mtab-btn" data-nav="plan"><span class="mtab-ic">🎯</span>规划</button>
+    <button type="button" class="mtab-btn" data-nav="insights"><span class="mtab-ic">📊</span>洞察</button>
+    <button type="button" class="mtab-btn" id="mtabCapture"><span class="mtab-ic">⚡</span>捕捉</button>
+    <button type="button" class="mtab-btn" id="mtabWeekReview"><span class="mtab-ic">◔</span>回顾</button>
+  </nav>
 
-<!-- SMART 对话弹窗 -->
-<div class="modal-mask" id="smartModal"></div>
+  <!-- SMART 对话弹窗 -->
+  <div class="modal-mask" id="smartModal"></div>
   <!-- 周回顾弹窗 -->
   <div class="modal-mask" id="weekReviewModal"></div>
   <!-- 项目（目标流）元信息 -->
   <div class="modal-mask" id="workflowMetaModal"></div>
-<!-- 早晚仪式闹钟弹窗（晨计划 / 晚总结） -->
-<div class="modal-mask" id="ritualModal"></div>
-<!-- 撤销 toast（危险操作 10 秒可撤销） -->
-<div class="toast" id="toast"></div>
+  <!-- 早晚仪式闹钟弹窗（晨计划 / 晚总结） -->
+  <div class="modal-mask" id="ritualModal"></div>
+  <!-- 撤销 toast（危险操作 10 秒可撤销） -->
+  <div class="toast" id="toast"></div>
   <!-- 项目总览 -->
   <div class="modal-mask" id="projectModal"></div>
   <!-- 必经步骤规划向导 -->
   <div class="modal-mask" id="planWizardModal"></div>
+  <!-- 基础设置（时间预算） -->
+  <div class="modal-mask" id="settingsModal"></div>
 
-  <script src="assets/js/gf-tokens.js?v=6.3"></script>
-  <script src="assets/js/gf-demos.js?v=6.3"></script>
-  <script src="assets/js/app.js?v=6.3"></script>
+  <script src="assets/js/gf-tokens.js?v=6.9"></script>
+  <script src="assets/js/gf-demos.js?v=6.9"></script>
+  <script src="assets/js/app.js?v=6.9"></script>
+  <!-- v6.6 兜底：若 app.js 异常未设置 is-ready，1.5 秒后强制显示页面，避免"按钮看不见也点不到" -->
+  <script>setTimeout(function(){document.body.classList.add('is-ready')},1500)</script>
 </body>
 
 </html>

@@ -14,10 +14,10 @@
   /* 声明自带明暗支持：防浏览器强制深色反转；滚动条/表单控件随模式着色 */
   color-scheme: dark;
 
-  /* 圆角与间距 */
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-pill: 999px;
+  /* 圆角与间距（圆角基准接 Qoder Sites Nudge：--site-radius 未注入时保持原值） */
+  --radius: var(--site-radius, 12px);
+  --radius-sm: calc(var(--site-radius, 12px) * 0.6667);
+  --radius-pill: 999px; /* 药丸/圆形属刻意选择，不参与整体缩放 */
   --space-1: 6px;
   --space-2: 12px;
   --space-3: 18px;
@@ -30,7 +30,7 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* 按钮 */
-  --btn-radius: 6px;
+  --btn-radius: calc(var(--site-radius, 12px) * 0.5);
   --btn-on-dark: #0b0c10;
   --btn-on-gold: #1a1206;
 }

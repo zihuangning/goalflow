@@ -2,6 +2,9 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 
+/* v6.6 移动端：禁用 Android 字体放大（"忽大忽小"），保留双指缩放 */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
 body {
   font-family: var(--font-ui);
   color: var(--ink);
@@ -10,7 +13,10 @@ body {
   font-size: 14px;
   line-height: 1.55;
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  /* 触屏下禁用 300ms 点击延迟，保留双指缩放 */
+  touch-action: manipulation;
 }
 
 /* 颗粒噪点（强度由主题 --grain-opacity 控制；linear 主题为 0） */

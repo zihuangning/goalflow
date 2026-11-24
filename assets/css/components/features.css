@@ -2499,3 +2499,154 @@
 .trow-im:focus,.trow-ur:focus { outline: none; border-color: var(--iris, #5e6ad2); }
 .trow.drop-target { outline: 1px dashed var(--iris, #5e6ad2); outline-offset: -2px; background: rgba(94, 106, 210, .06); }
 .trow[draggable] { cursor: grab; }
+
+/* ══════════ 日历视角（月 / 周 / 年网格 + 加权热力 + 日详情联动跳转）══════════ */
+.gf-cal { display: flex; flex-direction: column; gap: 12px; }
+.cal-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+.cal-nav { display: flex; align-items: center; gap: 7px; }
+.cal-title { font-size: 15px; font-weight: 700; color: var(--ink); min-width: 96px; text-align: center; }
+.cal-arrow { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--stroke); background: var(--panel-strong); color: var(--ink-2); font: inherit; font-size: 15px; line-height: 1; cursor: pointer; transition: border-color .12s, color .12s; }
+.cal-arrow:hover { border-color: var(--accent); color: var(--ink); }
+.cal-sum { display: flex; gap: 6px; flex-wrap: wrap; }
+.cal-chip { font: inherit; font-size: 11px; padding: 3px 9px; border-radius: var(--radius-pill); background: var(--panel-strong); border: 1px solid var(--stroke-soft); color: var(--ink-2); }
+.cal-chip.hot { color: var(--gold-soft); border-color: color-mix(in srgb, var(--gold) 38%, transparent); }
+button.cal-chip.best { cursor: pointer; }
+button.cal-chip.best:hover { border-color: var(--gold); color: var(--gold); }
+.cal-legend { display: flex; align-items: center; gap: 5px; margin-left: auto; font-size: 10.5px; color: var(--muted-2); }
+.cal-legend i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--stroke-soft); }
+/* 热力色阶：与 365 热力同族（--accent 由浅到满） */
+.c0 { background: var(--panel-strong); }
+.c1 { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+.c2 { background: color-mix(in srgb, var(--accent) 52%, transparent); }
+.c3 { background: color-mix(in srgb, var(--accent) 74%, transparent); }
+.c4 { background: var(--accent); }
+/* 格子 / 月卡底色：必须比 .cal-d、.cal-mo 自身声明更高权重，否则会被 --panel 整格盖掉 */
+.cal-d.c0,
+.cal-mo.c0 { background: var(--panel); }
+.cal-d.c1,
+.cal-mo.c1 { background: color-mix(in srgb, var(--accent) 26%, var(--panel)); }
+.cal-d.c2,
+.cal-mo.c2 { background: color-mix(in srgb, var(--accent) 45%, var(--panel)); }
+.cal-d.c3,
+.cal-mo.c3 { background: color-mix(in srgb, var(--accent) 66%, var(--panel)); }
+.cal-d.c4,
+.cal-mo.c4 { background: color-mix(in srgb, var(--accent) 88%, var(--panel)); }
+.cal-lvl.c3,
+.cal-lvl.c4 { color: #fff; border-color: transparent; }
+.cal-d.fut.c1,
+.cal-d.fut.c2,
+.cal-d.fut.c3,
+.cal-d.fut.c4 { background: transparent; }
+.cal-main { display: flex; gap: 14px; align-items: flex-start; }
+.cal-grid { flex: 1 1 auto; min-width: 0; }
+.cal-wkh,
+.cal-wk { display: grid; grid-template-columns: 66px repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal-wkh { font-size: 11px; color: var(--muted); padding-bottom: 4px; }
+.cal-wkh span:not(.cal-gut) { text-align: center; }
+.cal-wk { margin-bottom: 4px; }
+.cal-gut { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 10px; color: var(--muted-2); padding-right: 2px; }
+.cal-gut.cal-gut-h { justify-content: flex-start; }
+.cal-gut i { font-style: normal; font-size: 10px; padding: 1px 6px; border-radius: var(--radius-pill); background: var(--panel-strong); color: var(--ink-2); }
+.cal-d { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 78px; padding: 6px 7px; border-radius: 10px; border: 1px solid var(--stroke-soft); background: var(--panel); color: var(--ink-2); font: inherit; text-align: left; cursor: pointer; transition: border-color .12s, box-shadow .16s var(--ease-out), transform .12s; }
+.cal-d:hover { transform: translateY(-1px); }
+.cal-d.c3 .cal-n,
+.cal-d.c4 .cal-n,
+.cal-d.c3 .cal-h em,
+.cal-d.c4 .cal-h em { color: #fff; }
+.cal-d.out { opacity: .42; }
+.cal-d.fut { background: transparent; border-style: dashed; }
+.cal-d.blank { background: var(--panel); }
+.cal-d.sel { border-color: var(--gold); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent), 0 6px 18px rgba(0, 0, 0, .28); }
+.cal-d.today .cal-n { position: relative; padding-left: 9px; }
+.cal-d.today .cal-n::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+.cal-n { font-size: 12px; font-weight: 700; color: var(--ink); }
+.cal-hint { font-size: 10px; color: var(--muted); }
+.cal-h { display: flex; flex-wrap: wrap; gap: 3px; }
+.cal-h em { font-style: normal; font-size: 10px; line-height: 1.5; padding: 0 5px; border-radius: var(--radius-pill); background: var(--panel-strong); border: 1px solid var(--stroke-soft); color: var(--ink-2); }
+.cal-dl { position: absolute; right: 7px; bottom: 5px; font-size: 10px; color: var(--gold-soft); }
+.cal-detail { flex: 0 0 350px; max-height: 620px; overflow: auto; border: 1px solid var(--stroke-soft); border-radius: var(--radius); background: var(--panel); padding: 12px 13px 13px; }
+.cal-det-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-bottom: 10px; }
+.cal-det-h b { font-size: 15px; color: var(--ink); }
+.cal-lvl { margin-left: auto; font-size: 11px; padding: 2px 9px; border-radius: var(--radius-pill); color: var(--ink); border: 1px solid var(--stroke-soft); }
+.cal-parts-wrap { display: flex; flex-direction: column; gap: 5px; padding: 9px 10px; border-radius: var(--radius-sm); background: var(--bg1); border: 1px solid var(--stroke-soft); }
+.cal-part { display: grid; grid-template-columns: 60px 1fr auto; align-items: center; gap: 7px; font-size: 11px; color: var(--ink-2); }
+.cp-bar { height: 6px; border-radius: var(--radius-pill); background: var(--panel-strong); overflow: hidden; }
+.cp-bar i { display: block; height: 100%; border-radius: var(--radius-pill); background: var(--accent); transition: width .28s var(--ease-out); }
+.cp-v { font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+.cal-part.nodata .cp-l,
+.cal-part.nodata .cp-v { color: var(--muted-2); }
+.cal-score { margin-top: 8px; font-size: 11.5px; color: var(--ink-2); }
+.cal-score b { color: var(--gold); font-size: 14px; }
+.cal-sec { margin: 11px 0 5px; font-size: 11px; color: var(--muted); letter-spacing: .2px; }
+.cal-row { display: flex; align-items: center; gap: 6px; padding: 5px 7px; margin-bottom: 3px; border-radius: 8px; border: 1px solid var(--stroke-soft); background: var(--bg1); font-size: 12px; cursor: pointer; transition: border-color .12s, background .12s; }
+.cal-row:hover { border-color: var(--accent); background: var(--panel-strong); }
+.cr-t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+.cr-wf { font-size: 10px; color: var(--accent-2); flex-shrink: 0; }
+.cr-m { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+.cr-act { display: flex; gap: 3px; flex-shrink: 0; opacity: 0; transition: opacity .14s; }
+.cal-row:hover .cr-act { opacity: 1; }
+.cal-mini { font: inherit; font-size: 10px; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--stroke); background: var(--panel-strong); color: var(--ink-2); cursor: pointer; }
+.cal-mini:hover { border-color: var(--accent); color: var(--ink); }
+.cal-mini.star:hover { border-color: var(--gold); color: var(--gold); }
+.cal-eng { display: flex; gap: 6px; }
+.ce { font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--panel-strong); color: var(--muted); }
+.ce.has { color: var(--ink); }
+.cal-note { font-size: 12px; line-height: 1.55; color: var(--ink-2); padding: 7px 9px; border-radius: var(--radius-sm); background: var(--bg1); border-left: 2px solid var(--accent-2); }
+.cal-goods { margin: 5px 0 0; padding-left: 18px; font-size: 11.5px; color: var(--ink-2); line-height: 1.6; }
+.cal-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--stroke-soft); }
+.cal-hint2 { font-size: 10px; color: var(--muted-2); flex-basis: 100%; }
+/* 年视角：12 个月卡 + 后 14 天热力条 */
+.cal-year-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.cal-mo { display: flex; flex-direction: column; gap: 4px; padding: 8px 9px; border-radius: 10px; border: 1px solid var(--stroke-soft); color: var(--ink-2); font: inherit; text-align: left; cursor: pointer; transition: border-color .12s, transform .12s; }
+.cal-mo:hover { transform: translateY(-1px); border-color: var(--accent); }
+.cal-mo.cur { border-color: var(--gold); }
+.cal-mo b { font-size: 12.5px; color: var(--ink); }
+.cal-mo.c3 b,
+.cal-mo.c4 b,
+.cal-mo.c3 .cm-n,
+.cal-mo.c4 .cm-n,
+.cal-mo.c3 .cm-m,
+.cal-mo.c4 .cm-m { color: #fff; }
+.cm-n,
+.cm-m { font-size: 10.5px; color: var(--muted); }
+.cm-strip { display: flex; gap: 2px; margin-top: 2px; }
+.cm-strip i { flex: 1 1 auto; height: 14px; border-radius: 2px; min-width: 3px; }
+.cm-strip i.fut { opacity: .3; }
+/* 从日历「定位」跳回规划树时的高亮 */
+.trow-hl { animation: gfTrowHl 1.6s var(--ease-out) 1; border-radius: 8px; }
+@keyframes gfTrowHl {
+  0%, 55% { background: color-mix(in srgb, var(--gold) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent); }
+  100% { background: transparent; box-shadow: none; }
+}
+@media (max-width: 1180px) {
+  .cal-main { flex-direction: column; }
+  .cal-detail { flex: 1 1 auto; width: 100%; max-height: none; }
+}
+@media (max-width: 760px) {
+  .cal-wkh,
+  .cal-wk { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .cal-gut { display: none; }
+  .cal-d { min-height: 54px; padding: 4px; }
+  .cal-d .cal-h em:nth-child(n + 2) { display: none; }
+  .cal-year-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cr-act { opacity: 1; }
+}
+/* 日历色阶校正（低饱和 + 统一 --ink 文字）
+   整格铺满足量 --accent 时，12px 日期字在最浅的两档只有 1.3:1、c3/c4 用白字也仅 3.7:1；
+   改为 18/32/46/60% 叠在 --panel 上，深色模式底是深面板、浅色模式底是白，两档主题都用 --ink 达 AA。 */
+.cal-d.c1, .cal-mo.c1, .cal-lvl.c1, .cal-legend i.c1 { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); }
+.cal-d.c2, .cal-mo.c2, .cal-lvl.c2, .cal-legend i.c2 { background: color-mix(in srgb, var(--accent) 32%, var(--panel)); }
+.cal-d.c3, .cal-mo.c3, .cal-lvl.c3, .cal-legend i.c3 { background: color-mix(in srgb, var(--accent) 46%, var(--panel)); }
+.cal-d.c4, .cal-mo.c4, .cal-lvl.c4, .cal-legend i.c4 { background: color-mix(in srgb, var(--accent) 60%, var(--panel)); }
+.cal-d.c3, .cal-d.c4, .cal-mo.c3, .cal-mo.c4,
+.cal-d.c3 .cal-n, .cal-d.c4 .cal-n,
+.cal-d.c3 .cal-h em, .cal-d.c4 .cal-h em,
+.cal-mo.c3 b, .cal-mo.c4 b, .cal-mo.c3 .cm-n, .cal-mo.c4 .cm-n,
+.cal-lvl.c3, .cal-lvl.c4 { color: var(--ink); }
+.cal-mo.c3 .cm-m, .cal-mo.c4 .cm-m { color: var(--ink-2); }
+.cal-lvl.c3, .cal-lvl.c4 { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+/* 日历「钉为Top1」与英雄卡固定态 */
+.cal-mini.star.on { border-color: var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--panel-strong)); }
+.hero-pin { margin-left: 8px; font-size: 11px; font-weight: 500; }
+.hero-pin button { font: inherit; padding: 2px 9px; border-radius: var(--radius-pill); border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); background: color-mix(in srgb, var(--gold) 12%, transparent); color: var(--gold); cursor: pointer; transition: border-color .12s, color .12s; }
+.hero-pin button:hover { border-color: var(--gold); color: var(--gold-soft); }
