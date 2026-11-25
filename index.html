@@ -12,11 +12,12 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
   <script>try { var d = document.documentElement; d.dataset.theme = localStorage.getItem('goalflow.theme') || 'linear'; d.dataset.mode = localStorage.getItem('goalflow.mode') || 'dark' } catch (e) { document.documentElement.dataset.theme = 'linear'; document.documentElement.dataset.mode = 'dark' }</script>
-  <link rel="stylesheet" href="assets/css/main.css?v=6.9">
+  <link rel="stylesheet" href="assets/css/main.css?v=7.6">
 </head>
 
 <body>
   <div class="app-shell">
+    <div class="drawer-scrim" id="drawerScrim"></div>
 
     <!-- 左：图标轨（主导航：今日 / 规划 / 洞察） -->
     <nav class="rail" aria-label="主导航">
@@ -29,12 +30,13 @@
       <button type="button" class="ric on" data-nav="today" title="今日行动（每天的主页）">☀</button>
       <button type="button" class="ric" data-nav="plan" title="目标规划（输入 / 树形 / SMART）">🎯</button>
       <button type="button" class="ric" data-nav="insights" title="归纳洞察（流向图 / 四象限）">📊</button>
-      <button type="button" class="ric" id="railWeekReview" title="周回顾仪式">◔</button>
+      <button type="button" class="ric" data-nav="ai" title="AI 分析（智能拆解 / SMART 体检）">🤖</button>
       <span class="rail-bottom"><a class="ric" href="demos/index.html" title="风格实验室">◈</a></span>
     </nav>
 
     <!-- 左：侧栏（工作流步骤 + 目标树 + 主题） -->
-    <aside class="side">
+    <aside class="side" id="sideDrawer">
+      <div class="drawer-head"><span>项目 · 工具</span><button type="button" class="drawer-x" id="btnDrawerClose" aria-label="关闭侧栏">✕</button></div>
       <div class="side-ws">
         <span class="ws-dot"></span>
         <div class="ws-tx"><b>目标流 · GoalFlow</b>
@@ -47,6 +49,7 @@
       <button type="button" class="si on" data-nav="today"><span class="sidx">☀</span>今日行动</button>
       <button type="button" class="si" data-nav="plan"><span class="sidx">🎯</span>目标规划</button>
       <button type="button" class="si" data-nav="insights"><span class="sidx">📊</span>归纳洞察</button>
+      <button type="button" class="si" data-nav="ai"><span class="sidx">🤖</span>AI 分析</button>
       <div class="slabel">仪式</div>
       <button type="button" class="si" id="sideMorning">🌅 晨计划</button>
       <button type="button" class="si" id="sideEvening">🌙 晚总结</button>
@@ -60,23 +63,33 @@
 
     <!-- 右：主内容 -->
     <div class="main">
-      <header class="topbar">
+      <header class="topbar" id="topbar">
+        <button type="button" class="ab-menu m-only" id="btnDrawer" aria-label="项目与工具" aria-expanded="false" aria-controls="sideDrawer">☰</button>
+        <div class="ab-mini m-only"><b id="abMini">今日</b><span id="abMiniSub"></span></div>
         <span class="crumb">目标流 <i>/</i> <b id="crumbSection">今日行动</b></span>
         <div class="progress-chip" id="progressChip" style="display:none" title="叶子任务完成度">
           <span id="progressLbl">进度</span><span class="bar"><i id="progressFill" style="width:0%"></i></span>
         </div>
         <div class="spacer"></div>
         <div class="topbar-actions">
-          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnWeekReview"
-            title="周/月/季回顾 + 统计">📋 回顾</button>
-          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnExportIcs"
-            title="导出带期限叶子为 ICS（本地文件）">📅 ICS</button>
-          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnExportJson" title="备份目标数据">💾 备份</button>
-          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnImportJson" title="从 JSON 恢复">📂
-            恢复</button>
-          <input type="file" id="importFile" accept="application/json,.json" style="display:none">
-          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnSettings"
-            title="基础设置：每周可投入天数 × 每天小时，用于时间预算与超支警告">⚙ 设置</button>
+          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnSearch"
+            title="全局搜索任务 / 标签 / 等待备注（Ctrl+K 或 /）">🔍<span class="btn-lbl"> 搜索</span></button>
+          <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost m-only" id="btnProjects"
+            title="项目列表：切换 / 新建 / 总览">🗂 项目</button>
+          <details class="tb-more" id="tbMoreMenu">
+            <summary title="更多操作"></summary>
+            <div class="tb-drop">
+              <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnWeekReview"
+                title="周/月/季回顾 + 统计">📋 回顾</button>
+              <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnSettings"
+                title="基础设置：每周可投入天数 × 每天小时，用于时间预算与超支警告">⚙ 设置</button>
+              <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnExportIcs"
+                title="导出带期限叶子为 ICS（本地文件）">📅 导出 ICS</button>
+              <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnExportJson" title="备份目标数据">💾 备份数据</button>
+              <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnImportJson" title="从 JSON 恢复">📂 恢复数据</button>
+              <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+            </div>
+          </details>
           <span class="topbar-theme">
             <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnThemeCycle"
               title="切换界面主题（Linear / Raycast / RPG）">◈</button>
@@ -93,6 +106,7 @@
       </header>
 
       <div class="main-scroll">
+        <div class="app-title m-only" id="appTitle"><h1 id="appTitleText">今日</h1><p id="appTitleSub"></p></div>
         <!-- ══ 视图 1：今日行动（默认主页） ══ -->
         <section class="view on" id="view-today" data-view="today">
           <div class="hero-wrap" id="heroWrap">
@@ -111,19 +125,18 @@
               <div class="today-head-row">
                 <h2><span class="idx">☀</span> 今日行动</h2>
                 <div class="today-alarm-bar" id="todayAlarmBar"></div>
+                <div class="today-attn-pill" id="todayAttnPill"></div>
               </div>
               <p class="hint" id="todayHint">解析或载入示例后，系统会把「今天能做完的叶子」收敛到这里——先看 MIT，再按时段与微习惯执行。</p>
             </div>
-            <!-- v6.7 流程指示器：展示收件箱→MIT→时段→完成的流转关系 -->
-            <div class="flow-indicator" id="flowIndicator" style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin:0 0 10px;background:var(--bg1);border-radius:var(--radius-sm);font-size:11px;color:var(--muted);border:1px solid var(--stroke-soft)">
-              <span>📥 收件箱</span><span style="color:var(--stroke)">→</span>
-              <span>🎯 MIT</span><span style="color:var(--stroke)">→</span>
-              <span>🕐 时段</span><span style="color:var(--stroke)">→</span>
-              <span>✅ 完成</span>
-              <span style="margin-left:auto;font-size:10px;color:var(--muted-2)">执行流</span>
+            <!-- v6.7 流程指示器：展示收件箱→MIT→时段→完成的流转关系（首次显示，可关闭） -->
+            <div class="flow-indicator" id="flowIndicator" style="display:none;align-items:center;gap:8px;padding:8px 12px;margin:0 0 10px;background:var(--bg1);border-radius:var(--radius-sm);color:var(--muted);border:1px solid var(--stroke-soft)">
+              <span class="flow-track">📥 捕获 → 🎯 MIT → 📋 执行 → ✅ 完成</span>
+              <button type="button" class="flow-close" id="flowIndicatorClose" style="border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;margin-left:8px" title="不再显示">✕</button>
             </div>
             <div id="todayRocks"></div>
-            <div id="inboxPanel"></div>
+            <div id="inboxCapture"></div>
+            <div class="today-ctx-bar" id="todayCtxBar"></div>
             <div class="today-grid">
               <div class="today-block" id="todayMit"></div>
               <div class="today-block today-slots-wrap" id="todaySlots"></div>
@@ -157,6 +170,8 @@
               <div id="todayBurnout"></div>
               <div id="todayStale"></div>
               <div id="todayParked"></div>
+              <!-- 收件箱澄清队列：从执行路径降级到「需要关注」 -->
+              <div id="inboxPanel"></div>
             </div>
           </details>
 
@@ -175,7 +190,7 @@
             <div class="panel" id="panelInput">
               <h2><span class="idx">1</span> 输入目标（自由文本）</h2>
               <textarea id="input"
-                placeholder="把你的目标或一段计划粘进来，例如：&#10;目标：今年做到月入5万&#10;1. 核心：打磨销售方法论（重要不紧急）&#10;   - 读完3本销售书&#10;2. 紧急：本周跟进意向客户"></textarea>
+                placeholder="输入目标或计划，用缩进/编号分层。例如：&#10;目标：月入5万&#10;1. 打磨销售方法论&#10;   - 读完3本销售书"></textarea>
               <div class="btns gf-btns demo-bar">
                 <button type="button" class="gf-btn gf-btn--primary" id="btnParse">解析并生成</button>
                 <select id="demoSelect" class="gf-input gf-select gf-select--demo" title="选择示例主题"
@@ -184,20 +199,6 @@
                 <button type="button" class="gf-btn gf-btn--ghost" id="btnClear">清空</button>
                 <button type="button" class="gf-btn gf-btn--ghost" id="btnExportJson2">备份 JSON</button>
               </div>
-              <details>
-                <summary>这是什么 · 怎么读这张图</summary>
-                <p><b>桑基流图</b>：从「目标」流出的每条带子代表一份精力投入。<b>带子越宽 = 越重要</b>（值得投入的精力越多）；<b>颜色越暖（红）=
-                    越紧急</b>。战略主线（重要不紧急）是宽阔的冷色河，火情（重要且紧急）是又宽又红的急流。</p>
-                <p><b>金色发光的那条</b>就是「当下最重要」——算法按 重要度×10 + 期限临近加权 选出最该立刻动手的具体任务，并沿 目标→方向→任务 把它一路点亮。</p>
-                <p><b>时间尺度缩放</b>：右上角像地图一样可切换 年度总览 / 每月 / 每周 / 每日，看清不同时间颗粒度下的精力重点；下方「全年精力节奏」把一年拆成 12 个月，看精力在哪几个月扎堆。</p>
-                <p><b>四象限校准</b>：图下方把任务按「重要 / 紧急」铺成四象限，直接把卡片拖到目标象限即可重设优先级，与流图、英雄卡实时联动。</p>
-                <p><b>SMART 智能对话</b>：左栏「SMART 体检」会检查每个目标是否够具体、可衡量、有期限；点「对话拆解」可让助手逐项提问补齐，或一键拆成子任务。</p>
-                <p><b>执行闭环（v5.6）</b>：桑基/关系/看板/脑图/365热力 · OKR·KR · 周月季回顾（下周期调整→晨计划采纳 PDCA 闭环）· Top1 番茄 25′ · 自动评分 ·
-                  🌅晨计划/🌙晚总结 · 🗓周计划大石头 · 🔍时间审计与偏差校准 · 🛡执行意图 · ⚠️停滞预警 · 🪦事前验尸 · 🔥精力曲线匹配。</p>
-                <p><b>三视图（v6.0）</b>：左侧图标轨切换 ☀今日行动（每天主页）/ 🎯目标规划（输入·树形·SMART）/ 📊归纳洞察（流向图·四象限）。深链
-                  <code>#/today</code>、<code>#/plan</code>、<code>#/insights</code>。
-                </p>
-              </details>
               <div class="hint">层级用缩进 / 编号(1. 1.1) / 项目符号(- •)。首行自动作为「目标根」。日期如「周五前 / 本周内 / 3月15日 / 月底」会被自动识别为期限；「每天 / 每周
                 / 每月 / 今年」会被识别为时间尺度。</div>
             </div>
@@ -208,20 +209,9 @@
               <div class="tree-editor" id="treeEditor"></div>
               <div class="btns gf-btns" style="margin-top:10px">
                 <button type="button" class="gf-btn gf-btn--sm" id="btnSyncTree">同步到文本框</button>
+                <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" onclick="switchView('ai')">🤖 去 AI 分析做 SMART 体检 →</button>
               </div>
               <p class="hint">预估：文案含「30分钟 / 1小时」自动识别；日视图节奏条上方显示可做完性（默认 8h 容量）。</p>
-            </div>
-
-            <div class="panel" id="panelSmart">
-              <h2><span class="idx">3</span> SMART 体检 · 智能拆解</h2>
-              <div id="premortemCard"></div>
-              <div class="smart-list" id="smartList"></div>
-              <div class="hint">不够 SMART（具体 / 可衡量 / 有期限）的目标会列在这里。点「对话拆解」让助手提问补齐，或一键拆成子任务。可填 DeepSeek 密钥启用真·AI
-                深度拆解（留空则用内置规则引擎，完全离线）。</div>
-              <div class="btns gf-btns" style="margin-top:10px">
-                <input class="gf-input gf-input--grow" id="llmKey" placeholder="DeepSeek API Key（可选）">
-                <button type="button" class="gf-btn gf-btn--sm" id="btnSaveKey">保存密钥</button>
-              </div>
             </div>
           </div>
         </section>
@@ -245,6 +235,14 @@
                   <button type="button" data-view="heatmap">热力</button>
                   <button type="button" data-view="calendar">日历</button>
                 </div>
+                <select class="viewbar-select m-only" id="viewbarSelect" title="切换可视化视角">
+                  <option value="sankey" selected>桑基图</option>
+                  <option value="network">关系图</option>
+                  <option value="kanban">看板</option>
+                  <option value="mindmap">脑图</option>
+                  <option value="heatmap">热力图</option>
+                  <option value="calendar">日历</option>
+                </select>
                 <div class="zoombar" id="zoombar">
                   <button data-scale="all" class="on">年度总览</button>
                   <button data-scale="month">每月</button>
@@ -252,10 +250,15 @@
                   <button data-scale="day">每日</button>
                   <button id="btnFitWidth" class="m-only" title="把图缩放到屏幕宽度（再点一次恢复原始尺寸）">↔ 适应宽度</button>
                 </div>
+                <select class="viewbar-select m-only" id="zoombarSelect" title="时间尺度缩放" aria-label="时间尺度缩放">
+                  <option value="all" selected>年度总览</option>
+                  <option value="month">每月</option>
+                  <option value="week">每周</option>
+                  <option value="day">每日</option>
+                </select>
               </div>
               <div class="canvas-opt">
-                <label><input id="focusMode" type="checkbox"> 聚焦模式（隐去噪音）</label>
-                <label><input id="showNoise" type="checkbox" checked> 显示噪音</label>
+                <label><input id="showNoise" type="checkbox" checked> 显示噪音（不重要不紧急）</label>
               </div>
               <div class="rhythm" id="rhythm"></div>
               <div class="canvas-wrap" id="canvasWrap">
@@ -263,22 +266,35 @@
                 <div id="vizAlt" class="viz-alt"></div>
                 <button type="button" class="gf-btn gf-btn--primary gf-btn--cool ex-btn" id="btnExport">导出 PNG</button>
               </div>
-              <div class="legend">
-                <span><b>紧急度</b></span>
-                <span class="scale"><i style="background:var(--ur1)"></i><i style="background:var(--ur2)"></i><i
-                    style="background:var(--ur3)"></i><i style="background:var(--ur4)"></i><i
-                    style="background:var(--ur5)"></i></span>
-                <span>冷静 ←→ 火急</span>
-                <span style="margin-left:auto"><b class="gold">★ 金色</b> = 当下最重要</span>
-              </div>
+              <details class="legend-details">
+                <summary class="legend-summary">📊 图例说明</summary>
+                <div class="legend">
+                  <span><b>紧急度</b></span>
+                  <span class="scale"><i style="background:var(--ur1)"></i><i style="background:var(--ur2)"></i><i
+                      style="background:var(--ur3)"></i><i style="background:var(--ur4)"></i><i
+                      style="background:var(--ur5)"></i></span>
+                  <span>冷静 ←→ 火急</span>
+                  <span style="margin-left:auto"><b class="gold">★ 金色</b> = 当下最重要</span>
+                </div>
+              </details>
+              <details class="legend-details">
+                <summary class="legend-summary">📖 怎么读这张图</summary>
+                <div class="chart-help">
+                  <p><b>桑基流图</b>：从「目标」流出的每条带子代表一份精力投入。<b>带子越宽 = 越重要</b>；<b>颜色越暖（红）= 越紧急</b>。战略主线（重要不紧急）是宽阔的冷色河，火情（重要且紧急）是又宽又红的急流。</p>
+                  <p><b>金色发光的那条</b>就是「当下最重要」——算法按 重要度×10 + 期限临近加权 选出最该立刻动手的具体任务，并沿 目标→方向→任务 一路点亮，与今日页英雄卡 / MIT 同源。</p>
+                  <p><b>时间尺度缩放</b>：上方可切换 年度总览 / 每月 / 每周 / 每日；「全年精力节奏」把一年拆成 12 个月，看精力在哪几个月扎堆。</p>
+                  <p><b>四象限校准</b>：下方把任务按「重要 / 紧急」铺成四象限，把卡片拖到目标象限即可重设优先级（触屏用卡上 ± 按钮），与流图、英雄卡实时联动。</p>
+                </div>
+              </details>
             </div>
 
             <div class="panel quad-panel" id="quadPanel">
               <h2>四象限校准 · 拖拽归位</h2>
-              <div class="quad-hint">把任务卡拖到对应象限，即可重新校准它的「重要 / 紧急」。象限随上方缩放档位联动；任务卡可单独校准 <b>价值 / 费力</b>。带 🟡 金边 =
-                当下最重要；<b>⚡</b> = 高价值低费力快速赢。<span class="m-only">（手机端仅查看，拖拽归位请用桌面端）</span></div>
+              <div class="quad-hint">把任务卡拖到对应象限，即可重新校准它的「重要 / 紧急」。象限随上方缩放档位联动；点卡片 <b>⋯</b> 展开 价值/费力/尺度/时段。带 🟡 金边 =
+                当下最重要；<b>⚡</b> = 高价值低费力快速赢。<span class="m-only">（触屏：长按卡片拖动，或用 ± 按钮校准）</span></div>
               <div class="quad-grid" id="quadGrid"></div>
-              <div class="ve-panel">
+              <details class="ve-panel" id="vePanel">
+                <summary class="ve-summary">⚖ 价值 × 费力矩阵 <span class="ve-cnt" id="veSum"></span></summary>
                 <div class="ve-toolbar">
                   <span class="ve-title">价值 × 费力矩阵</span>
                   <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnQuickWin" title="四象限仅显示快速赢">⚡
@@ -288,22 +304,101 @@
                 <div class="ve-foot hint">快速赢：价值 ≥ 4 且 费力 ≤ 2（叶子任务可优先勾选完成，写入本周回顾统计）。 rollup 规则见
                   <code>docs/PROGRESS-ROLLUP.md</code>。
                 </div>
+              </details>
+            </div>
+
+            <div class="panel history-panel" id="historyPanel">
+              <h2>📈 完成历史 · 时间线</h2>
+              <div class="hist-stats" id="histStats"></div>
+              <div class="hist-heat" id="histHeat"></div>
+              <div class="hist-timeline" id="histTimeline"></div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ══ 视图 4：AI 分析（智能拆解 / SMART 体检） ══ -->
+        <section class="view" id="view-ai" data-view="ai">
+          <div class="view-inner">
+            <div class="panel" id="panelAIDecompose">
+              <h2><span class="idx">🤖</span> AI 分解目标</h2>
+              <div id="aiSmartSuggest" class="ai-suggest"></div>
+              <div class="ai-decompose-card">
+                <label class="wfm-row" style="display:block">
+                  <span style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">目标描述（一句话讲清要达成什么）</span>
+                  <textarea class="gf-input" id="aiGoalInput" rows="3" placeholder="例：3 个月内上线个人作品集网站，每周可投入 10 小时"></textarea>
+                </label>
+                <label class="wfm-row" style="display:flex;gap:8px;align-items:center;margin-top:10px">
+                  <span style="min-width:72px;font-size:13px;color:var(--muted)">时间偏好</span>
+                  <select class="gf-input" id="aiTimePreference" style="flex:1;max-width:240px">
+                    <option value="">不限（AI 自动安排）</option>
+                    <option value="morning">上午（8:00-12:00）</option>
+                    <option value="afternoon">下午（13:00-18:00）</option>
+                    <option value="evening">晚上（19:00-22:00）</option>
+                    <option value="weekday-only">仅工作日</option>
+                    <option value="weekend-only">仅周末</option>
+                  </select>
+                </label>
+                <details class="ai-context-details">
+                  <summary>📋 分解上下文（项目 · 预算 · 周期）</summary>
+                  <div class="ai-context-info" id="aiContextInfo"></div>
+                </details>
+                <div class="ai-decompose-actions">
+                  <button type="button" class="gf-btn gf-btn--primary" id="btnAIDecompose">🤖 AI 分解目标</button>
+                  <button type="button" class="gf-btn gf-btn--ghost" id="btnAIClear">清空</button>
+                </div>
+                <div class="ai-result" id="aiDecomposeResult"></div>
               </div>
             </div>
 
+            <div class="panel" id="panelAIHistory">
+              <h2><span class="idx">📜</span> AI 使用历史</h2>
+              <p class="hint">记录每次 AI 分解的输入和输出，方便回顾和复用。</p>
+              <div id="aiHistoryList" class="ai-history-list"></div>
+            </div>
+
+            <details class="panel" id="panelAIConfigDetails">
+              <summary><span class="idx">⚙</span> AI 配置（点击展开）</summary>
+              <div class="ai-config-section">
+                <label class="wfm-row">
+                  <span>DeepSeek API Key</span>
+                  <input type="password" class="gf-input" id="aiApiKey" placeholder="sk-...">
+                  <button type="button" class="gf-btn gf-btn--sm" id="btnToggleKey" title="显示/隐藏">👁</button>
+                </label>
+                <div class="hint">获取方式：<a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent)">platform.deepseek.com</a></div>
+              </div>
+
+              <div class="ai-config-section">
+                <label class="wfm-row">
+                  <span>Skill Prompt</span>
+                  <span class="readonly-badge">只读</span>
+                  <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnEditSkill" title="编辑 Skill">✎ 编辑</button>
+                  <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnResetSkill" title="恢复默认">↺ 重置</button>
+                </label>
+                <textarea class="gf-input ai-skill-text" id="aiSkillPrompt" rows="8" readonly></textarea>
+                <div class="hint">Skill 定义了 AI 如何拆解目标。点击「编辑」按钮修改后会影响所有后续的 AI 分解。</div>
+              </div>
+            </details>
+
+            <div class="panel" id="panelSMART">
+              <h2><span class="idx">✅</span> SMART 体检</h2>
+              <p class="hint">检查每个目标是否够 SMART（具体 / 可衡量 / 可达 / 相关 / 有期限）。不够 SMART 的目标会列在这里，可以一键 AI 拆解。</p>
+              <div id="premortemCard"></div>
+              <div class="smart-list" id="smartList"></div>
+            </div>
           </div>
         </section>
       </div>
     </div>
   </div>
 
-  <!-- 底部 tab（≤900px 移动端主导航，复用 [data-nav] 切换） -->
+  <!-- 底部 tab（≤900px 移动端主导航：4 视图 + 中央捕捉 FAB） -->
   <nav class="mtab" aria-label="移动端主导航">
     <button type="button" class="mtab-btn on" data-nav="today"><span class="mtab-ic">☀</span>今日</button>
     <button type="button" class="mtab-btn" data-nav="plan"><span class="mtab-ic">🎯</span>规划</button>
+    <button type="button" class="mtab-btn mtab-fab" id="mtabCapture" title="快速捕捉到收件箱"><span class="mtab-ic">⚡</span></button>
     <button type="button" class="mtab-btn" data-nav="insights"><span class="mtab-ic">📊</span>洞察</button>
-    <button type="button" class="mtab-btn" id="mtabCapture"><span class="mtab-ic">⚡</span>捕捉</button>
-    <button type="button" class="mtab-btn" id="mtabWeekReview"><span class="mtab-ic">◔</span>回顾</button>
+    <button type="button" class="mtab-btn" data-nav="ai"><span class="mtab-ic">🤖</span>AI</button>
   </nav>
 
   <!-- SMART 对话弹窗 -->
@@ -318,14 +413,22 @@
   <div class="toast" id="toast"></div>
   <!-- 项目总览 -->
   <div class="modal-mask" id="projectModal"></div>
+  <!-- 项目切换器（移动端项目入口） -->
+  <div class="modal-mask" id="projectsModal"></div>
   <!-- 必经步骤规划向导 -->
   <div class="modal-mask" id="planWizardModal"></div>
   <!-- 基础设置（时间预算） -->
   <div class="modal-mask" id="settingsModal"></div>
+  <!-- 习惯编辑器（独立输入 + 灵活周期） -->
+  <div class="modal-mask" id="habitModal"></div>
+  <!-- 全局搜索 + 快速捕获 -->
+  <div class="modal-mask" id="searchModal"></div>
+  <!-- 等待 / 阻塞 + 催办日期 -->
+  <div class="modal-mask" id="parkModal"></div>
 
-  <script src="assets/js/gf-tokens.js?v=6.9"></script>
-  <script src="assets/js/gf-demos.js?v=6.9"></script>
-  <script src="assets/js/app.js?v=6.9"></script>
+  <script src="assets/js/gf-tokens.js?v=7.6"></script>
+  <script src="assets/js/gf-demos.js?v=7.6"></script>
+  <script src="assets/js/app.js?v=7.6"></script>
   <!-- v6.6 兜底：若 app.js 异常未设置 is-ready，1.5 秒后强制显示页面，避免"按钮看不见也点不到" -->
   <script>setTimeout(function(){document.body.classList.add('is-ready')},1500)</script>
 </body>

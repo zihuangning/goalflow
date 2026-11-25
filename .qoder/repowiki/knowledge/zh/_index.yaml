@@ -1,0 +1,42 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: zh-CN
+commit: f347bed0b96346ab98bd9c8f0b8402f3fb1c7021
+branch: main
+exported_at: "2026-11-24T10:59:21Z"
+modules:
+    assets:
+        dir_name: GoalFlow 前端静态资源（主题、样式与交互脚本）
+        title: GoalFlow 前端静态资源（主题、样式与交互脚本）
+        scope:
+            - assets/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    demos:
+        dir_name: GoalFlow 视觉风格演示
+        title: GoalFlow 视觉风格演示
+        scope:
+            - demos/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: assets
+              reason: demos 的十个单页视觉稿是对 assets 中同一产品内核（英雄卡 / 桑基精力河 / 四象限校准 / 周回顾）的多主题静态渲染，每个页面通过独立 CSS 变量复用 GoalFlow 设计语义。
+    root:
+        dir_name: 目标流 GoalFlow（根壳与演示入口）
+        title: 目标流 GoalFlow（根壳与演示入口）
+        scope:
+            - README.md
+            - index.html
+            - .gitignore
+            - .目标流 GoalFlow.qoder.site
+            - openmemory.md
+        source_files: []
+        children:
+            - assets
+            - demos
+        depends_on: []
+        related_to: []

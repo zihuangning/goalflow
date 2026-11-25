@@ -1,0 +1,46 @@
+schema_version: 1
+module_path: root
+title: 目标流 GoalFlow（根壳与演示入口）
+scope:
+    - README.md
+    - index.html
+    - .gitignore
+    - .目标流 GoalFlow.qoder.site
+    - openmemory.md
+source_files: []
+depends_on: []
+related_to: []
+kk_module_id: cef4d652-26f7-4e05-a637-7c2a3608041b
+kk_cards:
+    architecture_design:
+        id: 2331fbaa-d10f-4f02-a38a-9e3cac34d006
+        title: 目标流 GoalFlow（根壳与演示入口）
+    coding_conventions:
+        id: e0baacfc-3568-43ed-b2db-224fa7a77c97
+        title: 目标流 GoalFlow（根壳与演示入口）
+    overview:
+        id: 80875e1d-a83a-460b-b67f-c1de3f8e7dde
+        title: 目标流 GoalFlow（根壳与演示入口）
+    tech_stack:
+        id: 42cd39f6-c60e-489f-8fb4-272b929ace45
+        title: 目标流 GoalFlow（根壳与演示入口）
+    unique_setup_and_commands:
+        id: 198f0345-3776-409c-a16c-5d5a37108da7
+        title: 目标流 GoalFlow（根壳与演示入口）
+    build_system:
+        id: 184ac751-833d-4d52-a6c6-4195a1b66604
+        title: 零构建静态站点与内联打包脚本
+    error_handling:
+        id: e7d31637-6b1d-471f-a789-5bc6c616d437
+        title: 前端无结构化的本地错误处理
+    frontend_style:
+        id: eff1da86-82e0-4082-849c-a37f6b75bb68
+        title: GoalFlow 零构建前端风格系统：CSS Token + BEM 组件 + CSS 自定义属性主题
+    logging_system:
+        id: 60182e41-5044-47de-9a0a-29a667310dc0
+        title: 浏览器端基于原生 console API 的轻量调试日志
+kk_repo_cards:
+    - build_system
+    - error_handling
+    - frontend_style
+    - logging_system

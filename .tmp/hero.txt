@@ -1,0 +1,5 @@
+3471: const box = document.getElementById('hero');
+3477: box.className = 'hero empty';
+3478: box.innerHTML = '<div class="hero-main">暂无待办——把你的目标粘进来，或点击「载入示例」。等待/阻塞的任务已自动退出竞选。</div>';
+3481: box.className = 'hero';
+3495: altHtml = `<div class="hero-stack"><div class="hs-lbl">执行栈 · 仍可优先（Top ${alts.length + 1} 之 ${alts.length > 1 ? '②③' : '②'}）</div>` +

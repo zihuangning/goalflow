@@ -1,0 +1,22 @@
+schema_version: 1
+module_path: assets
+title: GoalFlow 前端静态资源（主题、样式与交互脚本）
+scope:
+    - assets/
+source_files: []
+depends_on: []
+related_to: []
+kk_module_id: d7d48efb-ff4e-4fa1-8639-4a7e865d902f
+kk_cards:
+    architecture_design:
+        id: a34db56b-75b8-4149-86f9-c8d60a851e5e
+        title: GoalFlow 前端静态资源（主题、样式与交互脚本）
+    coding_conventions:
+        id: f55b33ca-bc1f-4616-bb52-564d0ec7b575
+        title: GoalFlow 前端静态资源（主题、样式与交互脚本）
+    overview:
+        id: 8d5ca6dd-6554-4fc5-a5b9-241d152be0d5
+        title: GoalFlow 前端静态资源（主题、样式与交互脚本）
+    tech_stack:
+        id: b4f54d81-e98a-4acf-a227-9cce0cb0e226
+        title: GoalFlow 前端静态资源（主题、样式与交互脚本）

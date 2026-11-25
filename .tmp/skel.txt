@@ -1,0 +1,138 @@
+19: <div class="app-shell">
+22: <nav class="rail" aria-label="主导航">
+23: <div class="rail-mark" title="目标流 · GoalFlow">
+37: <aside class="side">
+38: <div class="side-ws">
+44: <div class="wf-bar" id="wfBar" aria-label="项目列表：可展开多个"></div>
+45: <div class="ws-store" id="wsStore" title=""></div>
+52: <button type="button" class="si" id="sideMorning">🌅 晨计划</button>
+53: <button type="button" class="si" id="sideEvening">🌙 晚总结</button>
+54: <button type="button" class="si" id="sideWeekPlan">🗓 周计划</button>
+55: <button type="button" class="si" id="sideWeekReview">◔ 周回顾</button>
+56: <div class="slabel">目标树 <span class="sprog" id="sideProg"></span></div>
+57: <div class="side-tree" id="sideTree">
+63: <div class="main">
+64: <header class="topbar">
+66: <div class="progress-chip" id="progressChip" style="display:none" title="叶子任务完成度">
+70: <div class="topbar-actions">
+71: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnSearch"
+73: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost m-only" id="btnProjects"
+75: <details class="tb-more" id="tbMoreMenu">
+77: <div class="tb-drop">
+78: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnWeekReview"
+80: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnSettings"
+82: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnExportIcs"
+84: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnExportJson" title="备份目标数据">💾 备份数据</button>
+85: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnImportJson" title="从 JSON 恢复">📂 恢复数据</button>
+90: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnThemeCycle"
+92: <select id="themeSelect" class="gf-input gf-select" title="界面主题" aria-label="界面主题">
+97: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost mode-btn" id="modeToggle"
+101: <div class="today-chip" id="todayLine"></div>
+104: <div class="main-scroll">
+106: <section class="view on" id="view-today" data-view="today">
+107: <div class="hero-wrap" id="heroWrap">
+108: <div class="hero-eyebrow">FOCUS · 当下河流</div>
+109: <div id="planShare"></div>
+110: <div id="metricsStrip" class="metrics-wrap" style="display:none"></div>
+111: <div class="hero empty" id="hero">
+112: <div class="hero-main">载入目标后，这里会显示「当下最重要」的一件事。</div>
+114: <div class="pomo-bar" id="pomoBar" aria-live="polite"></div>
+118: <section class="panel today-panel zone-exec" id="todayPanel">
+122: <div class="today-alarm-bar" id="todayAlarmBar"></div>
+127: <div class="flow-indicator" id="flowIndicator" style="display:none;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:8px 12px;margin:0 0 10px;background:var(--bg1);b
+133: <button type="button" class="flow-close" id="flowIndicatorClose" style="border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;
+135: <div id="todayRocks"></div>
+136: <div id="inboxPanel"></div>
+137: <div class="today-ctx-bar" id="todayCtxBar"></div>
+139: <div class="today-block" id="todayMit"></div>
+140: <div class="today-block today-slots-wrap" id="todaySlots"></div>
+141: <div class="today-block" id="todayMicro"></div>
+143: <div class="today-checklist" id="todayChecklist"></div>
+147: <details class="zone zone-status" id="zoneStatus">
+148: <summary>📊 今日状态 <span class="zone-sum" id="statusSum"></span></summary>
+149: <div class="zone-body">
+150: <div id="todayCapacity"></div>
+151: <div id="todayScore"></div>
+152: <div id="todayEnergy"></div>
+153: <div id="todayAudit"></div>
+158: <details class="zone zone-attention" id="zoneAttention">
+159: <summary>🔔 需要关注 <span class="zone-badge" id="attentionBadge"></span></summary>
+160: <div class="zone-body">
+161: <div class="review-banner" id="reviewBanner">
+163: <button type="button" class="gf-btn gf-btn--sm gf-btn--primary" id="btnReviewBanner">开始周回顾</button>
+164: <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnDismissBanner">稍后</button>
+166: <div id="onboardCard"></div>
+167: <div id="todayBackupBar"></div>
+168: <div id="todayBurnout"></div>
+169: <div id="todayStale"></div>
+170: <div id="todayParked"></div>
+175: <details class="zone zone-focus" id="zoneFocus">
+177: <div class="zone-body">
+178: <div id="todayFocus"></div>
+184: <section class="view" id="view-plan" data-view="plan">
+186: <div class="panel" id="panelInput">
+191: <button type="button" class="gf-btn gf-btn--primary" id="btnParse">解析并生成</button>
+192: <select id="demoSelect" class="gf-input gf-select gf-select--demo" title="选择示例主题"
+194: <button type="button" class="gf-btn" id="btnDemo">载入示例</button>
+195: <button type="button" class="gf-btn gf-btn--ghost" id="btnClear">清空</button>
+196: <button type="button" class="gf-btn gf-btn--ghost" id="btnExportJson2">备份 JSON</button>
+202: <div class="panel" id="panelTree">
+205: <div class="tree-editor" id="treeEditor"></div>
+207: <button type="button" class="gf-btn gf-btn--sm" id="btnSyncTree">同步到文本框</button>
+216: <section class="view" id="view-insights" data-view="insights">
+218: <div class="panel canvas-panel" id="canvasPanel">
+222: <div class="sub" id="canvasSub">条带宽度 = 重要性 · 颜色冷暖 = 紧急性 · 金色发光 = 当下最重要<span
+226: <div class="viewbar" id="viewbar" title="切换可视化视角">
+234: <select class="viewbar-select m-only" id="viewbarSelect" title="切换可视化视角">
+242: <div class="zoombar" id="zoombar">
+247: <button id="btnFitWidth" class="m-only" title="把图缩放到屏幕宽度（再点一次恢复原始尺寸）">↔ 适应宽度</button>
+249: <select class="viewbar-select m-only" id="zoombarSelect" title="时间尺度缩放" aria-label="时间尺度缩放">
+259: <div class="rhythm" id="rhythm"></div>
+260: <div class="canvas-wrap" id="canvasWrap">
+262: <div id="vizAlt" class="viz-alt"></div>
+263: <button type="button" class="gf-btn gf-btn--primary gf-btn--cool ex-btn" id="btnExport">导出 PNG</button>
+287: <div class="panel quad-panel" id="quadPanel">
+291: <div class="quad-grid" id="quadGrid"></div>
+292: <details class="ve-panel" id="vePanel">
+293: <summary class="ve-summary">⚖ 价值 × 费力矩阵 <span class="ve-cnt" id="veSum"></span></summary>
+296: <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnQuickWin" title="四象限仅显示快速赢">⚡
+299: <div class="ve-grid" id="veGrid"></div>
+306: <div class="panel history-panel" id="historyPanel">
+308: <div class="hist-stats" id="histStats"></div>
+309: <div class="hist-heat" id="histHeat"></div>
+310: <div class="hist-timeline" id="histTimeline"></div>
+317: <section class="view" id="view-ai" data-view="ai">
+319: <div class="panel" id="panelAIDecompose">
+321: <div id="aiSmartSuggest" class="ai-suggest"></div>
+329: <select class="gf-input" id="aiTimePreference" style="flex:1;max-width:240px">
+340: <div class="ai-context-info" id="aiContextInfo"></div>
+343: <button type="button" class="gf-btn gf-btn--primary" id="btnAIDecompose">🤖 AI 分解目标</button>
+344: <button type="button" class="gf-btn gf-btn--ghost" id="btnAIClear">清空</button>
+346: <div class="ai-result" id="aiDecomposeResult"></div>
+350: <div class="panel" id="panelAIHistory">
+353: <div id="aiHistoryList" class="ai-history-list"></div>
+356: <details class="panel" id="panelAIConfigDetails">
+362: <button type="button" class="gf-btn gf-btn--sm" id="btnToggleKey" title="显示/隐藏">👁</button>
+371: <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnEditSkill" title="编辑 Skill">✎ 编辑</button>
+372: <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnResetSkill" title="恢复默认">↺ 重置</button>
+379: <div class="panel" id="panelSMART">
+382: <div id="premortemCard"></div>
+383: <div class="smart-list" id="smartList"></div>
+392: <nav class="mtab" aria-label="移动端主导航">
+393: <button type="button" class="mtab-btn on" data-nav="today"><span class="mtab-ic">☀</span>今日</button>
+394: <button type="button" class="mtab-btn" data-nav="plan"><span class="mtab-ic">🎯</span>规划</button>
+395: <button type="button" class="mtab-btn mtab-fab" id="mtabCapture" title="快速捕捉到收件箱"><span class="mtab-ic">⚡</span></button>
+396: <button type="button" class="mtab-btn" data-nav="insights"><span class="mtab-ic">📊</span>洞察</button>
+397: <button type="button" class="mtab-btn" data-nav="ai"><span class="mtab-ic">🤖</span>AI</button>
+401: <div class="modal-mask" id="smartModal"></div>
+403: <div class="modal-mask" id="weekReviewModal"></div>
+405: <div class="modal-mask" id="workflowMetaModal"></div>
+407: <div class="modal-mask" id="ritualModal"></div>
+409: <div class="toast" id="toast"></div>
+411: <div class="modal-mask" id="projectModal"></div>
+413: <div class="modal-mask" id="projectsModal"></div>
+415: <div class="modal-mask" id="planWizardModal"></div>
+417: <div class="modal-mask" id="settingsModal"></div>
+419: <div class="modal-mask" id="habitModal"></div>
+421: <div class="modal-mask" id="searchModal"></div>
+423: <div class="modal-mask" id="parkModal"></div>

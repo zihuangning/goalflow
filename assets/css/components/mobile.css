@@ -71,76 +71,82 @@
    2. 窄屏排版（≤900px：手机 + 竖屏平板）
    ============================================================ */
 @media (max-width: 900px) {
-  /* 基础字号整体抬升 1–2px，解决"字体很小" */
-  body { font-size: 15px; }
-  .gf-btn, button                { font-size: 13px; padding: 7px 13px; }
-  .gf-btn--sm, button.small      { font-size: 12.5px; padding: 6px 11px; }
+  /* v7.7 可读性基线：正文 ≥16px（iOS/Android 通用推荐值，也是 Safari 输入框不自动放大的门槛）、
+     次级信息 ≥13px、标签 ≥12px；旧版整体停在 11–13px，是「移动端字体太小」的主因。 */
+  body { font-size: 16px; }
+  .gf-btn, button                { font-size: 15px; padding: 9px 15px; min-height: 44px; }
+  .gf-btn--sm, button.small      { font-size: 14px; padding: 8px 13px; min-height: 40px; }
   .gf-btn--sm.gf-btn--pill,
-  .topbar-actions .gf-btn--sm    { padding: 7px 12px; }
-  .gf-btn--mini                  { font-size: 12.5px; padding: 2px 8px; }
+  .topbar-actions .gf-btn--sm    { padding: 8px 12px; min-height: 40px; }
+  .gf-btn--mini                  { font-size: 13px; padding: 4px 10px; min-height: 32px; }
 
-  .hint, .gf-hint                { font-size: 12.5px; }
-  .crumb                         { font-size: 13px; }
-  .ttl                           { font-size: 16px; }
-  .sub                           { font-size: 12.5px; }
-  .canvas-head .sub              { font-size: 12.5px; }
+  /* 表单：16px 起，避免 iOS 聚焦时整页放大 */
+  .gf-input, input[type="text"], input[type="number"], input[type="date"],
+  input[type="time"], input[type="password"], textarea, select { font-size: 16px; }
 
-  .today-txt                     { font-size: 13.5px; }
-  .today-txt-in                  { font-size: 13.5px; }
-  .today-block-h                 { font-size: 12px; }
-  .today-meta                    { font-size: 11px; }
-  .today-slot                    { font-size: 12px; }
-  .today-slot-h                  { font-size: 12px; }
-  .today-slot-item               { font-size: 12px; }
+  .hint, .gf-hint                { font-size: 14.5px; }
+  .crumb                         { font-size: 14px; }
+  .ttl                           { font-size: 18px; }
+  .sub                           { font-size: 14px; }
+  .canvas-head .sub              { font-size: 14px; }
+
+  .today-txt                     { font-size: 16px; }
+  .today-txt-in                  { font-size: 16px; }
+  .today-block-h                 { font-size: 14.5px; }
+  .today-meta                    { font-size: 13px; }
+  .today-slot                    { font-size: 14.5px; }
+  .today-slot-h                  { font-size: 14.5px; }
+  .today-slot-item               { font-size: 14.5px; }
   .today-checklist               { padding: 12px; }
 
-  .slabel                        { font-size: 11.5px; }
-  .ws-tx b                       { font-size: 13px; }
-  .ws-tx p                       { font-size: 11px; }
+  .slabel                        { font-size: 13px; }
+  .ws-tx b                       { font-size: 15px; }
+  .ws-tx p                       { font-size: 13.5px; }
 
-  .viewbar button, .zoombar button { font-size: 12.5px; padding: 6px 12px; }
-  .legend                        { font-size: 12.5px; }
-  .canvas-opt                    { font-size: 13px; }
+  .viewbar button, .zoombar button { font-size: 14.5px; padding: 8px 13px; min-height: 40px; }
+  .legend                        { font-size: 14.5px; }
+  .canvas-opt                    { font-size: 14px; }
 
-  .cal-row                       { font-size: 13px; padding: 7px 9px; }
-  .cr-t                          { font-size: 13px; }
-  .cr-wf, .cr-m                  { font-size: 11px; }
-  .cal-mini                      { font-size: 11px; padding: 3px 8px; }
-  .ce                            { font-size: 12px; padding: 3px 9px; }
-  .cal-note                      { font-size: 13px; }
-  .cal-goods                     { font-size: 12.5px; }
-  .cal-hint2                     { font-size: 11px; }
-  .cal-mo b                      { font-size: 13px; }
-  .cm-n, .cm-m                   { font-size: 11px; }
+  .cal-row                       { font-size: 14.5px; padding: 9px 10px; }
+  .cr-t                          { font-size: 15px; }
+  .cr-wf, .cr-m                  { font-size: 13px; }
+  .cal-mini                      { font-size: 13px; padding: 4px 9px; }
+  .ce                            { font-size: 14px; padding: 4px 10px; }
+  .cal-note                      { font-size: 14.5px; }
+  .cal-goods                     { font-size: 14px; }
+  .cal-hint2                     { font-size: 13px; }
+  .cal-mo b                      { font-size: 15px; }
+  .cm-n, .cm-m                   { font-size: 13px; }
 
-  .qh                            { font-size: 13px; }
-  .qstep button                  { font-size: 13px; padding: 2px 8px; }
-  .qscale, .qslot                { font-size: 11.5px; padding: 3px 6px; }
-  .qai                           { font-size: 12px; padding: 3px 8px; }
+  .qh                            { font-size: 15px; }
+  .qstep button                  { font-size: 14px; padding: 4px 10px; min-height: 36px; }
+  .qscale, .qslot                { font-size: 13px; padding: 5px 8px; }
+  .qai                           { font-size: 14px; padding: 5px 10px; }
 
-  .zone > summary                { font-size: 13px; padding: 11px 14px; }
-  .zone-sum                      { font-size: 12.5px; }
-  .zone-badge                    { font-size: 11.5px; }
+  .zone > summary                { font-size: 15px; padding: 13px 14px; }
+  .zone-sum                      { font-size: 14px; }
+  .zone-badge                    { font-size: 13px; }
 
-  .hero-eyebrow                  { font-size: 11px; }
-  .hero-main                     { font-size: 15px; }
-  .hero-sub                      { font-size: 13px; }
-  .hero-score                    { font-size: 13px; }
+  .hero-eyebrow                  { font-size: 13px; }
+  .hero-main                     { font-size: 17px; }
+  .hero-sub                      { font-size: 14.5px; }
+  .hero-score                    { font-size: 14px; }
 
-  .kb-h                          { font-size: 12px; }
-  .mindmap                       { font-size: 13px; }
-  .mm-t em                       { font-size: 11px; }
+  .kb-h                          { font-size: 14px; }
+  .mindmap                       { font-size: 14.5px; }
+  .mm-t em                       { font-size: 13px; }
 
-  .wr-k                          { font-size: 11.5px; }
-  .wr-v                          { font-size: 24px; }
+  .wr-k                          { font-size: 13px; }
+  .wr-v                          { font-size: 26px; }
 
-  .rt-body                       { font-size: 13px; }
-  .toast                         { font-size: 13px; }
+  .rt-body                       { font-size: 15px; }
+  .toast                         { font-size: 15px; }
 
-  .today-alarm-bar               { font-size: 11.5px; }
+  .today-alarm-bar               { font-size: 13.5px; gap: 8px; }
+  .today-alarm-st                { font-size: 13.5px; }
+  .alarm-set                     { font-size: 13.5px; }
+  .alarm-set input               { font-size: 14px; width: 86px; min-height: 36px; }
 
-  /* 顶栏：不再隐藏备份 / 恢复 / ICS，让 flex-wrap 自然换行 */
-  #btnExportIcs, #btnImportJson { display: inline-flex !important; }
   .topbar-theme select           { display: none !important; } /* 主题选择用 cycle 按钮替代 */
   .today-chip                    { display: none !important; } /* 顶栏空间紧张，日期已在 hero */
 
@@ -174,15 +180,45 @@
    3. 超窄屏（≤480px：小屏手机）
    ============================================================ */
 @media (max-width: 480px) {
-  body { font-size: 14.5px; }
-  .gf-btn, button                { font-size: 12.5px; padding: 6px 11px; }
-  .gf-btn--sm, button.small      { font-size: 12px; padding: 5px 10px; }
+  /* v7.7：超窄屏只收窄间距，字号一律不低于 ≤900px 基线。
+     旧版把 body 降回 14.5px、.today-meta 降到 10.5px —— 比平板还小，
+     正是「手机端字体还是太小」的直接原因。 */
+  body { font-size: 16px; }
+  .gf-btn, button                { font-size: 15px; padding: 9px 13px; min-height: 44px; }
+  .gf-btn--sm, button.small      { font-size: 14px; padding: 7px 11px; min-height: 40px; }
+  .gf-btn--mini                  { font-size: 13px; padding: 4px 9px; }
 
-  .today-txt                     { font-size: 13px; }
-  .today-txt-in                  { font-size: 13px; }
-  .today-meta                    { font-size: 10.5px; }
+  .today-txt                     { font-size: 16px; }
+  .today-txt-in                  { font-size: 16px; }
+  .today-meta                    { font-size: 13px; }
+  .today-block-h                 { font-size: 14.5px; }
 
-  .viewbar button, .zoombar button { font-size: 12px; padding: 5px 10px; }
+  .ttl                           { font-size: 17px; }
+  .hero-main                     { font-size: 16.5px; }
+
+  .viewbar button, .zoombar button { font-size: 14.5px; padding: 7px 11px; }
+
+  /* 提醒条：字号变大后一行装不下 7 个控件，改成 4 列网格分三行走完，
+     避免堆成 250px 高把首屏吃掉。 */
+  .today-alarm-bar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px 6px;
+    align-items: center;
+  }
+  .today-alarm-bar .alarm-toggle   { grid-column: span 2; justify-self: stretch; }
+  .today-alarm-bar .alarm-set      { grid-column: span 1; justify-self: end; }
+  .today-alarm-bar .today-alarm-st { grid-column: 1 / -1; white-space: normal; order: 5; }
+  .today-alarm-bar .gf-btn         { width: 100%; padding: 8px 4px; font-size: 13.5px; }
+  /* 三个仪式入口 + 周回顾排在授权说明之后，一行四个 */
+  #btnMorningRitual, #btnEveningRitual, #btnWeekPlan, #btnWeekReviewBar, #btnEnableAlarm { order: 6; }
+
+  /* 元信息标签行：允许折行并放开行距 */
+  .si-meta, .ai-history-meta, .today-meta, .ai-context-row {
+    gap: 6px 8px;
+    row-gap: 6px;
+    line-height: 1.5;
+  }
 
   /* 今日行：动作按钮换行到下方，避免与文案挤在一起 */
   .today-row {
@@ -194,6 +230,7 @@
     margin-top: 6px;
     padding-top: 6px;
     border-top: 1px dashed var(--stroke-soft);
+    gap: 8px;
   }
   .today-timing {
     width: 100%;
@@ -206,6 +243,7 @@
   .canvas-head {
     flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
   }
   .viewbar, .zoombar {
     width: 100%;
@@ -215,6 +253,23 @@
   .viewbar button, .zoombar button {
     flex: 1 1 auto;
     white-space: nowrap;
+  }
+  /* v7.6: 移动端视角切换改为下拉菜单 */
+  .viewbar-select {
+    display: block;
+    width: 100%;
+    max-width: 220px;
+    font-size: 15px;
+    padding: 10px 12px;
+    min-height: 44px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--stroke);
+    background: var(--panel-strong);
+    color: var(--ink);
+    margin: 8px 0;
+  }
+  .viewbar {
+    display: none;
   }
 }
 
@@ -244,10 +299,31 @@
    仅移动端显示，把主题选择 / 备份 / 恢复 / ICS 折叠进一个菜单，
    避免顶栏堆成两行。
    ============================================================ */
+/* 桌面端：隐藏折叠菜单，直接显示按钮 */
+.tb-more {
+  display: none;
+}
+/* 桌面端：显示原按钮 */
+#btnWeekReview, #btnSettings, #btnExportIcs, #btnExportJson, #btnImportJson {
+  display: inline-flex;
+}
+
 @media (max-width: 900px) {
+  /* 移动端：隐藏原按钮，显示折叠菜单 */
+  #btnWeekReview, #btnSettings, #btnExportIcs, #btnExportJson, #btnImportJson {
+    display: none !important;
+  }
   .tb-more {
-    position: relative;
     display: inline-block;
+    position: relative;
+  }
+  /* 折叠菜单内的按钮显示 */
+  .tb-more .tb-drop #btnWeekReview,
+  .tb-more .tb-drop #btnSettings,
+  .tb-more .tb-drop #btnExportIcs,
+  .tb-more .tb-drop #btnExportJson,
+  .tb-more .tb-drop #btnImportJson {
+    display: inline-flex !important;
   }
   .tb-more > summary {
     list-style: none;
@@ -321,12 +397,23 @@
 }
 @media (max-width: 900px) {
   .flow-indicator {
-    font-size: 10px;
-    padding: 6px 10px;
-    gap: 6px;
+    /* v7.7: 10px → 13px；这一行是「收件箱 / MIT / 时段 / 完成」的主要导航 */
+    font-size: 13px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .flow-indicator {
+    /* v7.7: 390px 下「收件箱→MIT→时段→完成」一行放不平，✕ 被顶出视口；改为可换行 */
+    flex-wrap: wrap;
+    row-gap: 6px;
   }
   .flow-indicator span {
     white-space: nowrap;
+  }
+  .flow-close {
+    font-size: 14px;
+    padding: 4px 8px;
+    min-width: 32px;
   }
 }
 
@@ -507,7 +594,29 @@
   border-radius: var(--radius-sm) !important;
   padding: 8px 12px !important;
   margin-bottom: 10px !important;
-  font-size: 12px !important;
+  /* v7.7: 这里原本是 font-size: 12px !important，把第 2 节 hero-score 14px 和第 33 节地板一起压掉了 */
+}
+.hero-details {
+  margin: 8px 0;
+  border: 1px solid var(--stroke-soft);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.15);
+}
+.hero-details > summary {
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+.hero-details > summary:hover {
+  color: var(--ink);
+}
+.hero-details[open] > summary {
+  border-bottom: 1px solid var(--stroke-soft);
+}
+.hero-details .hero-score {
+  margin: 8px 12px !important;
 }
 .hero-stack {
   background: rgba(0, 0, 0, 0.2) !important;
@@ -554,7 +663,8 @@
 }
 .hero-alt .alt-toggle {
   margin-left: auto;
-  font-size: 10px;
+  font-size: 13px;
+  min-height: 32px;
   color: var(--muted);
   cursor: pointer;
   padding: 4px 8px;
@@ -580,8 +690,11 @@
    ============================================================ */
 .hero-edit-btn {
   margin-left: auto !important;
-  font-size: 11px !important;
-  padding: 4px 10px !important;
+  /* v7.7: 之前 11px + !important，第 33 节的字号地板完全压不动它；
+     这是英雄卡上唯一的编辑入口，按可点击文本的最小可读尺寸给到 14px / 40px 高。 */
+  font-size: 14px !important;
+  padding: 8px 12px !important;
+  min-height: 40px !important;
 }
 .hero-edit-form {
   background: rgba(0, 0, 0, 0.3);
@@ -700,4 +813,1080 @@
 .guide-templates .gf-btn {
   font-size: 11px;
   padding: 4px 10px;
+}
+
+/* ============================================================
+   21. 目标补充向导（v6.9）
+   ============================================================ */
+.enrich-section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--stroke-soft);
+}
+.enrich-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.enrich-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 8px 0;
+}
+.enrich-target {
+  background: rgba(245, 196, 81, 0.1);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.enrich-budget {
+  background: var(--bg1);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.enrich-ai-info {
+  background: rgba(91, 159, 212, 0.1);
+  border: 1px solid rgba(91, 159, 212, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.enrich-ai-info .hint {
+  margin: 4px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ============================================================
+   22. 项目创建向导 - 时间预算（v7.0）
+   ============================================================ */
+.wfm-section {
+  margin: 16px 0;
+  padding: 12px;
+  background: var(--bg1);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--stroke-soft);
+}
+.wfm-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 10px 0;
+}
+.guide-ai-setup {
+  background: rgba(91, 159, 212, 0.1);
+  border: 1px solid rgba(91, 159, 212, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+.guide-ai-setup .hint {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ============================================================
+   23. SMART 体检面板增强（v7.2）
+   ============================================================ */
+.si-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.si-tag {
+  background: var(--bg1);
+  padding: 3px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--stroke-soft);
+  font-size: 12px;
+}
+.si-smart {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.smart-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.ai-badge {
+  font-size: 11px;
+  background: rgba(91, 159, 212, 0.2);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 4px;
+}
+
+/* ============================================================
+   24. AI 分析视图（v7.2）
+   ============================================================ */
+.ai-decompose-card {
+  background: var(--bg1);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 12px;
+  border: 1px solid var(--stroke-soft);
+}
+.ai-decompose-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ai-result {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  min-height: 60px;
+}
+.ai-loading {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 20px;
+}
+.ai-success {
+  background: rgba(107, 196, 138, 0.1);
+  border: 1px solid var(--ok);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  color: var(--ink);
+}
+.ai-success .ai-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+.ai-error {
+  background: rgba(239, 83, 80, 0.1);
+  border: 1px solid var(--err);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  color: var(--ink);
+}
+
+/* ============================================================
+   25. AI 配置面板（v7.3）
+   ============================================================ */
+.ai-config-section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--stroke-soft);
+}
+.ai-config-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.ai-config-section label.wfm-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.ai-config-section label.wfm-row span {
+  min-width: 120px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.ai-config-section label.wfm-row input {
+  flex: 1;
+}
+.ai-skill-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 120px;
+}
+.ai-context-info {
+  background: var(--bg1);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 10px 0;
+  border: 1px solid var(--stroke-soft);
+}
+.ai-context-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  gap: 10px;
+}
+.ai-context-label {
+  color: var(--muted);
+}
+.ai-context-value {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ============================================================
+   26. AI 历史记录（v7.4）
+   ============================================================ */
+.ai-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.ai-history-empty {
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--muted);
+  font-size: 13px;
+  background: var(--bg1);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--stroke-soft);
+}
+.ai-history-item {
+  background: var(--bg1);
+  border: 1px solid var(--stroke-soft);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  transition: border-color 0.2s;
+}
+.ai-history-item:hover {
+  border-color: var(--accent);
+}
+.ai-history-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.ai-history-status {
+  font-size: 14px;
+}
+.ai-history-date {
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.ai-history-project {
+  color: var(--ink);
+  font-weight: 600;
+  flex: 1;
+}
+.ai-history-tasks {
+  background: rgba(91, 159, 212, 0.2);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ai-history-goal {
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.ai-history-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.ai-history-actions {
+  display: flex;
+  gap: 6px;
+}
+.ai-history-actions .gf-btn {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+.ai-history-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--stroke-soft);
+}
+.ai-history-detail-row:last-child {
+  border-bottom: none;
+}
+.ai-history-detail-row span {
+  color: var(--muted);
+}
+.ai-history-detail-row b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.ai-history-detail-row.error b {
+  color: var(--err);
+}
+.ai-history-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ai-history-task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg1);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.ai-history-task-item .task-idx {
+  color: var(--muted);
+  font-weight: 600;
+  min-width: 20px;
+}
+.ai-history-task-item .task-text {
+  flex: 1;
+  color: var(--ink);
+}
+.ai-history-task-item .task-meta {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* ============================================================
+   27. AI 分析遮罩层（v7.5）
+   ============================================================ */
+.ai-analyzing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s;
+}
+.ai-analyzing-content {
+  background: var(--bg0);
+  border-radius: var(--radius);
+  padding: 32px 40px;
+  text-align: center;
+  border: 2px solid var(--accent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.ai-analyzing-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--stroke-soft);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 1s linear infinite;
+}
+.ai-analyzing-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.ai-analyzing-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ============================================================
+   28. 设置弹窗 - 时间预算（v7.5）
+   ============================================================ */
+.set-usage-info,
+.set-available-info {
+  background: var(--bg1);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+.usage-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--stroke-soft);
+}
+.usage-row:last-child {
+  border-bottom: none;
+}
+.usage-row span {
+  color: var(--muted);
+}
+.usage-row b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.usage-row.total {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 2px solid var(--stroke);
+}
+.usage-row.total b {
+  color: var(--accent);
+  font-size: 14px;
+}
+.set-available-info .usage-row.total b {
+  color: var(--ok);
+}
+
+/* ============================================================
+   29. 四象限移动端禁用态（v7.6）
+   ============================================================ */
+@media (max-width: 900px) {
+  .quad-panel h2 {
+    font-size: 15px;
+  }
+  .quad-hint {
+    font-size: 12px;
+    padding: 10px 12px;
+    background: rgba(245, 196, 81, 0.05);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+  }
+  .quad-hint .m-only {
+    display: inline;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  /* 禁用拖拽视觉反馈 */
+  .qcard {
+    cursor: default !important;
+    user-select: text !important;
+  }
+  .qcard:active {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .qcard[draggable="true"] {
+    cursor: default !important;
+  }
+}
+
+/* ============================================================
+   30. 图例可折叠（v7.6）
+   ============================================================ */
+.legend-details {
+  margin: 12px 0;
+  border: 1px solid var(--stroke-soft);
+  border-radius: var(--radius-sm);
+  background: var(--bg1);
+}
+.legend-summary {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+.legend-summary::-webkit-details-marker {
+  display: none;
+}
+.legend-summary::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.legend-details[open] .legend-summary::before {
+  transform: rotate(90deg);
+}
+.legend-summary:hover {
+  color: var(--ink);
+}
+.legend-details[open] .legend-summary {
+  border-bottom: 1px solid var(--stroke-soft);
+}
+.legend-details .legend {
+  margin: 0;
+  padding: 12px 14px;
+}
+
+/* ============================================================
+   31. AI 配置折叠面板（v7.6）
+   ============================================================ */
+#panelAIConfigDetails {
+  margin: 12px 0;
+  border: 1px solid var(--stroke-soft);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+#panelAIConfigDetails > summary {
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#panelAIConfigDetails > summary::-webkit-details-marker {
+  display: none;
+}
+#panelAIConfigDetails > summary::after {
+  content: '▶';
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+#panelAIConfigDetails[open] > summary::after {
+  transform: rotate(90deg);
+}
+#panelAIConfigDetails[open] > summary {
+  border-bottom: 1px solid var(--stroke-soft);
+}
+#panelAIConfigDetails .ai-config-section {
+  padding: 16px;
+}
+.readonly-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(107, 114, 128, 0.2);
+  color: var(--muted);
+  border: 1px solid var(--stroke-soft);
+  margin-left: 8px;
+}
+.ai-skill-text[readonly] {
+  background: rgba(0, 0, 0, 0.15);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* ============================================================
+   32. 页头临时横幅提醒（v7.6）
+   ============================================================ */
+.topbar-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--stroke);
+  animation: slideDown 0.3s ease-out;
+}
+.topbar-banner.info {
+  background: rgba(91, 159, 212, 0.15);
+  color: var(--accent);
+}
+.topbar-banner.success {
+  background: rgba(107, 196, 138, 0.15);
+  color: var(--ok);
+}
+.topbar-banner.error {
+  background: rgba(239, 83, 80, 0.15);
+  color: var(--err);
+}
+.topbar-banner span {
+  flex: 1;
+}
+.banner-close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  opacity: 0.7;
+}
+.banner-close:hover {
+  opacity: 1;
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ============================================================
+   33. 移动端字号地板（v7.7）
+   —— features/layout 里约 240 处硬编码 font-size 停在 9–12.5px，逐条改不干净；
+      这里按「正文 ≥14.5px / 次级 ≥13.5px / 徽章微标签 ≥12.5px」统一兜底。
+      只抬升、不压低：前面移动端块已给出更大值的规则会被跳过。
+      已排除 SVG 图表内部文字（sankey / 脑图 / 热力格），放大会把画布挤爆。
+   ============================================================ */
+
+/* —— 14.5px 档（64 项） —— */
+@media (max-width: 900px) {
+  .ai-suggest-gap, .ai-suggest-go, .ai-suggest-h, .cr-m, .cr-wf {
+    font-size: 14.5px;
+  }
+  .day-capacity, .e-v, .fitem .dl, .fitem-today, .hb-preview {
+    font-size: 14.5px;
+  }
+  .hb-wd, .ib-cnt, .ib-meta, .ib-someday-h, .ib-someday-toggle {
+    font-size: 14.5px;
+  }
+  .kb-card, .mit-energy, .modal-head .mh-sub, .ms-conf, .ms-pill {
+    font-size: 14.5px;
+  }
+  .mtab-btn, .pm-body textarea, .qmicro, .qslot, .review-banner {
+    font-size: 14.5px;
+  }
+  .rt-defer input, .rt-dispo-cur, .rt-dispo-done > summary, .rt-dispo-h, .rt-good-h {
+    font-size: 14.5px;
+  }
+  .rt-good-sub, .rt-ifthen, .rt-ifthen input, .rt-mit .rt-pre-tag, .rt-next {
+    font-size: 14.5px;
+  }
+  .rt-note, .rt-pend-h, .rt-preview > summary, .rt-row, .rt-row .rt-m {
+    font-size: 14.5px;
+  }
+  .rt-total, .rt-weekplan-tip, .si, .si-cost, .si-gaps {
+    font-size: 14.5px;
+  }
+  .si-more summary, .si.dim, .side-tree .child, .stale-row, .ta-row {
+    font-size: 14.5px;
+  }
+  .toast button, .today-est, .today-remind, .tree-editor-hint, .trow-act {
+    font-size: 14.5px;
+  }
+  .trow-done, .trow-est, .trow-im, .trow-meta, .trow-ur {
+    font-size: 14.5px;
+  }
+  .ve-row, .wf-body, .wfm-row>span, .zone-sum {
+    font-size: 14.5px;
+  }
+}
+
+/* —— 13.5px 档（91 项） —— */
+@media (max-width: 900px) {
+  .ai-context-details summary, .bub .assembled, .cal-bar, .cal-chip, .cal-n {
+    font-size: 13.5px;
+  }
+  .cal-part, .cal-score, .cal-sec, .cal-wkh, .chart-help {
+    font-size: 13.5px;
+  }
+  .ctrls, .fgroup h3, .gf-chip, .gs-empty span, .gs-hint {
+    font-size: 13.5px;
+  }
+  .gs-meta, .heatmap365 .hm-head, .hero-alt, .hero-pin, .hero-stack .hs-lbl {
+    font-size: 13.5px;
+  }
+  .kb-empty, .optbar, .pill, .pk-h, .pk-note {
+    font-size: 13.5px;
+  }
+  .pm-h, .pm-sub, .pm-txt, .po-body, .po-row>span:first-child {
+    font-size: 13.5px;
+  }
+  .pomo-pct, .pomo-task, .progress-chip, .ps-gap, .ps-h {
+    font-size: 13.5px;
+  }
+  .ps-meta, .ps-name, .ps-num, .qbody, .qempty {
+    font-size: 13.5px;
+  }
+  .quad-head, .quad-hint, .rhint, .row .tt .txt .dl, .rtitle {
+    font-size: 13.5px;
+  }
+  .scale-sel, .set-fs-status, .set-snap-m, .set-snap-t, .smart-btn {
+    font-size: 13.5px;
+  }
+  .smart-empty, .soft-tip, .stale-h, .ta-bias, .ta-sum {
+    font-size: 13.5px;
+  }
+  .ta-title, .today-chip, .today-done-row, .today-energy, .today-ifthen .ti-input {
+    font-size: 13.5px;
+  }
+  .today-ifthen .ti-shield, .today-rocks, .today-time, .topbar-theme select, .ts-label {
+    font-size: 13.5px;
+  }
+  .typing, .ve-head, .ve-summary, .ve-title, .wf-name {
+    font-size: 13.5px;
+  }
+  .wfm-body, .wp-cand, .wr-bar-row, .wr-bars-title, .wr-check {
+    font-size: 13.5px;
+  }
+  .wr-ctab, .wr-done-list ul, .wr-empty, .wr-field, .wr-field textarea {
+    font-size: 13.5px;
+  }
+  .wr-fold > summary, .wr-gold, .wr-moved-sec, .wr-mv-input input, .wr-okr {
+    font-size: 13.5px;
+  }
+  .wr-tab, .zone>summary, button.ve-more, details, details.fold > summary {
+    font-size: 13.5px;
+  }
+  details.fold > summary .fold-sum {
+    font-size: 13.5px;
+  }
+}
+
+/* —— 13.0px 档（33 项） —— */
+@media (max-width: 900px) {
+  .cal-dl, .cal-h em, .cal-hint, .e-hint, .e-lbl {
+    font-size: 13.0px;
+  }
+  .kb-m, .po-bnum, .po-dim, .po-num, .po-sec {
+    font-size: 13.0px;
+  }
+  .rhythm-tasks, .rmo, .rsub, .sprog, .stale-m {
+    font-size: 13.0px;
+  }
+  .ta-col-h, .today-add, .ve-empty, .ve-more, .wf-cnt {
+    font-size: 13.0px;
+  }
+  .wf-edit, .wf-head, .wf-hint, .wf-kprog, .wf-prog span {
+    font-size: 13.0px;
+  }
+  .wf-range, .wf-rel-h, .wf-rel-row, .wf-today-n, .wf-toggle {
+    font-size: 13.0px;
+  }
+  .wr-h, .wr-hint, .ws-store {
+    font-size: 13.0px;
+  }
+}
+
+/* —— 12.5px 档（33 项） —— */
+@media (max-width: 900px) {
+  .badge, .bub .qtag, .cal-gut, .cal-gut i, .cal-legend {
+    font-size: 13px;
+  }
+  .cal-lvl, .cp-v, .dc-tag, .fgroup h3 .cnt, .gf-kbd {
+    font-size: 13px;
+  }
+  .gs-kbd, .hero-alt .rank, .ob-step b, .ob-steps, .panel h2 .idx {
+    font-size: 13px;
+  }
+  .peak-tag, .pk-tag, .ps-badge, .rock-chip, .si .sidx {
+    font-size: 13px;
+  }
+  .slot-empty, .smart-flag, .ss .ss-k, .today-pfx, .today-slot-sel {
+    font-size: 13px;
+  }
+  .today-time-lbl, .ts-pills, .ve-cnt, .ve-summary .ve-cnt, .wf-tagchip {
+    font-size: 13px;
+  }
+  .zone>summary::before, details.fold > summary::before, kbd {
+    font-size: 13px;
+  }
+}
+
+/* ============================================================
+   34. 到点提醒开关 + 桌面通知状态行（v7.7）
+   —— 原先「不支持通知」和「开启提醒」按钮同时出现且点了没反应；
+      现在开关是真 checkbox，通知授权单独一行按状态着色，两者语义不再打架。
+   ============================================================ */
+.alarm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  min-height: 32px;
+  padding: 0 10px 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: var(--panel-strong);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.alarm-toggle input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--gold);
+  cursor: pointer;
+  flex: none;
+}
+.alarm-toggle:has(input:checked) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.today-alarm-st.granted  { color: var(--ok); }
+.today-alarm-st.denied   { color: var(--err); }
+.today-alarm-st.unsupported { color: var(--muted); white-space: normal; }
+.today-alarm-st.default  { color: var(--muted); }
+
+@media (max-width: 900px) {
+  .empty-state { font-size: 15.5px; }
+  .empty-state .es-sub { font-size: 13.5px; }
+  .empty-hint { font-size: 14.5px; }
+  .alarm-toggle { min-height: 40px; padding: 0 12px 0 9px; font-size: 14.5px; }
+  .alarm-toggle input[type="checkbox"] { width: 20px; height: 20px; }
+  .today-alarm-st { white-space: normal; }
+}
+
+/* ============================================================
+   35. 空状态排版（v7.7）
+   —— 原来这些字号写死在 app.js 的内联 style 里（11–12px），内联优先级最高，
+      第 33 节的字号地板根本盖不住；现在收进类，移动端统一可读。
+   ============================================================ */
+.empty-state {
+  text-align: center;
+  padding: 18px 14px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.empty-state .es-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+}
+.empty-hint {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   36. 兜住浏览器默认相对字号（v7.7）
+   —— <small> 默认 0.8em：15px 父级下只剩 12px，13px 父级下只剩 10.4px。
+   ============================================================ */
+@media (max-width: 900px) {
+  /* 用 max() 兜住：0.9em 在 13.5px 父级下只剩 12.15px，仍然低于阅读下限 */
+  small { font-size: max(0.9em, 13px); }
+  .empty-state small, .si-gaps small { font-size: 13.5px; }
+}
+
+/* ============================================================
+   37. 成就统计 + 完成热力时间线（v7.7）
+   —— features.css 里这组规则停在 11～12px；它们是洞察页唯一还在地板之外的
+      HTML 文本（不是 SVG 图表内部刻度），按阅读下限统一抬到 13/13.5px。
+   ============================================================ */
+@media (max-width: 900px) {
+  .hs-cell span { font-size: 13px; }
+  .hs-cell b    { font-size: 24px; }
+  .hs-cell      { padding: 12px 8px; }
+  .hh-lbl       { font-size: 13px; margin-top: 8px; }
+  .ht-day-h     { font-size: 13.5px; margin-bottom: 6px; padding-bottom: 5px; }
+  .ht-time      { font-size: 13px; }
+  .ht-txt       { font-size: 14px; }
+  .ht-wf        { font-size: 13px; }
+}
+
+/* ============================================================
+   38. 折叠标题右侧摘要（v7.7）
+   —— .fold-sum 的 white-space: nowrap 在小屏（320px）会把「当前 —」顶出右边界；
+      summary 不是 flex，margin-left:auto 本来就无效，所以直接允许折行。
+   ============================================================ */
+@media (max-width: 420px) {
+  details.fold > summary .fold-sum {
+    white-space: normal;
+    display: block;
+    margin-left: 0;
+    text-align: right;
+    line-height: 1.45;
+  }
+}
+
+/* ============================================================
+   39. 勾选框触控面积（v7.7）
+   —— 第 1 节把复选框放大绑在 (hover:none) and (pointer:coarse) 上，窄屏桌面/桌面
+      预览窗口拿不到，实测仍是 15×15（.today-check 整个 label 只有 22×25）。
+      这是今日列表最常用的点击目标，按 44pt 建议补一层与指针类型无关的宽度规则。
+   ============================================================ */
+@media (max-width: 900px) {
+  .today-check,
+  .qdone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    min-height: 40px;
+    margin: 0;
+  }
+  .today-check input,
+  .qdone input,
+  .alt-check,
+  #ritualOn {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .alarm-toggle {
+    min-height: 44px;
+  }
+}
+
+/* ============================================================
+   41. app 外壳（v7.8）：紧凑顶栏 + 可折叠大标题 + 左侧抽屉 + 单行提醒条
+   —— 之前 390×844 首屏全是外壳：顶栏 104（还会滚走）+ 提醒条 183 + 流程条 90，
+     真正要执行的 MIT / 执行清单掉到 1300px 之后。这里把外壳压到 ~110px：
+     顶栏 52（常驻）+ 大标题 44（随内容滚走）+ 提醒条 40（横向 chips）。
+   ============================================================ */
+@media (max-width: 900px) {
+
+  /* —— 顶栏：固定 52px 一行，玻璃底 —— */
+  header.topbar {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 2px;
+    min-height: 52px;
+    padding: calc(4px + env(safe-area-inset-top, 0px)) calc(6px + env(safe-area-inset-right, 0px)) 4px calc(6px + env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    backdrop-filter: blur(18px) saturate(1.35);
+    border-bottom: 1px solid var(--stroke-soft);
+  }
+  header.topbar.scrolled {
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    border-bottom-color: var(--stroke);
+  }
+  /* 桌面才需要的东西：面包屑、进度胶囊（进度改到大标题副标题里） */
+  header.topbar .crumb,
+  header.topbar .progress-chip,
+  header.topbar #btnProjects,
+  header.topbar #btnThemeCycle { display: none !important; }
+
+  .ab-menu {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    border: 0; border-radius: 12px;
+    background: transparent; color: var(--ink);
+    font-size: 19px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .ab-menu:active { background: var(--panel-strong); transform: scale(.96); }
+
+  /* 滚动后出现的迷你标题（大标题已滚出视口） */
+  .ab-mini {
+    display: flex; flex-direction: column; justify-content: center;
+    min-width: 0; margin-left: 2px;
+    opacity: 0; transform: translateY(3px);
+    transition: opacity .18s ease, transform .18s ease;
+    pointer-events: none;
+  }
+  header.topbar.scrolled .ab-mini { opacity: 1; transform: none; }
+  .ab-mini b { font-size: 16.5px; line-height: 1.15; color: var(--ink); font-weight: 650; }
+  .ab-mini span { font-size: 13px; line-height: 1.25; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .topbar-actions { margin-left: auto; gap: 0; flex-wrap: nowrap; }
+  header.topbar #btnSearch,
+  header.topbar #modeToggle {
+    width: 44px; min-height: 44px;
+    padding: 0; font-size: 17px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  header.topbar #btnSearch .btn-lbl { display: none; }
+  .tb-more > summary { width: 44px !important; height: 44px !important; font-size: 18px !important; }
+
+  /* —— 大标题：随内容滚动，滚出后顶栏迷你标题淡入 —— */
+  .app-title { padding: 8px 16px 0; }
+  .app-title h1 {
+    margin: 0;
+    font-size: 30px; line-height: 1.12; font-weight: 700;
+    letter-spacing: -.015em;
+    color: var(--ink);
+  }
+  .app-title p { margin: 5px 0 0; font-size: 13.5px; color: var(--muted); }
+
+  /* —— 侧栏 → 左侧抽屉 —— */
+  .side {
+    display: flex;
+    position: fixed; top: 0; bottom: 0; left: 0;
+    width: min(84vw, 330px);
+    z-index: 95;
+    transform: translateX(-104%);
+    transition: transform .28s cubic-bezier(.32, .72, 0, 1);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .55);
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 12px calc(80px + env(safe-area-inset-bottom, 0px));
+    overscroll-behavior: contain;
+    border-right: 1px solid var(--stroke);
+  }
+  .side.open { transform: none; }
+  .drawer-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 2px 2px 10px;
+  }
+  .drawer-head span { font-size: 13px; color: var(--muted); letter-spacing: .04em; }
+  .drawer-x {
+    width: 40px; height: 40px;
+    border: 0; border-radius: 11px;
+    background: var(--panel-strong); color: var(--ink); font-size: 15px;
+  }
+  .drawer-x:active { transform: scale(.94); }
+  .side .si { min-height: 44px; font-size: 15px; }
+  .side .side-ws { padding-bottom: 4px; }
+
+  body.drawer-open { overflow: hidden; }
+  body.drawer-open .main-scroll { overflow: hidden; }
+  .drawer-scrim { display: block; }
+  .drawer-scrim.on { opacity: 1; pointer-events: auto; }
+
+  /* —— 底部 tab：原生指示条 + 更清楚的字号 —— */
+  .mtab-btn {
+    position: relative;
+    font-size: 12px !important;
+    gap: 4px;
+  }
+  .mtab-btn .mtab-ic { font-size: 19px; }
+  .mtab-btn.on { background: transparent; }
+  .mtab-btn.on::after {
+    content: '';
+    position: absolute; top: 0; left: 50%;
+    width: 20px; height: 3px; margin-left: -10px;
+    border-radius: 0 0 3px 3px;
+    background: var(--gold, #f5c451);
+  }
+
+  /* —— 今日页：标题不再和「今日行动」重复 —— */
+  .today-head-row h2 { display: none; }
+  .today-head-row { gap: 0; }
+
+  /* —— 提醒条：4 列网格 → 单行横向 chips（183px → ~40px）—— */
+  .today-alarm-bar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding: 2px 2px 4px;
+    margin: 4px 0 0;
+    font-size: 13.5px;
+  }
+  .today-alarm-bar::-webkit-scrollbar { display: none; }
+  .today-alarm-bar > * { flex: 0 0 auto; }
+  .today-alarm-bar .alarm-toggle {
+    order: 0; width: auto; justify-self: auto;
+    min-height: 36px; padding: 0 12px 0 8px;
+  }
+  .today-alarm-bar .alarm-set { order: 1; grid-column: auto; justify-self: auto; }
+  .today-alarm-bar .alarm-set input { width: 74px; min-height: 36px; font-size: 14px; }
+  .today-alarm-bar .today-alarm-st {
+    order: 2; grid-column: auto;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  .today-alarm-bar .gf-btn {
+    width: auto !important; min-height: 36px;
+    padding: 0 12px; font-size: 13.5px; white-space: nowrap;
+  }
+  #btnMorningRitual, #btnEveningRitual, #btnWeekPlan, #btnWeekReviewBar, #btnEnableAlarm { order: 3; }
+
+  /* —— 流程指示条：多行 90px → 单行 32px —— */
+  .flow-indicator { padding: 6px 10px !important; gap: 6px !important; }
+  .flow-track {
+    flex: 1 1 auto; min-width: 0;
+    font-size: 13px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .flow-indicator .flow-close { flex: 0 0 auto; padding: 2px 8px !important; min-width: 30px; }
+}
+/* 桌面：遮罩永不出现 */
+.drawer-scrim {
+  position: fixed; inset: 0; z-index: 94;
+  background: rgba(0, 0, 0, .5);
+  opacity: 0; pointer-events: none; display: none;
+  transition: opacity .28s;
 }

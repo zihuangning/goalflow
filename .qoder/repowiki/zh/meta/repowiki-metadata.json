@@ -1,0 +1,1916 @@
+{
+  "wiki_repo": {
+    "id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+    "name": "goalflow",
+    "progress_status": "completed",
+    "wiki_present_status": "COMPLETED",
+    "recovery_checkpoint": "wiki_generation_completed",
+    "last_commit_id": "f347bed0b96346ab98bd9c8f0b8402f3fb1c7021",
+    "last_commit_update": "2026-11-24T11:34:23Z",
+    "gmt_create": "2026-11-24T11:34:23Z",
+    "gmt_modified": "2026-11-24T11:34:23Z",
+    "extend_info": "{\"language\":\"zh\",\"active\":true,\"branch\":\"main\"}"
+  },
+  "wiki_catalogs": [
+    {
+      "id": "04414714-d307-46c1-83fc-a90ff7e81bea",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "项目总览",
+      "description": "project-overview",
+      "prompt": "为目标流 GoalFlow 创建项目总览文档。阐述该工具的核心定位——把一整年画成一张图，让「当下最重要」自己发光的可视化时间管理方案；说明它解决的目标清单越长越不做真正重要事、重要不紧急的任务永远被延后的痛点。介绍三视图架构（☀ 今日行动 / 🎯 目标规划 / 📊 归纳洞察）、核心能力（桑基图自动生成、MIT 算法自动选要事、多维时间轴缩放、四象限拖拽归位、SMART 体检与对话式拆解、执行闭环 Top3+Backlog+番茄钟+评分）以及「纯本地、双击即用、无账号无云端无订阅」的技术哲学。结合 README 中快速开始与数据隐私说明，给出在线体验与离线安装的两种上手路径。说明 index.html 作为单页应用入口的角色，assets/css 与 assets/js 的模块化组织方式，demos/ 示例主题与 docs/ 设计规范的位置。为初学者提供概览，同时给有经验读者指出后续深入章节的导航方向。",
+      "progress_status": "completed",
+      "dependent_files": "README.md,index.html",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "kk_dependent_files": [
+        "README.md",
+        "index.html"
+      ]
+    },
+    {
+      "id": "39e503e4-e385-4a74-ac0f-a08ea28f20b7",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "设计令牌与主题配置",
+      "description": "design-tokens-and-theme-config",
+      "prompt": "为目标流 GoalFlow 的设计令牌与主题配置机制编写详细文档。重点说明 gf-tokens.js 中 GoalFlowTheme 对象的结构：颜色命名空间（背景、文字、主色、强调色、状态色等）、标签语义颜色映射、按钮样式类名集合、图标语义定义、布局尺寸变量，以及 themeRegistry 或默认主题数组的组织方式。解释这些 token 如何在运行时被 JavaScript 读取、转换为 CSS 变量并注入到 document.documentElement 或 body 上；说明 data-theme 与 data-mode=dark/light 的切换逻辑。给出添加新主题的完整示例：从零构造一个 GoalFlowTheme 对象，覆盖背景色、卡片表面色、主色与强调色、语义标签色，并验证深色模式下的可访问性与对比度。同时说明现有预置主题（如内置示例）如何使用同一结构复用，列出 token 命名约定、必须字段与可选字段的契约关系，以及与 UI 组件状态之间的对应表。包含“主题对象 → CSS 变量键值”映射图。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/gf-tokens.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "layer_level": 2,
+      "kk_dependent_files": [
+        "assets/js/gf-tokens.js"
+      ]
+    },
+    {
+      "id": "642aeec0-5f85-4f81-b189-b9900cb57afd",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "整体架构概览",
+      "description": "overall-architecture",
+      "prompt": "为目标流 GoalFlow 撰写整体架构概览文档，说明其「单 HTML + 静态资源」的高层设计。描述 index.html 作为 shell UI 和入口，如何加载 assets/js/app.js、gf-tokens.js 以及主样式；解释 app.js 为何是唯一的业务逻辑中心——集中管理全局 state、监听 DOM 事件、调用解析器和渲染器、同步 localStorage。给出应用上下文图：用户 → index.html → app.js → GF Theme API（gf-tokens.js）→ CSS 变量系统 → DOM；同时展示数据流：文本输入 → parseText/parseToNodes → computeTree → setState → beginTick → saveNodes/saveMeta → localStorage。说明本项目未使用任何运行时框架的取舍、单文件职责过重的权衡，以及如何通过命名空间与注释分块在单文件中维护职责边界。包含高层架构图、依赖关系表和职责矩阵，帮助初学者理解 SPA 外壳与核心 JS 模块的关系。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js,assets/css/main.css,assets/js/gf-tokens.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "layer_level": 1,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js",
+        "assets/css/main.css",
+        "assets/js/gf-tokens.js"
+      ]
+    },
+    {
+      "id": "8324be64-56e0-47f8-9449-c1d4c71e2901",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "持久化数据模型",
+      "description": "persistent-data-model",
+      "prompt": "为目标流 GoalFlow 的 localStorage 层创建权威数据字典与契约文档。围绕 app.js 中实际写入 state.nodes / state.meta / state.workflows / state.pomo 的所有字段展开，逐项列出：node（id/text/parentId/im/ur/val/eff/targetNum/targetDone/deadline/deadlineDate/daysLeft/overdue/done/doneAt/touchedAt/createdAt/estimateMinutes/actualMinutes/recur/scale/slot/isRoot/isLine/isLeaf/parentType/depth/rollupState/workflowId/tag/planNotes/execIntent/predictedStartDate/…）、meta（weekReviews/dailyCompletions/energyLog/careerPlan/yearPlan/stayAlert/lastBackupAt/scoreLog/dayNotes/ritual/pendingActions/weekPlans/inbox/planShare/eveningDispo/goodThings/…）、workflows（name/tags/color/topPin/startDate/endDate/meta）、pomo（active/endAt/minutes/nodeId/wfId）的结构定义、类型约束、默认值、必填性与校验规则。说明根节点约定（nodes[0] 为年度总目标）、父子关系（parentId 指向 byId[id]）、V/E（im/ur, val/eff）语义、时长字段估算/实计分离、重复任务（recur）指标累计规则。提供最小可验证 JSON 样例与非法输入处理策略；记录与 state 初始化函数（ensureMeta / newNode / ensureEstimate / ensureMetrics）的一致性。解释在主题切换或版本升级场景下新增字段的安全回退方案。面向读者给出「字段名 — 含义 — 范围 — 变更影响」的速查表，并结合示例代码片段标注实现位置。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "layer_level": 1,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "b354cdc5-8369-46c3-bde0-587ae25dd4de",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "localStorage 数据键与结构",
+      "description": "local-storage-api",
+      "prompt": "为目标流 GoalFlow 的浏览器 localStorage API 编写参考文档。明确说明这是一个纯前端本地存储接口，所有数据都保存在用户本机浏览器的 Storage Area 中，不涉及任何服务端传输。逐个列出并解释以下键：goalfocus.v4（扁平节点数组 v5）、goalfocus.meta.v1（元数据，含 weekReviews、dailyCompletions、energyLog、capacity、lastBackupAt 等）；goalflow.theme / goalflow.mode（当前主题与明/暗模式）；goalflow.view（今日行动/目标规划/归纳洞察视图名）；goalflow.workflows.v2（多工作区配置对象数组，每个工作区含 id/name/topId/tags/start/end/description/color/nodes）；goalflow.backups（自动备份时间戳表）；gf_llm_key（DeepSeek API Key，用户可选配置）。每个键需给出：JSON schema、字段含义、写入示例、典型读取场景。说明 getStore(k)/setStore(k,v) 等内部读写函数及 try/catch 防护。指出容量限制约 5–10 MB，数据不会跨浏览器迁移；提供 JSON 备份导出/恢复作为跨设备转移方案。包含错误处理（storage quota exceeded、JSON 解析失败、键不存在回退到 goalfocus.v3）、性能建议（不要轮询，只在 save() 后读取），以及安全提示（API Key 只存本地，不提交给第三方脚本）。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "layer_level": 1,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "bc361a14-3193-4a03-ad01-bc3d84342254",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "Sankey 流图渲染器",
+      "description": "sankey-diagram-renderer",
+      "prompt": "为目标流 GoalFlow 的 Sankey 流图渲染器编写实现级文档。首先说明 Sankey 渲染的整体职责：将已解析的目标树（state.nodes + _children/_vc）转换为 SVG 中可见的层级布局与边集，并通过宽度反映权重/数量、颜色反映紧急度（ur）、Top1 标记用金色高亮；解释 viewMode 在 sankey / plan / insights 等视图间的切换如何影响 layout 和视觉语义。详细说明 sankeyLayout(vis) 的实现——深度计算、子节点高度合并（first._y → last._y + last._h）、每层 x 坐标 SX + depth × (NODEW + COLGAP)、列数 maxD、最小高度 MINH 与像素间距 LGAP 的作用；并列出关键常量（如 SY、SX、NODEW、COLGAP、UH 等）及其设计依据。说明 Sankey 数据模型中的 source/target 边是如何从 parent→child 关系推导出来的，以及当 nodesToIndentedText、parseText、computeTree 等上游模块改变节点结构时，边集如何增量重建。提供一段从一段自由目标文本到最终生成 SVG 边的“最小示例”，展示 parseText → computeTree → sankeyLayout → SVG 元素创建的完整链路。文档必须包含：Sankey 数据结构定义、绘制步骤图（解析→分组→布局→路径→上色→交互）、常见问题的排查指南（SVG path 重叠、节点间距过小导致子项被裁切、移动端横向滚动异常、颜色对比不足、TopPin 钉选状态不刷新），以及在当前单文件架构下如何通过扩展新的维度（workflow/category/time/status 等）映射为桑基图的横列。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "7924e6b3-fc95-4c33-b0dc-97aa242018f0",
+      "layer_level": 2,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "d4a6a9f5-2634-4fc5-bbd5-59935c700838",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "全局 State 模型与变更驱动",
+      "description": "global-state-model",
+      "prompt": "为目标流 GoalFlow 的全局 state 对象编写详细技术文档，重点说明其顶层字段 nodes、meta、workflows、pomo、view、currentWfId、selectedNodeId 等的职责、默认初始值、可空约束以及相互关系。解释 setState 如何合并更新、beginTick/beginBatch 如何控制单条/批量写入、tickEnd/saveNodes/saveMeta/flushWrites 在 DOM 重绘与本地存储之间的调度时序。描述从用户交互（如勾选完成、调整 V/E、拖拽四象限）到状态变更、观察者订阅、Sankey/列表/时间轴重新渲染的完整链路，并用真实代码片段演示一个典型用例：调用 pickRanked/pickTop/focusScore 后 Top3、Backlog、MIT 与日程安排如何同时刷新。给出 state 字段的类型契约、常见非法状态、调试手段（如通过浏览器控制台检查 goalfocus.v4）和性能注意事项，避免重复遍历整个节点树。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "layer_level": 2,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "da64fad3-0fb0-401a-b80b-decd60d3a274",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "☀ 今日行动视图",
+      "description": "today-view",
+      "prompt": "为目标流 GoalFlow 的「今日行动」视图撰写用户与实现兼顾的功能文档。重点覆盖：① 英雄卡 MIT——基于 pickRanked/pickTop/focusScore 算法自动选出「当下最重要任务」，包括判定依据、权重说明与用户可调整入口；② Top3 聚焦清单与 Backlog 泳道——如何按日期（dateKey）从 state.nodes 筛选今日任务、Backlog 的任务滞留展示、勾选完成对完成状态和评分的影响；③ 番茄钟——pomo.active/pomo.endAt/pomo.minutes/pomo.nodeId 等字段的变化过程，计时器起止、进度条与计时结束后的状态回写；④ 每日总评分与评级——结合 meta.dailyCompletions、完成标记与时间估算给出评分反馈。每项需写出用户在 index.html 页面中的操作路径，对应 app.js 中触发事件、状态更新与 DOM 重渲染的关键逻辑，并列出常见使用问题及排查建议（如番茄钟不显示、MIT 选择不符合预期）。语言面向使用者，但保留 state 字段与函数名以便开发者对照扩展。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "layer_level": 1,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "e9f5cdee-9012-41d8-9451-9d9ad86a57ec",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "应用 Shell 与三栏布局",
+      "description": "app-shell-and-layout",
+      "prompt": "为目标流 GoalFlow 的 Shell 布局编写详细文档。逐行说明 index.html 中 `<div class='app-shell'>` 下的三个区域：左侧图标轨 `<nav class='rail' data-nav='rail'>`（today/plan/insights/ai 四个导航按钮）、aside `<nav class='side' id='side'>`（wfBar、wsStore、slabel、side-tree、侧边操作区）、主内容 `<main class='main' id='main'>`（topbar、topbar-actions 与各视图容器）。解释三栏布局 CSS 变量：--rail-w、--side-w、--content-x1，以及 app-shell、rail、side、main 如何协同。说明路由 `#`hash 与 rail nav-link--active 的联动逻辑在 JS 中如何选择 today/plan/insights/ai 视图。提供 DOM 树示意图，并列出每个区块的典型 class 与用途。包含常见调试方法（例如检查 data-view= 属性、计算 width）和常见问题排查（Rail 或 Side 被隐藏时的修复方式）。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/css/main.css,assets/css/components/layout.css",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "layer_level": 1,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/css/main.css",
+        "assets/css/components/layout.css"
+      ]
+    },
+    {
+      "id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "状态管理与存储层",
+      "description": "state-and-storage-layer",
+      "prompt": "为目标流 GoalFlow 的状态管理与存储层编写详细技术文档，聚焦全局 state 对象及其内部结构（nodes、meta、workflows、pomo、view 等）、setState 封装、beginTick/beginBatch 批量更新机制、saveNodes/saveMeta/flushWrites 的防抖持久化策略，以及 goalfocus.v4/goalfocus.meta.v1 两个 localStorage 键的生命周期与版本迁移路径。解释状态变更如何驱动观察者重绘、撤销/恢复流程如何利用命令模式实现、Top3/Backlog/MIT/日程分配等视图如何读取同一份 state。列出关键函数的参数与返回值，例如 pickRanked、pickTop、focusScore、dateKey、computeWeekReview 等在状态流转中的角色，并给出从用户点击“完成任务”到节点 completedAt 更新、完成度统计、评分与进度 Rollup 的端到端示例。说明 localStorage 的性能瓶颈、读写频率优化手段，以及在数据损坏或键值缺失时的降级恢复方案。包含状态转换图和数据流图，兼顾新手概念理解和高级开发者调试需求。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "layer_level": 1,
+      "order": 1,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "49b719eb-1f84-4002-9e3c-d3dcab42c9a4",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "🎯 目标规划流程",
+      "description": "goal-planning",
+      "prompt": "为目标流 GoalFlow 的「目标规划」能力撰写完整文档。核心内容应包含：① 自由文本输入与 parseText/computeTree 解析管线——如何将粘贴的目标描述转换为 node 数组、父子关系、优先级标签以及最终树结构；② Smart 体检提示——系统如何检测目标是否满足 SMART 标准并给出修改建议；③ 对话式拆解——配置 DeepSeek API Key 后，如何通过 LLM 辅助把抽象目标逐层拆解为可执行节点，涉及的调用约定、返回结果落库位置以及对 state.nodes 的影响；④ 目标树的树形维护——新增、重命名、提升/下沉、删除子任务的操作路径；⑤ 期限与估算设置——deadline、estimateMinutes、im/ur 等属性如何影响后续 MIT、日程分配和评分。需要引用 parseText、computeTree、节点创建与保存等相关代码路径，并用实际示例演示「一段自然语言 → Sankey 目标图」的全过程；同时补充解析失败、LLM 无响应或目标层级异常时的排查方法。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "layer_level": 1,
+      "order": 1,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "5e2eb862-2af2-4e69-b54d-ed0aa26a62fe",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "CSS 变量与主题注入机制",
+      "description": "css-variable-injection-and-loading-order",
+      "prompt": "为目标流 GoalFlow 的 CSS 变量加载与主题注入机制编写详细文档。说明 main.css 作为样式入口的导入顺序：设计令牌层、base 基础样式、components/* 模块化组件、mobile 响应式适配，并解释为什么该顺序对 :root 或 body 上的 CSS 变量覆盖至关重要。文档 CSS 变量命名约定，例如主题 token 如何映射为 var(--gf-bg-primary)、var(--gf-text-*)、var(--gf-accent-*) 等形式；主题切换时哪些变量会被替换、哪些只用于断点或布局；data-theme 与 data-mode 属性的选择器优先级和覆盖策略。结合 app.js/gf-tokens.js 中的实际注入逻辑，说明首次渲染、主题切换、用户偏好设置时的变量重计算过程，并指出在开发工具中使用 Elements/Styles 面板调试主题变量的步骤。提供常见问题的排查清单：变量未生效、颜色反色异常、暗色模式对比度过低、第三方字体加载后色彩不一致等。",
+      "progress_status": "completed",
+      "dependent_files": "assets/css/main.css,assets/css/base.css",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "layer_level": 2,
+      "order": 1,
+      "kk_dependent_files": [
+        "assets/css/main.css",
+        "assets/css/base.css"
+      ]
+    },
+    {
+      "id": "6123ed48-c856-4526-9aa8-20e87d7f5db0",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "localStorage 持久化与备份恢复",
+      "description": "local-persistence-and-backup",
+      "prompt": "为目标流 GoalFlow 的数据持久化机制编写详细实现文档，围绕 localStorage 中 goalfocus.v4 与 goalfocus.meta.v1 两个键的设计差异进行说明：前者存放结构化目标节点与工作区元数据，后者存放滚动汇总、能量日志、习惯打卡等 meta 数据。详述 saveNodes/saveMeta/flushWrites 的实现策略，包括防抖节流、批量合并、异常捕获与降级逻辑，以及在网络不可用或 localStorage 配额耗尽时的处理方案。说明 JSON 备份与恢复流程，包括导出格式、导入校验、版本缺失键值的自动回填、损坏数据的兜底解析，以及与 ICS 日历导出的关系。给出手动干预示例，例如在浏览器开发者工具中直接读取、替换或修复 goalfocus.v4 字符串。列出常见问题与排查清单：data too large、QuotaExceededError、跨标签页写入冲突、首次安装无键值、主版本号不匹配时如何处理。结合实际错误日志展示完整的故障恢复步骤，并强调生产环境对读写频率与体积的监控建议。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "layer_level": 2,
+      "order": 1,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "8a4ad012-2b7a-414d-bfae-45dcf5a8ea67",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "页面结构 ric / si / topbar",
+      "description": "layout-ric-si-topbar",
+      "prompt": "为目标流 GoalFlow 的主页容器 ric、工作空间容器 si 与顶部 bar topbar/topbar-actions 编写组件级文档。说明 `.ric` 作为今日行动/目标规划/归纳洞察三大视图的共同外层，`.si` 作为多工作区列表容器；描述它们与 `data-view=today|plan|insights`、`data-type=all|done|pending`、`data-workflow=*` 等属性的协作关系。详述 topbar 的 title、search、tagFilter、workspacePicker 子元素及其对应的 JS 事件监听位置。说明 side 区域的 slabel、side-tree、wfBar、wsStore、bottom-bar 的作用与显示条件，包括侧边展开收起的状态字段。给出一个典型的页面快照 HTML 片段，标注每个 class 与数据属性，并解释新增视图时如何在 main 中插入对应模板。补充响应式场景下 topbar-actions 的可滚动行为。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/css/main.css,assets/css/components/features.css",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "layer_level": 1,
+      "order": 1,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/css/main.css",
+        "assets/css/components/features.css"
+      ]
+    },
+    {
+      "id": "c23aaf7e-df4f-418b-a5b1-c34131fb1bd9",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "节点生命周期与字段校验",
+      "description": "node-lifecycle-validation",
+      "prompt": "基于 assets/js/app.js 中的 parseText/computeTree/newNode/recomputeSchedule/ensureEstimate/ensureMetrics/setNodeDone 等核心函数，系统描述单棵目标树从文本解析到渲染落库的生命周期。按阶段说明：输入文本 → 解析 deadline（parseDeadline：今天/明天/后天/Y-M-D/M月D日/周X/本周内/下周/月底前/第N周）→ computeTree 构建 _children/depth → inferScale 推断年/月/周/日尺度 → recomputeSchedule 填充 deadlineDate/daysLeft/overdue → ensureEstimate 补齐叶子 estimateMinutes（默认 30，正则 parseEstimateMinutes）→ ensureMetrics 归一 targetNum/targetDone。明确每个阶段的入参、副作用、返回值及对 state 的影响；给出边界情况：空父指针、环形 parentId、无根节点、未设期限、过期任务、targetDone > targetNum、negative minutes、已 done 后误删 doneAt、重复任务与习惯打卡的 targetDone 自增规则。提供基于真实代码片段的时序图与校验流程图，并附可复现的单元测试输入（成功 + 失败用例）。说明 setNodeDone 触发链：doneAt 写回、实际时长回填、bumpDailyCompletion、goldChain touchedAt、appendScore/appendExecutionLog/updateHabitStreak/logHabitCheck 的顺序与可逆性。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "layer_level": 1,
+      "order": 1,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "c525e384-64ae-4ad1-8444-6f1eabb6bc40",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "目标节点（node）与元数据（meta）数据模型",
+      "description": "node-meta-schema",
+      "prompt": "为目标流 GoalFlow 的核心数据结构编写数据模型文档。详细说明扁平化 node 对象的完整字段定义：id、text、parentId（空表示根节点）、im（重要性 1–5）、ur（紧急性 1–5）、val（价值维度 quick/major/easy/trap）、eff（费力程度 1–5）、estimateMinutes（计划分钟）、actualMinutes（实际分钟）、done（布尔）、deadlineDate、deadlineString、repeat（inferred recur 标志）、workflowId、score、createdAt、updatedAt、_children 等；解释 ensureVE()、ensureEstimate()、isQuickWin()、inferRecur() 对字段值的约束与默认值。说明 meta 对象中的 weekReviews、dailyCompletions、energyLog、capacity、chartScale、ritualHistory、lastBackupAt 等子字段语义。给出一个完整的 {nodes:[], meta:{...}} JSON 实例，包含一个根节点和三个叶子节点。说明 normalizeNode() 在加载时的归一化规则：缺失字段补齐、im/ur/clamp 范围检查、estimateMinutes 从文本解析、deadLine 推导等。解释 PROGRESS-ROLLUP.md 中定义的完成度 rollup 公式如何通过 child 状态向上聚合到 parent.score。提供常见操作示例：新增节点、更新 done、调整 im/ur、设置 deadlineDate 以触发 ICS 导出、批量导入外部 JSON。强调 node.id 必须唯一、parentId 引用需在同一个 nodes 数组内有效、workflowId 与 state.workflows[] 对应。包含验证失败的降级行为与调试建议（在浏览器 console 用 state.nodes 查看原始数据）。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js,docs/PROGRESS-ROLLUP.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "layer_level": 1,
+      "order": 1,
+      "kk_dependent_files": [
+        "assets/js/app.js",
+        "docs/PROGRESS-ROLLUP.md"
+      ]
+    },
+    {
+      "id": "e261c17a-95b7-4bd4-b736-8d1140873d51",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "四象限矩阵与交互",
+      "description": "quadrant-matrix-interaction",
+      "prompt": "为目标流 GoalFlow 的四象限矩阵（V×E / VE 矩阵 / V/E 四象限）编写实现与交互文档。解释 VE_ORDER 和 VE 常量定义的四个象限（quick/major/easy/trap 或 now/core/distract/noise），说明重要（im）与紧急（ur）维度的分类规则、Top3 与 Backlog 的高亮逻辑、空态占位样式，以及 renderQuadrant() / renderVeMatrix() 如何把 state.nodes 的未完成任务分配到 buckets 并渲染 DOM。文档需涵盖以下方面：\n\n1. 模型：节点进入四象限的条件、done/backlog/blocked/waiting 节点的处理方式、VE 属性的来源与 ensureVE 的职责。\n2. 渲染：四列表头的图标、标签、计数 ve-cnt 和左边框颜色如何由 VE[k].icon/label/color 生成；各象限容器、任务卡片、已完成划线与拖拽反馈的 DOM 结构。\n3. 交互：拖拽起始、目标象限判定、drop 后的状态写入流程，包括重要/紧急维度调整、Top3/Backlog 高亮变更、评分 focusScore / pickRanked 是否重新缓存，以及与 beginTick / debouncedAfterChange / throttledSave 协作的批处理机制。\n4. 性能与一致性：哪些操作触发增量重绘而非整页重建；_tickN、_rankSlot、_viewSlot 缓存如何在同一 tick 内复用排序结果；频繁拖拽下的保存节流策略。\n5. 示例与排障：给出把一个待办从“核心”拖到“救火”象限后 state 变化的端到端示例；说明常见 bug（任务拖错列、拖出界面丢失、移动端触摸 drag 不支持时的降级方案、四象限计数与实际任务不一致、Top3 与 backlog 状态冲突）的排查步骤。\n6. 可维护性：当新增维度或调整象限语义（例如引入新的 priority 等级）时，应修改 VE、VE_ORDER、buckets 分配逻辑以及对应的 CSS。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "7924e6b3-fc95-4c33-b0dc-97aa242018f0",
+      "layer_level": 2,
+      "order": 1,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "f313bc9b-d4ce-477f-90e3-aed27652d398",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "快速开始",
+      "description": "getting-started",
+      "prompt": "为目标流 GoalFlow 编写快速开始指南，覆盖两种使用方式：① 在线体验——通过 https://guichangcoder.github.io/goalflow/ 在浏览器打开，无需安装且数据存储在 localStorage；② 下载到本地——克隆或下载仓库后保留 index.html 与 assets/ 同级，双击直接打开，字体 CDN 可降级到系统字体。说明首次打开为空白状态，可从侧边栏选择 10 个示例主题之一并点击「载入示例」获得预填充数据。简述基础任务：粘贴一段年度/项目文本 → 自动生成目标树与桑基图 → 查看 MIT 英雄卡 → 在四象限中拖拽分类。提醒数据存储位置（localStorage）、备份习惯（💾 导出 JSON）、恢复方法（📂 导入），以及如需生成单文件 standalone HTML 可运行 node scripts/inline-bundle.mjs。面向新手按步骤操作，避免引入高级配置。",
+      "progress_status": "completed",
+      "dependent_files": "README.md,index.html",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 1,
+      "kk_dependent_files": [
+        "README.md",
+        "index.html"
+      ]
+    },
+    {
+      "id": "12e63f97-8645-4df7-8ac6-1db1c16e9e98",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "组件样式模块与规范",
+      "description": "component-styling-modules",
+      "prompt": "为目标流 GoalFlow 的组件样式模块编写详细文档，逐文件说明 button.css、chip.css、forms.css、layout.css、features.css 的职责边界、CSS 类名约定、可用变体以及它们如何消费主题 CSS 变量。明确每个组件支持的视觉状态（默认、悬停、禁用、激活、选中、完成、警告、错误等），以及与 JavaScript DOM 节点 class 或 data-* 属性之间的绑定关系。说明组件样式与全局 layout 的关系：布局容器、栅格、间距、阴影、圆角、层级 z-index 如何由 layout.css 定义，并由 features.css 扩展业务区特性样式；forms.css 如何处理输入框、文本域、下拉与表单反馈控件的主题化。提供具体示例：修改按钮主色、替换 chip 标签的颜色映射、调整表单字段在暗色模式下的边框与 placeholder 可读性，并确保不破坏现有交互状态。说明新增组件样式时应遵循的规则：优先使用 CSS 变量而非硬编码颜色、保持 BEM 或项目现有类名风格、避免直接覆盖全局 base 样式、通过组件类作用域隔离副作用。",
+      "progress_status": "completed",
+      "dependent_files": "assets/css/components/button.css,assets/css/components/chip.css,assets/css/components/forms.css,assets/css/components/layout.css,assets/css/components/features.css,assets/css/main.css",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "layer_level": 2,
+      "order": 2,
+      "kk_dependent_files": [
+        "assets/css/components/button.css",
+        "assets/css/components/chip.css",
+        "assets/css/components/forms.css",
+        "assets/css/components/layout.css",
+        "assets/css/components/features.css",
+        "assets/css/main.css"
+      ]
+    },
+    {
+      "id": "1aca9428-8fdd-470e-b2b9-47858ad48df1",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "主题与示例数据 API",
+      "description": "theme-and-demos-api",
+      "prompt": "为 GoalFlow 的主题系统与示例演示 API 编写集成文档。首先说明 gf-tokens.js 暴露的全局 GoalFlowTheme 对象及其方法：GoalFlowTheme.setTheme(name)、GoalFlowMode.setMode(mode)（或 toggleMode()）、GoalFlowTheme.THEMES、DEFAULT_THEME 常量。解释 THEMES 下每个条目（linear/raycast/rpg 等）包含 label、dark/light 两套配置，每套配置含 PALETTE_UR（五色调色板）、noise、COLORS.accent/accent2/gold/goldSoft/svgGlow/scaleLabel/smartGap/gradSmartDot 等令牌，这些令牌同时被 app.js 渲染器与 assets/css/tokens.css 使用。说明主题切换机制：设置 documentElement.dataset.theme = name + '-' + mode，并从 localStorage.goalflow.theme 持久化。提供通过控制台切换主题的代码示例，以及如何新增自定义主题（扩展 GoalFlowTheme.THEMES['your']）。然后说明 gf-demos.js 提供的 demos 数组，每个 demo 包含 name、nodes 节点树数组、可选 workflow 配置。展示如何将 demo 注入 state.nodes 或序列化到 JS 示例页面复用，并说明 DemoData 格式与生产环境 serializeNodes()/normalizeNode() 的兼容性。列出注意事项：主题令牌必须在 light/dark 两侧一致；demo 节点 parentId 必须构成有向无环图；添加新 demo 后需在 demos/index.html 或示例页引用。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/gf-tokens.js,assets/js/gf-demos.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "layer_level": 1,
+      "order": 2,
+      "kk_dependent_files": [
+        "assets/js/gf-tokens.js",
+        "assets/js/gf-demos.js"
+      ]
+    },
+    {
+      "id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "核心功能详解",
+      "description": "core-features",
+      "prompt": "为目标流 GoalFlow 的核心功能创建综合性用户文档，围绕三大视图与关键工作流展开：① ☀ 今日行动：英雄卡 MIT、Top3 聚焦清单、Backlog 泳道、勾选完成、番茄钟、每日总评分；② 🎯 目标规划：自由文本输入、Smart 体检、SMART 对话式拆解（需配置 DeepSeek API Key）、目标树树形维护、期限与估算设置；③ 📊 归纳洞察：桑基图、V/E 矩阵、精力曲线、时间审计、计划谬误校准、停滞预警。补充仪式化工作流（晨计划、晚总结、周计划、周回顾、三件好事）、多维度时间轴缩放（年→月→周→日联动）、多工作区与标签筛选、ICS 日历导出与 JSON 备份恢复。每项功能需说明用户入口、操作流程、与 state.nodes/state.meta/workflows/pomo 等数据结构的映射关系，并给出从 app.js 中对应的渲染/交互逻辑出发的实现提示。语言面向使用者，但保持对源码实现的精确引用，便于开发者对照扩展。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js,docs/PROGRESS-ROLLUP.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 2,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js",
+        "docs/PROGRESS-ROLLUP.md"
+      ]
+    },
+    {
+      "id": "45f97ce1-72e2-4f52-ba21-e0570a7b8c1f",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "MIT 选择、评分与进度 Rollup",
+      "description": "mit-scoring-scheduling-algorithms",
+      "prompt": "为目标流 GoalFlow 的核心计算层编写算法级技术文档，详细说明 pickRanked、pickTop、focusScore、computeWeekReview、dateKey 以及 docs/PROGRESS-ROLLUP.md 中定义的进度 Rollup 规则。解释 MIT（Most Important Task）的选择顺序：如何在待办集合中结合 im、ur、completedAt、estimateMinutes、依赖 parent/child 关系、V/E 分类与四象限权重筛选出「当下最重要任务」，并把结果映射到 Top3、Backlog、今日计划与日程区间。说明 score/nodeScore 的计算输入、中间变量与输出等级含义，区分完成度、专注时长、评分与能量曲线各自参与的状态写入位置。结合 PROGRESS-ROLLUP.md 中的权威定义，用伪代码逐步演示从节点完成 → completedAt 更新 → 日维度统计 → 周滚动汇总 → 可视化反馈的全过程，包括边界情况：子节点未完成是否允许父节点计为完成、回退 completedAt、重复完成、跨周日切分、缺失 estimateMinutes 时的默认行为。提供 API 参数表、返回值示例、时间复杂度提示、可观测指标与单元测试用例设计建议，帮助高级开发者在不破坏现有语义的前提下扩展评分策略。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js,docs/PROGRESS-ROLLUP.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "layer_level": 2,
+      "order": 2,
+      "kk_dependent_files": [
+        "assets/js/app.js",
+        "docs/PROGRESS-ROLLUP.md"
+      ]
+    },
+    {
+      "id": "734efa1f-5fa3-45fa-9b78-f94a4a04180a",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "MIT 选择与评分算法",
+      "description": "mit-scoring-algorithms",
+      "prompt": "聚焦 MIT（Most Important Task）机制，完整文档化 pickRanked(pool, limit)、pickTop(pool) 与 focusScore(n)/focusScoreParts(n)。首先给出数学公式：候选池过滤（非根、未 done、非 blocked/waiting）、得分权重、稳定排序键，再逐项拆解 focusScore 加分项：基础 im×10；deadlineDate 逾期 +30、≤1 天 +26、≤3 天 +20、≤7 天 +13、≤14 天 +7、否则 +3；无截止时 im≥5 加 4、im≥4 加 2；blocked -60 / waiting -45；精力高峰时段高费力任务的临时 +6。解释 pickRanked 的 fallback 流程（优先纯叶→非阻塞非完成→退回根节点），以及缓存 _rankSlot 失效条件。提供伪代码、带注释的真实函数片段、典型打分分解结果与负分场景说明。说明该算法如何与四象限 category(im, ur)、日程 slot、能量曲线（energyCurve()/energyBucketNow()）协作，以及与 todayScore/scoreDoneItem 的区别（MIT 选当前最重要，scoreDoneItem 对已完成动作进行成就评奖）。补充测试矩阵：极端到期、无限期高重要、被阻塞待办、不同能量峰时段。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "layer_level": 1,
+      "order": 2,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "7c69eb9e-6c98-4ee4-bb1c-23fbdf7f4821",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "桑基图可视化引擎",
+      "description": "sankey-visualization",
+      "prompt": "为目标流 GoalFlow 的桑基图可视化引擎创建专门的技术与用户指南。内容须覆盖：① 数据到 SVG 的映射——state.nodes 如何被转换为层次节点、边权重、颜色分类，以及 Progress Rollup 规则如何决定宽度和完成度视觉表达；② 用户交互——缩放、点击、高亮、过滤与节点展开/折叠如何触发重绘；③ 与四象限矩阵、时间轴、MIT 的关系——Sankey 图作为「目标结构总览」如何联动其他视图；④ 性能考虑——大型目标树下的渲染优化策略、SVG DOM 节点管理与防抖刷新；⑤ 故障定位——当宽度异常、边丢失或滚动卡顿时的排查步骤。需要明确关联 docs/PROGRESS-ROLLUP.md 中的权威语义定义，并在实现说明中引用 app.js 中负责 Sankey 绘制、坐标计算与交互绑定的函数区域。面向初学者解释“宽度代表什么、颜色代表谁”，面向开发者提供扩展新指标与主题色的具体接口。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js,docs/PROGRESS-ROLLUP.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "layer_level": 1,
+      "order": 2,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js",
+        "docs/PROGRESS-ROLLUP.md"
+      ]
+    },
+    {
+      "id": "7ef94592-7f91-457c-a476-b11eb7382c74",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "可复用 UI 组件类",
+      "description": "reusable-ui-components",
+      "prompt": "为目标流 GoalFlow 中的可复用前端组件类编写 API 参考文档，包括按钮、Chip、表单输入等。对按钮组件详细说明 gf-btn、gf-btn--sm、gf-btn--pill、gf-btn--ghost 变体，以及 icon-only、disabled、primary/secondary/tertiary 颜色语义；列出可用 class、默认样式、hover/focus 状态和交互效果。对 Chip 组件说明其作为标签/标签筛选/进度 chip 的不同用法，以及宽度截断、选中态、关闭按钮的行为。对表单组件（input, textarea, select, checkbox, radio）列出 CSS class、placeholder 规范、focus ring、错误态与校验提示。为每个组件提供至少两个来自 index.html 的实际 DOM 示例，注明 class、data-* 属性和 JS 绑定点。包含移动端特殊处理、无障碍建议（aria-*、tabindex）以及扩展新变体的步骤，并提醒不要直接覆盖 gf- 命名空间的核心样式。",
+      "progress_status": "completed",
+      "dependent_files": "assets/css/components/button.css,assets/css/components/chip.css,assets/css/components/forms.css,assets/css/main.css",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "layer_level": 1,
+      "order": 2,
+      "kk_dependent_files": [
+        "assets/css/components/button.css",
+        "assets/css/components/chip.css",
+        "assets/css/components/forms.css",
+        "assets/css/main.css"
+      ]
+    },
+    {
+      "id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "主题与样式系统",
+      "description": "theme-and-style-system",
+      "prompt": "为目标流 GoalFlow 的主题与样式系统编写详细文档，说明 gf-tokens.js 如何通过 GoalFlowTheme 对象暴露设计令牌（颜色、标签语义色、按钮类名、图标语义、布局尺寸等），以及这些令牌如何在运行时注入到 :root 或 body 的 CSS 变量中，配合 data-theme/mode=dark/light 切换深色与浅色主题。文档 main.css 的入口导入顺序、CSS 模块化组织方式（tokens → base → components/* → mobile），以及各组件 CSS 文件（button、chip、forms、layout、features、mobile）的职责划分和响应式适配规则。给出添加新主题的实际示例：定义主题对象、注册语义标签色、设置按钮与卡片色彩、验证暗色模式对比度，并通过主题预览页面验证效果。说明 token 名称与 CSS 变量的约定、浏览器兼容性、可访问性要求，以及与 JavaScript 中组件渲染状态的对应关系。包含主题层次图和样式加载时序图，使前端定制者和扩展者都能直接复用。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/gf-tokens.js,assets/css/main.css,assets/css/components/button.css,assets/css/components/chip.css,assets/css/components/forms.css,assets/css/components/layout.css,assets/css/components/features.css,assets/css/components/mobile.css",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "layer_level": 1,
+      "order": 2,
+      "kk_dependent_files": [
+        "assets/js/gf-tokens.js",
+        "assets/css/main.css",
+        "assets/css/components/button.css",
+        "assets/css/components/chip.css",
+        "assets/css/components/forms.css",
+        "assets/css/components/layout.css",
+        "assets/css/components/features.css",
+        "assets/css/components/mobile.css"
+      ]
+    },
+    {
+      "id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "架构与设计",
+      "description": "architecture-and-design",
+      "prompt": "为目标流 GoalFlow 撰写架构与设计文档，解释其作为纯前端静态 SPA 的高层设计：单页入口 index.html 承载 shell UI，assets/js/app.js 作为唯一业务逻辑中心负责状态管理、DOM 事件监听、状态变更触发重新渲染；assets/js/gf-tokens.js 暴露 GF Theme API，定义设计令牌并同步 CSS 变量；assets/css 采用 main.css 入口 + components/ 组件样式分层。说明数据流向——用户输入文本经 parseText/parseToNodes 转为节点树，computeTree 补充维度属性，setState → beginTick → saveNodes/saveMeta 写入 localStorage，视图根据全局 state 对象增量重绘。描述应用遵循的架构模式：单例状态模式、观察者模式（DOM 事件驱动）、函数式数据处理、命令/撤销操作、工厂初始化。说明构建脚本 scripts/inline-bundle.mjs 如何在生产环境中将外链资源内联为单个 HTML。讨论零运行时依赖、Node.js 仅用于开发打包的取舍，以及如何通过 theme dataAttribute 与 mode dark/light 切换主题。包含架构图、数据流图和组件职责表。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js,assets/js/gf-tokens.js,assets/css/main.css,scripts/inline-bundle.mjs",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 3,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js",
+        "assets/js/gf-tokens.js",
+        "assets/css/main.css",
+        "scripts/inline-bundle.mjs"
+      ]
+    },
+    {
+      "id": "0354138b-af29-4ff4-a4be-8a8bfe5e699c",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "ICS 日历导出 API",
+      "description": "ics-export-api",
+      "prompt": "为目标流 GoalFlow 的 ICS 日历导出功能编写 API 文档。说明 exportICS() 函数仅依赖 state.nodes，无需 HTTP 请求；由按钮点击事件调用，输出 .ics 附件下载。精确描述算法步骤：先 getCachedTree(state.nodes) 构建 _children，过滤出满足 parentId 非空且 _children 长度为空的叶子节点，再进一步筛选 n.deadlineDate 存在；若没有符合条件的节点则弹出告警。逐条叶子生成 VCALENDAR/VCALENDAR/VERSION:2.0/PRODUCE:/‑//GoalFlow//ZH/CALSCALE:GREGORIAN/METHOD:PUBLISH 及多个 BEGIN:VEVENT，字段包括 UID:${n.id}@goalflow.local、DTSTAMP（当前时间）、DTSTART;VALUE=DATE:${dt}、SUMMARY:icsEscape(n.text)、DESCRIPTION:'GoalFlow 叶子 · 重要'+n.im+' 紧急'+n.ur，并以 END:VEVENT/END:VCALENDAR 结尾。说明 icsStamp(d) 产生 YYYYMMDDTHHMMSS，DTSTART 取前 8 位变成日期值；icsEscape(s) 转义 \\、;、,、\\n 以符合 RFC 5545。提供一个合法的最小 .ics 样例。讨论适用场景：将 Deadline 式叶子任务导入 Outlook/iOS Calendar/Google Calendar；讨论限制：不包含 repeat/RRULE、不支持 VTODO、截止日期为日期而非时刻、文件名带 goalflow-deadlines-YYYY-MM-DD.ics 前缀。包含常见问题排查：未找到带期限叶子→教用户在节点写“周五前/3月15日”或使用 deadline 字段；导出为空→检查是否使用了非标准节点 id；特殊字符乱码→确认 UTF-8 解码。补充性能说明：通常最多几千个叶子，Blob 下载为客户端操作，不产生网络请求。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "layer_level": 1,
+      "order": 3,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "55038ab6-c5d3-4de9-addc-3cb88d7114db",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "进度 Rollup 与统计指标",
+      "description": "progress-rollup-statistics",
+      "prompt": "以 docs/PROGRESS-ROLLUP.md 为权威依据，详细定义 GoalFlow 的进度 rollup 语义，并在 assets/js/app.js 中对应 leafProgress()、subtreeProgress(n) 的实现逐一印证。重点阐明：仅叶子节点（parentId 非空且 _children.length === 0）计入分母与分子；根节点与任意中间层不计入；被聚焦模式隐藏但仍参与完整 state.nodes 统计；doneAt 用于「本周完成」计数，要求 doneAt 落入本周一 0:00～下周一 0:00；历史已勾选缺 doneAt 的项需重新勾选才补记；estimateMinutes/actualMinutes 不参与叶子百分比，只影响日容量与预估 vs 实计对比；quick-win（val≥4 且 eff≤2）仅用于筛选和叙述。给出 leafProgress/subtreeProgress 的分步伪代码、子树遍历递归过程、输出结构 {done,total,pct} 及 null 语义。说明与 computeWeekStats 的配合、与四象限分类及 V/E 评估的解耦点。列举边界用例：零叶子、空树、部分完成子树、doneAt 跨周、target 指标类节点是否按此统计。结合 top bar/hero card UI 展示「叶子 xx%」「子树 xx%」的实际计算来源。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js,docs/PROGRESS-ROLLUP.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "layer_level": 1,
+      "order": 3,
+      "kk_dependent_files": [
+        "assets/js/app.js",
+        "docs/PROGRESS-ROLLUP.md"
+      ]
+    },
+    {
+      "id": "717f2880-2e51-476a-839b-8fae8361779b",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "Design Tokens 与主题引擎",
+      "description": "tokens-theme-system",
+      "prompt": "为目标流 GoalFlow 的主题系统编写完整开发文档。首先梳理 gf-tokens.js 中 GF Theme 对象的固定字段：color（accent/border/bg/body/hover/icon/selected/tag/*/tag-bg/* 等）、tag（默认 tags 数组）、presets（默认主题名集合），以及它如何被注入到 documentElement.style.setProperty、documentElement.dataset.theme、localStorage.goalflow.theme。说明 dark/light mode 切换时 JS 如何遍历 color.* 并把值写入对应 CSS 变量，并解释 theme-dark/theme-light 类名的触发条件。说明 gf-demos.js 中的预置示例主题（如销售、考研、健康、MVP、RPG 等）是如何注册到 presets 并在 Demo 导航中展示的。给出新增主题的最小模板：复制现有 preset → 修改色板/标签 → 通过 `#/theme/$id` 打开 → 验证 localStorage.goalflow.theme 是否更新。强调必须保持所有 token key 存在，否则运行时会出现空值；给出兼容性与回退策略。最后列举典型调用路径：GF.Theme.save → GF.initTheme → 各组件读取 CSS var(--goalflow.*)。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/gf-tokens.js,assets/js/gf-demos.js,index.html",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "layer_level": 1,
+      "order": 3,
+      "kk_dependent_files": [
+        "assets/js/gf-tokens.js",
+        "assets/js/gf-demos.js",
+        "index.html"
+      ]
+    },
+    {
+      "id": "7924e6b3-fc95-4c33-b0dc-97aa242018f0",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "可视化与渲染引擎",
+      "description": "visualization-and-rendering-engine",
+      "prompt": "为目标流 GoalFlow 的可视化与渲染引擎编写技术文档，重点覆盖 Sankey 流图生成：节点树如何转为 Sankey source/target 边集、节点分组（如 project、category、workflow、time、status 等维度）如何映射为桑基图的横列、宽度与颜色如何反映任务数量或权重、SVG 元素如何动态创建和重新计算。解释四象限 V×E 矩阵的渲染与交互——包括拖拽分类、重要/紧急维度调整、Top3/Backlog 高亮与筛选、空态占位和移动端布局处理。详细说明渲染流水线：数据变更触发 setState → renderSankey / renderQuadrants / refreshTimelines 等函数增量更新 DOM，而不是整页重建；说明哪些操作走批处理 batched updates。提供从纯文本目标字符串生成 Sankey 边的最小示例，以及常见问题的排查方法，如 SVG path 重叠、节点间距过小、移动端缩放异常、颜色对比不足等。包含 Sankey 数据结构、绘制步骤图与交互流程图，让读者既能读懂实现细节，也能据此扩展新的可视化维度。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "layer_level": 1,
+      "order": 3,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "7c72082f-db86-4c72-ae7d-1131c4a6a943",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "响应式布局与移动端适配",
+      "description": "responsive-layout-and-mobile-adaptation",
+      "prompt": "为目标流 GoalFlow 的响应式布局与移动端适配机制编写详细文档。说明 layout.css 定义的基础栅格、间距系统、flex/grid 布局规则，以及 mobile.css 中针对窄屏幕的断点策略：Sankey 图四象限、任务列表、侧边栏、时间轴和导航在小屏下的折叠、缩放与触控优化。文档移动端特有的交互变化：点击替代悬停、拖拽区域调整、字号和触控目标最小尺寸、键盘导航与焦点样式在 touch device 的表现。说明主题变量如何在响应式上下文中保持一致性，例如在不同视口下背景色、分割线、阴影和标签颜色的可访问性要求。提供调试指南：在 Chrome DevTools 设备模式下观察 Sankey 流图宽度、四象限对齐、番茄钟进度条与时间刻度；修复常见问题的步骤包括容器溢出、文字截断、触摸区域过小、横竖屏切换布局错乱等。最后给出扩展建议：新增页面区块时应先在 layout.css 声明布局约束，再在 mobile.css 补充小屏覆盖，而不是直接在业务 HTML 中写内联样式。",
+      "progress_status": "completed",
+      "dependent_files": "",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "layer_level": 2,
+      "order": 3
+    },
+    {
+      "id": "d24e2d55-0d91-4f34-84cb-f434868559ba",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "优先级与 MIT 算法",
+      "description": "priority-algorithms",
+      "prompt": "为目标流 GoalFlow 的优先级与 MIT（Most Important Task）算法撰写实现参考文档。重点阐述：① V/E 矩阵（重要×紧急）分类及其节点属性映射；② pickRanked、pickTop、focusScore 的计算逻辑，包括 im、ur、urgency、importance、完成状态、计划时间等因子的组合方式；③ 四象限拖拽归类如何让任务跨象限移动并同步更新优先级分数；④ MIT 选择的日常意义与边界情况——例如多节点权重相同、已完成或无截止日期的任务如何处理；⑤ Progress Rollup 对父节点状态的反向传播，以及它与评分系统的协作。需提供清晰的决策流程图、伪代码片段或来自 app.js 的真实函数片段，并给出验证规则的正确/错误用例。若未来要扩展新的优先级信号（如能量时段、习惯打卡频率），应在本节给出可扩展点的实现指引。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js,docs/PROGRESS-ROLLUP.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "layer_level": 1,
+      "order": 3,
+      "kk_dependent_files": [
+        "assets/js/app.js",
+        "docs/PROGRESS-ROLLUP.md"
+      ]
+    },
+    {
+      "id": "2cf3e4c4-c681-4c64-b21c-dd0701e880b9",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "移动端适配与响应式规则",
+      "description": "responsive-and-mobile-support",
+      "prompt": "为目标流 GoalFlow 的移动端与响应式支持编写技术文档。以 mobile.css 为核心，梳理所有基于 max-width 与 min-width 的断点，以及这些断点对 rail、side、main、topbar、sankey-container、chart-row、list-item 的具体影响：哪些列变为单栏、side 是否折叠成抽屉或隐藏、Rail 是否替换为底部 tab 或顶部工具栏。说明与桌面端 layout.css 中 CSS 变量的冲突优先顺序，并给出浏览器开发者工具模拟设备时的最佳实践。列举常见的移动端问题：触控区域太小导致误触、侧边树在窄屏下溢出、Sankey 图缩放异常、topbar-actions 横向滚动不完整，并提供定位与修复方案。包含一个针对最小宽度的排布流程图，帮助读者判断在 320px、480px、768px、1024px、1280px 各断点下 app-shell 的实际布局形态。",
+      "progress_status": "completed",
+      "dependent_files": "assets/css/components/mobile.css,assets/css/main.css",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "layer_level": 1,
+      "order": 4,
+      "kk_dependent_files": [
+        "assets/css/components/mobile.css",
+        "assets/css/main.css"
+      ]
+    },
+    {
+      "id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "数据模型与算法",
+      "description": "data-model-and-algorithms",
+      "prompt": "为目标流 GoalFlow 的数据模型与核心算法创建权威参考文档。首先详述持久化数据结构：node（id/text/parentId/im/ur/estimateMinutes/start/end/completedAt/overdue/vScore/uScore/completed/energyLog/workflowId/tag/estimateActualRatio/dailyCompletions/predictedStartDate/planNotes/execIntent/isRoot/isLine/isLeaf/isStuck/parentType/depth/rollupState/…）、meta（weekReviews/dailyCompletions/energyLog/careerPlan/yearPlan/stayAlert/lastBackupAt/…）、workflows（name/tags/color/topPin/startDate/endDate/meta）、pomo（active/endAt/minutes/nodeId/wfId）。说明主键、父子关系、必填字段、默认值与验证规则。然后逐项实现文档化关键算法：MIT 选择（pickRanked/pickTop/focusScore）、进度 Rollup（含 docs/PROGRESS-ROLLUP.md 中的权威语义）、四象限分类、V/E 评估、容量计算（基于每周可投入天数与每天小时）、完成率与自动评分、能量曲线与倦怠预警、停滞预警触发条件。每条算法给出输入、返回值、伪代码、边界情况（如过期、未设期限、预估与实际偏差）以及与 state 更新的关系。提供基于真实 app.js 片段的代码示例。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js,docs/PROGRESS-ROLLUP.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 4,
+      "kk_dependent_files": [
+        "assets/js/app.js",
+        "docs/PROGRESS-ROLLUP.md"
+      ]
+    },
+    {
+      "id": "7055f817-4469-4109-ba8f-9cc914e98615",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "多维度时间轴与调度",
+      "description": "time-scheduling",
+      "prompt": "为目标流 GoalFlow 的多维度时间轴缩放与调度功能撰写文档。围绕年→月→周→日联动视图说明：① dateKey 的时间粒度划分与当日任务筛选逻辑；② 容量计算——根据工作区目标数量、时长估算与可用时段平衡安排；③ 不同时间尺度下的渲染差异与交互行为（放大查看详情、缩小查看结构）；④ 周期计划如何影响 Backlog、Top3 与 MIT；⑤ ICS 日历导出时与时间轴的对应关系。需要明确哪些 state 字段用于表示时间段与计划排期，并结合 app.js 中与时间切换、范围过滤相关的函数区域给出实现提示。同时补充常见问题排查，如某日任务为空、跨周计划断链、ICS 导入后时间错乱等。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "layer_level": 1,
+      "order": 4,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "8cd01ab5-e0a8-4a3c-89c0-4bb8df94db98",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "四象限分类与时间容量计算",
+      "description": "quadrant-and-time-capacity",
+      "prompt": "文档化四象限分类与时间调度算法。首先说明 category(im, ur) 的规则：im≥4 且 ur≥4 → Now（立刻做），im≥4 且 ur<4 → Core（重点做），im<4 且 ur≥4 → Distract（尽量不做），其余 Noise（再做或不做的噪声），给出决策表。然后说明 inferScale(text, deadlineDate, daysLeft, hasChildren) 的尺度嗅探：每天/每日/日课 → day，每周/周报/双周 → week，每月/月报 → month，今年/年度/长期/主线 → year；若无文本线索则按 deadline.daysLeft ≤1→day、≤7→week、>7→month；有子节点默认 year、叶默认 month。接着介绍容量模型：结合用户设置的每周可投入天数与每天小时数（含 slot 分配 h0~h6：清晨/上午/中午/午后/下午/傍晚/夜间），把 estimateMinutes 聚合为可排程容量，并按 scale 分配到年/月/周/日视图。说明 deadlineUrgency(dl) 到 UR 的映射（overdue=5、≤2→5、≤4→4、≤7→4、≤14→3，否则 2），以及它与 im/ur/UR 的关系。附上决策树、容量计算伪代码、slot 归属冲突时的处理与可视化占位规则；提供典型规划场景输入输出，包括无期限长周期项目、多 slot 混合习惯打卡、周末不可用等情况。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "layer_level": 1,
+      "order": 4,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "94b6d53b-76bd-44f6-af99-6ffa8309eff0",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "JSON 备份与导入导出 API",
+      "description": "json-backup-import-export-api",
+      "prompt": "为目标流 GoalFlow 的 JSON 备份/恢复 API 编写参考文档。重点说明两个客户端入口函数：exportBackup() 与 importBackup(file)。exportBackup() 调用 flushActiveWorkflow() 与 ensureWorkflows() 确保一致性，然后构造 payload = {app:'goalflow', version:10, exportedAt: ISO 字符串, viewMode, activeWorkflowId, workflows:[], nodes, meta}；workflows[] 中每个元素包含 {id, name, topId|null, topPin|null, tags[], startDate, endDate, description, color, nodes:serializeNodes(w.nodes)}。payload 经 Blob(JSON.stringify(payload,null,2)) 转为 goalflow-backup-YYYY-MM-DD.json 下载，并记录 state.meta.lastBackupAt。importBackup(file) 通过 FileReader.readAsText 解析，要求 data 为数组或含有 data.nodes 字段。分支策略：若有 Array.isArray(data.workflows)，则逐一映射 w→workflow，normalizeNode() 每条节点，调用 applyActiveWorkflow()；否则回退到单项目兼容路径 {nodes:[], workflows:[], activeWorkflowId:null}。解析成功后合并 meta 并 save()+afterChange()。提供最小可恢复 JSON 示例：{version:10, nodes:[{id:'x',text:'A'}], meta:{}}。说明兼容性：支持旧版单数组形式，也接受现代 workflows 数组；版本字段用于未来迁移，目前固定为 10。列出异常处理：FileReader.onerror 可能抛出、JSON.parse 失败时 alert('JSON 解析失败')、data.nodes 不是数组或未找到有效目标时返回。给出导入前的安全建议：导入会覆盖当前全部目标流，必须提前通过 exportBackup() 备份；如果多人协作，注意 workflow.id/topId 冲突。说明如何程序化调用：页面中添加 FileInput 绑定 fin.onchange → importBackup(files[0])，或在测试环境中用 URL.createObjectURL(new Blob([...])) 模拟文件。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "layer_level": 1,
+      "order": 4,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "d0b30787-1110-4b0b-981b-66d1ceda0870",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "领域模型与文本解析器",
+      "description": "domain-models-and-parsers",
+      "prompt": "为目标流 GoalFlow 的领域模型与文本解析器编写详细文档，先定义核心数据实体：node 节点、meta 元数据、workflow 工作区、pomo 番茄钟、tag 标签等的字段类型、必填约束和关联关系；解释 nodes 数组如何通过 parentId 形成树，又如何在视图层被展平为扁平列表。深入讲解 parseText、parseToNodes 等解析函数如何将自然语言目标文本转换为结构化节点树，如何处理编号、缩进、冒号分隔、Markdown 标题等语法约定，以及默认属性（如 estimateMinutes、im/ur/V/E 标记）的计算逻辑。结合 docs/PROGRESS-ROLLUP.md 说明进度 Rollup 的业务规则：子任务完成度如何向上聚合、周回顾 weekReviews 如何记录完成情况、能量日志 energyLog 和时间审计数据的累积方式。提供若干真实输入样本及对应的解析结果 JSON，并列举常见解析失败场景与修复建议（歧义编号、空行、非法缩进、嵌套超限）。包含实体关系图、解析前后对照表和错误诊断清单。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js,docs/PROGRESS-ROLLUP.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "layer_level": 1,
+      "order": 4,
+      "kk_dependent_files": [
+        "assets/js/app.js",
+        "docs/PROGRESS-ROLLUP.md"
+      ]
+    },
+    {
+      "id": "6997f382-8dd3-4c4c-9f87-f7d6842fae5e",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "DeepSeek LLM 智能辅助集成",
+      "description": "deepseek-llm-integration",
+      "prompt": "为目标流 GoalFlow 的 DeepSeek 大语言模型集成编写 API 与配置指南。明确说明这是可选功能：仅在设置面板输入 API Key 并保存至 localStorage.gf_llm_key 后才启用；应用启动时通过 getLLMKey() 读取缓存，首次使用还保存到 LLM_KEY_STORAGE 键。说明请求过程（基于 OpenAI 兼容 API 约定）：客户端将当前任务节点与自然语言提示发送给 DeepSeek Chat Completions 端点（OpenAI 兼容 base_url），请求体应包含 model、messages[{role,content}]，其中 system/user content 由 AI_DECOMPOSE_SYSTEM 与用户 prompt 拼成；返回体解析后回填到 state.nodes 或临时 UI 结果中。由于仓库内未见具体 fetch URL，请根据 app.js 实际调用的 URL 变量或常量如实描述，若 URL 由环境变量或配置决定也应明确指出。文档需包含：① 配置流程——打开设置面板、粘贴 DeepSeek API Key、点击保存；② 消息结构——system prompt 来源、用户 prompt 拼接方式、期望的结构化输出字段；③ 错误处理——网络超时、401/403/429/5xx 的错误提示、key 无效时的引导文案；④ 隐私说明——API Key 仅存入浏览器 localStorage，不在打包产物或日志中泄露；⑤ 速率限制与重试建议；⑥ 调试方法——在开发者工具 Network 面板观察请求头与响应体，校验 Authorization/Bearer、Content-Type。提供最小可用示例：设置 key 后在某个叶子上触发拆解，得到包含新 child 节点的响应。若实际调用路径与 OpenAI 不完全一致，需标注差异并给出适配要点。最后强调此 API 不涉及 GoalFlow 自身的数据 schema，只承担“建议新节点”的能力，最终仍由用户对节点进行编辑/保存。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "layer_level": 1,
+      "order": 5,
+      "kk_dependent_files": [
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "cbe3d3ea-3afe-4447-bbbe-0b464cf0afda",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "构建、部署与分发",
+      "description": "build-deployment-and-distribution",
+      "prompt": "为目标流 GoalFlow 的构建、部署与分发编写指南文档，解释为什么该项目没有传统构建系统和运行时依赖：所有业务逻辑集中在单个 app.js，CSS 通过主入口按顺序加载，Google Fonts 仅为可选字体缓存，因此生产环境可直接分发 index.html 与其静态资源。重点说明 scripts/inline-bundle.mjs 的作用——在生产环境中将外链脚本、样式或字体等资源内联进最终 HTML，确保离线可用；给出安装 Node.js 后的执行命令、输出产物位置和打包前后的文件大小差异。讨论部署选项：双击本地运行、GitHub Pages、Vercel Static Site、CDN 直链等方式，以及 HTTPS、Cache-Control、Content-Type 配置对字体和资源加载的影响。说明 .gitignore 忽略策略、版本号与 key 前缀（goalfocus.v4/goalfocus.meta.v1）的关系，并提供故障排查清单：资源 404、CSP 阻止脚本、字体跨域、localStorage 配额不足、DeepSeek API Key 未保存等。补充极简发布 check list 和回滚策略。",
+      "progress_status": "completed",
+      "dependent_files": "scripts/inline-bundle.mjs,.gitignore,README.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "layer_level": 1,
+      "order": 5,
+      "kk_dependent_files": [
+        "scripts/inline-bundle.mjs",
+        ".gitignore",
+        "README.md"
+      ]
+    },
+    {
+      "id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "UI 组件与主题系统",
+      "description": "ui-components-and-theming",
+      "prompt": "为目标流 GoalFlow 的 UI 组件与主题系统编写完整开发文档。说明 index.html 中的 Shell 布局：左侧图标轨 rail（主导航 today/plan/insights/ai）、aside side（工作流 wfBar、wsStore、slabel、side-tree、侧边按钮）、main 主内容区域、topbar topbar-actions 与页面路由 `#/today`、`#/plan`、`#/insights`、`#/ai`。梳理核心 CSS 类约定：app-shell、rail、side、main、topbar、ric、si、gf-btn/gf-btn--sm/gf-btn--pill/gf-btn--ghost、chip、layout、mobile 适配断点。详述 gf-tokens.js 中 GF Theme 对象的结构与扩展方式：颜色 token、tag 列表、预设主题名、如何绑定 documentElement.dataset.theme 和 goalflow.theme localStorage 键。说明 CSS tokens.css 与 JS tokens.js 的同步约束，dark/light mode 切换机制，移动端适配 rules 在 mobile.css 中的断点与特殊交互。提供新增一个示例主题的完整模板与步骤，并解释 class 命名约定与兼容性注意事项。配合实际的 class 名与 DOM 片段举例。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/css/main.css,assets/css/components/layout.css,assets/css/components/button.css,assets/css/components/chip.css,assets/css/components/forms.css,assets/css/components/features.css,assets/css/components/mobile.css,assets/js/gf-tokens.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 5,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/css/main.css",
+        "assets/css/components/layout.css",
+        "assets/css/components/button.css",
+        "assets/css/components/chip.css",
+        "assets/css/components/forms.css",
+        "assets/css/components/features.css",
+        "assets/css/components/mobile.css",
+        "assets/js/gf-tokens.js"
+      ]
+    },
+    {
+      "id": "f846f0a6-dd9d-423e-a5c2-7d64fdfcf576",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "仪式感工作流",
+      "description": "ritual-workflows",
+      "prompt": "为目标流 GoalFlow 的仪式化工作流编写指南。分别详解晨计划、晚总结、周计划、周回顾、三件好事的用户操作流程与设计意图：① 每一步需要在哪些视图切换，应该记录或确认哪些字段（如今日 Top3、昨日完成率、本周遗留、能量曲线、经验总结）；② 这些工作流如何写入 meta 数据（weekReviews、dailyCompletions、energyLog 等），并反作用于后续 MIT 与评分；③ 如何在日常节奏中嵌入这些环节，形成 PDCA 持续改进闭环；④ 若未按时进行回顾，应用如何发出提醒或展示停滞预警。需结合 index.html 中的入口元素与 app.js 中的相关处理函数给出实现说明，并为想添加自定义仪式（如月度复盘、项目里程碑）的开发者提供扩展建议。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "layer_level": 1,
+      "order": 5,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "57d4010c-52bf-41e1-9456-fd79a1256c75",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "构建与打包脚本 API",
+      "description": "build-script-api",
+      "prompt": "为目标流 GoalFlow 的构建脚本 scripts/inline-bundle.mjs 编写开发与部署参考。说明该脚本的作用：读取项目源码 index.html 与 assets/* 下的静态资源，利用 Node.js fs 文件系统把外链 CSS/JS 等资源内联进 HTML，输出单个独立的 dist/index-standalone.html，供双击直接运行或部署到任何静态服务器（GitHub Pages、Netlify、Nginx）。精确描述脚本的参数约定：例如是否传入输出目录、输入源目录、匹配规则等（需根据 inline-bundle.mjs 实际实现逐项说明）；列出使用的 Node.js built-in 模块：fs、fs/promises、path、url 等，并解释每一步——遍历 HTML、正则或 DOM 提取 href/src、readFile、base64/dataURI 编码、替换原标签、写入 dist。给出运行命令，例如 node scripts/inline-bundle.mjs [--output dist/index.html]，并说明开发时修改 assets/css 或 assets/js 后需要重新执行脚本以使独立版同步更新。讨论产物特征：不含外部 <script src> 或 @import，字体仍可从 Google Fonts CDN 拉取（如有）；HTML 体积显著增大但仍可在浏览器直接打开。说明版本兼容性：脚本依赖 ES module 语法（.mjs）与较新的 Node.js fs.readFileSync、createWriteStream，因此最低 Node 版本应与项目 README 一致。包含故障排查：EACCES 权限问题、dist 目录不存在、assets 路径偏移、产出 HTML 无法被浏览器解析、CDN 被墙导致字体加载慢但不影响运行。如果 scripts/inline-bundle.mjs 本身还暴露了可供其他脚本调用的函数或导出（如 build()、inlineAssets），请在本节补充对应的函数签名、参数与返回值。",
+      "progress_status": "completed",
+      "dependent_files": "scripts/inline-bundle.mjs",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "layer_level": 1,
+      "order": 6,
+      "kk_dependent_files": [
+        "scripts/inline-bundle.mjs"
+      ]
+    },
+    {
+      "id": "5bcbd973-b9cc-4f03-b469-625d9b45e363",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "示例与演示主题",
+      "description": "examples-and-demos",
+      "prompt": "为目标流 GoalFlow 的示例与演示主题创建指南。说明 demos/index.html 作为风格实验室入口的作用，以及 demo-01 到 demo-10 对应销售线性目标、日常待办 Things、Notion 工作流、Sunsama 实践、Stripe 目标树、Raycast 场景、Amie、Kinfolk、Vercel、RPG 等 10 个示例主题的组织方式。解释 gf-demos.js 如何注册示例数据供「载入示例」下拉菜单选择；每个示例的主题名、配色、默认 workflow、初始 targetText 与预期 Sankey 效果。提供从零创建新示例的步骤：在 gf-demos.js 中添加 Demo 对象、复制 demo-template HTML 到 demos/xx-xxx.html，并在新页面中注入目标数据与主题样式。强调示例数据的只读性质与与主应用中 user data 的区别。为想要用 GoalFlow 展示行业模板、团队目标或培训素材的读者提供模板与最佳实践。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/gf-demos.js,demos/index.html,demos/01-linear.html,demos/02-things.html,demos/03-notion.html,demos/04-sunsama.html,demos/05-stripe.html,demos/06-raycast.html,demos/07-amie.html,demos/08-kinfolk.html,demos/09-vercel.html,demos/10-rpg.html",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 6,
+      "kk_dependent_files": [
+        "assets/js/gf-demos.js",
+        "demos/index.html",
+        "demos/01-linear.html",
+        "demos/02-things.html",
+        "demos/03-notion.html",
+        "demos/04-sunsama.html",
+        "demos/05-stripe.html",
+        "demos/06-raycast.html",
+        "demos/07-amie.html",
+        "demos/08-kinfolk.html",
+        "demos/09-vercel.html",
+        "demos/10-rpg.html"
+      ]
+    },
+    {
+      "id": "9900fcd1-83d6-47e9-9310-1e7353f0801e",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "多工作区与标签筛选",
+      "description": "multi-workspace",
+      "prompt": "为目标流 GoalFlow 的多工作区与标签筛选功能撰写文档。说明：① workflows 数组的工作区模型——name、tags、color、topPin、startDate、endDate 等业务字段的含义与默认值；② 用户如何在界面创建、切换、重命名或删除工作区；③ 标签筛选与聚合视图如何实现按 tags 过滤 nodes，并在工作区维度下保持 MIT、Top3 与桑基图一致；④ 不同工作区的元数据（如 weekReviews、dailyCompletions）如何区分隔离；⑤ 性能影响——大量标签与工作区时的查找和渲染优化策略。应给出 state.workflows、state.meta 与当前 wfId 之间的数据流转图，并附上典型多项目场景（如“销售冲刺 vs 考研复习”）的操作示例；同时提供标签命名规范与常见误用问题的排查建议。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "layer_level": 1,
+      "order": 6,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "5e7623d6-1754-4a00-9c2f-0de6db860d0a",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "数据持久化、备份与 ICS 导出",
+      "description": "data-persistence-backup",
+      "prompt": "为目标流 GoalFlow 的数据持久化、备份恢复与 ICS 日历导出创建综合文档。内容应包括：① localStorage 键名约定（goalfocus.v4、goalfocus.meta.v1 等）与 state.nodes/state.meta/workflows/pomo 的序列化/反序列化规则；② JSON 备份与恢复流程——导出文件的结构、版本号兼容性、导入时增量合并策略及冲突处理方式；③ ICS 日历导出的数据映射——如何将节点 deadline、estimateMinutes、工作区与分类转为 ICS 事件；④ 数据迁移与损坏恢复——当旧版本字段缺失或 localStorage 异常时如何重建可信数据源；⑤ 安全与隐私注意事项，如避免泄露敏感目标的备份文件。需直接引用 app.js 中存储读写、防抖保存、备份下载、ICS 生成相关函数的实现要点，并提供一个从「清空浏览器缓存 → 重新恢复数据」的实操演练。",
+      "progress_status": "completed",
+      "dependent_files": "index.html,assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "parent_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "layer_level": 1,
+      "order": 7,
+      "kk_dependent_files": [
+        "index.html",
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "API 与集成参考",
+      "description": "api-and-integration",
+      "prompt": "为目标流 GoalFlow 的公开接口与集成能力编写 API 参考。明确说明这是一个无服务端的前端工具，所有集成发生在浏览器上下文与文件系统边界：① localStorage API——列出 goalfocus.v4、goalfocus.meta.v1、goalflow.theme、goalflow.mode、goalflow.backups、gf_llm_key 等键名及其 JSON 结构，给出读取/写入示例；② GoalFlowTheme API——说明 gf-tokens.js 中主题对象字段，外部如何通过修改 documentElement.dataset.theme 切换主题；③ Demo 数据 API——说明 gf-demos.js 中示例数组格式，如何在其他页面复用示例节点；④ ICS 导出——说明 exportICS 触发生成的 .ics 内容语义（VCALENDAR/VTODO、SUMMARY/DESCRIPTION/DUE/RRULE）及如何批量导出带期限叶子；⑤ JSON 备份 v6——说明 goalflow-backup-*.json 的文件格式，包含 nodes/meta/workflows/pomo 字段；⑥ DeepSeek LLM 集成——说明 gf_llm_key 的配置位置、请求体/返回体结构与错误处理；⑦ 构建脚本 API——说明 scripts/inline-bundle.mjs 如何通过 Node.js fs 读取 index.html 和 assets/* 输出 dist/index-standalone.html。为每个接口给出参数、返回值、异常处理和适用场景。",
+      "progress_status": "completed",
+      "dependent_files": "assets/js/app.js,assets/js/gf-tokens.js,assets/js/gf-demos.js,scripts/inline-bundle.mjs,README.md",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 7,
+      "kk_dependent_files": [
+        "assets/js/app.js",
+        "assets/js/gf-tokens.js",
+        "assets/js/gf-demos.js",
+        "scripts/inline-bundle.mjs",
+        "README.md"
+      ]
+    },
+    {
+      "id": "8d85b615-316c-4a18-839b-43e3f7a6f7ea",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "故障排查与常见问题",
+      "description": "troubleshooting-faq",
+      "prompt": "为目标流 GoalFlow 编写故障排查与常见问题手册。覆盖以下典型问题：① 双击打开 index.html 无法显示内容——说明需保留 assets/ 同目录、受浏览器 file:// 协议限制、推荐在线地址或本地 HTTP 服务；② 字体加载失败——解释 Inter/JetBrains Mono 走 Google Fonts CDN，离线时会回退系统字体；③ 数据丢失——说明 localStorage 随缓存清理可能丢失，指导使用 💾 备份与 📂 恢复流程；④ AI/智能拆解不可用——说明需在设置处正确填写 DeepSeek API Key，检查网络与密钥有效期；⑤ 移动端 H5 中四象限不可拖拽——解释手机仅查看模式，桌面端才支持拖拽；⑥ 备份 JSON 无法恢复——检查版本兼容性与字段完整性；⑦ 时间轴或评分计算不符合预期——说明 plan-hours/week-days 设置影响容量预算，可通过时间审计面板校准；⑧ 撤销操作无效——说明仅在删除节点或清空全部后约 10 秒窗口内有效。每个问题给出现象、原因分析、复现步骤、解决方案与预防建议，并指向 app.js 中相关判断与 localStorage 键名。",
+      "progress_status": "completed",
+      "dependent_files": "README.md,index.html,assets/js/app.js",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 8,
+      "kk_dependent_files": [
+        "README.md",
+        "index.html",
+        "assets/js/app.js"
+      ]
+    },
+    {
+      "id": "6fe585e4-c107-4c83-bc65-501ff102ba04",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "name": "贡献与发布流程",
+      "description": "contributing-and-release",
+      "prompt": "为目标流 GoalFlow 编写贡献与发布流程指南。说明仓库定位为轻量级个人项目，许可要求——个人非商业使用自由，商业再分发或商业化使用需作者授权；列出可接受的贡献类型：修复 bug、改善可读性、补充示例主题、完善文档、优化样式与可访问性，但不承诺引入大型重构或框架依赖。详细说明开发环境与前置条件：任意现代浏览器；可选 Node.js 与 npm。提交前自行确认 index.html 仍可与 assets/ 双打开、主题切换正常、localStorage 读写无误、移动端 tab 与手势可用。发布步骤包括：版本号与 assets/css/main.css?v=xx 缓存版本号对齐、运行 node scripts/inline-bundle.mjs 生成 dist/index-standalone.html、提交 dist 产物、推送至 GitHub Pages 分支并发布站点。说明 .gitignore 中应忽略的内容与如何增加新的静态资源。提供最小 PR 描述模板与验收 checklist。",
+      "progress_status": "completed",
+      "dependent_files": "README.md,scripts/inline-bundle.mjs,.gitignore",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z",
+      "order": 9,
+      "kk_dependent_files": [
+        "README.md",
+        "scripts/inline-bundle.mjs",
+        ".gitignore"
+      ]
+    }
+  ],
+  "wiki_items": [
+    {
+      "id": "04414714-d307-46c1-83fc-a90ff7e81bea",
+      "catalog_id": "04414714-d307-46c1-83fc-a90ff7e81bea",
+      "title": "项目总览",
+      "description": "project-overview",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "39e503e4-e385-4a74-ac0f-a08ea28f20b7",
+      "catalog_id": "39e503e4-e385-4a74-ac0f-a08ea28f20b7",
+      "title": "设计令牌与主题配置",
+      "description": "design-tokens-and-theme-config",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "642aeec0-5f85-4f81-b189-b9900cb57afd",
+      "catalog_id": "642aeec0-5f85-4f81-b189-b9900cb57afd",
+      "title": "整体架构概览",
+      "description": "overall-architecture",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "8324be64-56e0-47f8-9449-c1d4c71e2901",
+      "catalog_id": "8324be64-56e0-47f8-9449-c1d4c71e2901",
+      "title": "持久化数据模型",
+      "description": "persistent-data-model",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "b354cdc5-8369-46c3-bde0-587ae25dd4de",
+      "catalog_id": "b354cdc5-8369-46c3-bde0-587ae25dd4de",
+      "title": "localStorage 数据键与结构",
+      "description": "local-storage-api",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "bc361a14-3193-4a03-ad01-bc3d84342254",
+      "catalog_id": "bc361a14-3193-4a03-ad01-bc3d84342254",
+      "title": "Sankey 流图渲染器",
+      "description": "sankey-diagram-renderer",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "d4a6a9f5-2634-4fc5-bbd5-59935c700838",
+      "catalog_id": "d4a6a9f5-2634-4fc5-bbd5-59935c700838",
+      "title": "全局 State 模型与变更驱动",
+      "description": "global-state-model",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "da64fad3-0fb0-401a-b80b-decd60d3a274",
+      "catalog_id": "da64fad3-0fb0-401a-b80b-decd60d3a274",
+      "title": "☀ 今日行动视图",
+      "description": "today-view",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "e9f5cdee-9012-41d8-9451-9d9ad86a57ec",
+      "catalog_id": "e9f5cdee-9012-41d8-9451-9d9ad86a57ec",
+      "title": "应用 Shell 与三栏布局",
+      "description": "app-shell-and-layout",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "catalog_id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "title": "状态管理与存储层",
+      "description": "state-and-storage-layer",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "49b719eb-1f84-4002-9e3c-d3dcab42c9a4",
+      "catalog_id": "49b719eb-1f84-4002-9e3c-d3dcab42c9a4",
+      "title": "🎯 目标规划流程",
+      "description": "goal-planning",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "5e2eb862-2af2-4e69-b54d-ed0aa26a62fe",
+      "catalog_id": "5e2eb862-2af2-4e69-b54d-ed0aa26a62fe",
+      "title": "CSS 变量与主题注入机制",
+      "description": "css-variable-injection-and-loading-order",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "6123ed48-c856-4526-9aa8-20e87d7f5db0",
+      "catalog_id": "6123ed48-c856-4526-9aa8-20e87d7f5db0",
+      "title": "localStorage 持久化与备份恢复",
+      "description": "local-persistence-and-backup",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "8a4ad012-2b7a-414d-bfae-45dcf5a8ea67",
+      "catalog_id": "8a4ad012-2b7a-414d-bfae-45dcf5a8ea67",
+      "title": "页面结构 ric / si / topbar",
+      "description": "layout-ric-si-topbar",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "c23aaf7e-df4f-418b-a5b1-c34131fb1bd9",
+      "catalog_id": "c23aaf7e-df4f-418b-a5b1-c34131fb1bd9",
+      "title": "节点生命周期与字段校验",
+      "description": "node-lifecycle-validation",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "c525e384-64ae-4ad1-8444-6f1eabb6bc40",
+      "catalog_id": "c525e384-64ae-4ad1-8444-6f1eabb6bc40",
+      "title": "目标节点（node）与元数据（meta）数据模型",
+      "description": "node-meta-schema",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "e261c17a-95b7-4bd4-b736-8d1140873d51",
+      "catalog_id": "e261c17a-95b7-4bd4-b736-8d1140873d51",
+      "title": "四象限矩阵与交互",
+      "description": "quadrant-matrix-interaction",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "f313bc9b-d4ce-477f-90e3-aed27652d398",
+      "catalog_id": "f313bc9b-d4ce-477f-90e3-aed27652d398",
+      "title": "快速开始",
+      "description": "getting-started",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "12e63f97-8645-4df7-8ac6-1db1c16e9e98",
+      "catalog_id": "12e63f97-8645-4df7-8ac6-1db1c16e9e98",
+      "title": "组件样式模块与规范",
+      "description": "component-styling-modules",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "1aca9428-8fdd-470e-b2b9-47858ad48df1",
+      "catalog_id": "1aca9428-8fdd-470e-b2b9-47858ad48df1",
+      "title": "主题与示例数据 API",
+      "description": "theme-and-demos-api",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "catalog_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "title": "核心功能详解",
+      "description": "core-features",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "45f97ce1-72e2-4f52-ba21-e0570a7b8c1f",
+      "catalog_id": "45f97ce1-72e2-4f52-ba21-e0570a7b8c1f",
+      "title": "MIT 选择、评分与进度 Rollup",
+      "description": "mit-scoring-scheduling-algorithms",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "734efa1f-5fa3-45fa-9b78-f94a4a04180a",
+      "catalog_id": "734efa1f-5fa3-45fa-9b78-f94a4a04180a",
+      "title": "MIT 选择与评分算法",
+      "description": "mit-scoring-algorithms",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "7c69eb9e-6c98-4ee4-bb1c-23fbdf7f4821",
+      "catalog_id": "7c69eb9e-6c98-4ee4-bb1c-23fbdf7f4821",
+      "title": "桑基图可视化引擎",
+      "description": "sankey-visualization",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "7ef94592-7f91-457c-a476-b11eb7382c74",
+      "catalog_id": "7ef94592-7f91-457c-a476-b11eb7382c74",
+      "title": "可复用 UI 组件类",
+      "description": "reusable-ui-components",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "catalog_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "title": "主题与样式系统",
+      "description": "theme-and-style-system",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "catalog_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "title": "架构与设计",
+      "description": "architecture-and-design",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "0354138b-af29-4ff4-a4be-8a8bfe5e699c",
+      "catalog_id": "0354138b-af29-4ff4-a4be-8a8bfe5e699c",
+      "title": "ICS 日历导出 API",
+      "description": "ics-export-api",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "55038ab6-c5d3-4de9-addc-3cb88d7114db",
+      "catalog_id": "55038ab6-c5d3-4de9-addc-3cb88d7114db",
+      "title": "进度 Rollup 与统计指标",
+      "description": "progress-rollup-statistics",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "717f2880-2e51-476a-839b-8fae8361779b",
+      "catalog_id": "717f2880-2e51-476a-839b-8fae8361779b",
+      "title": "Design Tokens 与主题引擎",
+      "description": "tokens-theme-system",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "7924e6b3-fc95-4c33-b0dc-97aa242018f0",
+      "catalog_id": "7924e6b3-fc95-4c33-b0dc-97aa242018f0",
+      "title": "可视化与渲染引擎",
+      "description": "visualization-and-rendering-engine",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "7c72082f-db86-4c72-ae7d-1131c4a6a943",
+      "catalog_id": "7c72082f-db86-4c72-ae7d-1131c4a6a943",
+      "title": "响应式布局与移动端适配",
+      "description": "responsive-layout-and-mobile-adaptation",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "d24e2d55-0d91-4f34-84cb-f434868559ba",
+      "catalog_id": "d24e2d55-0d91-4f34-84cb-f434868559ba",
+      "title": "优先级与 MIT 算法",
+      "description": "priority-algorithms",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "2cf3e4c4-c681-4c64-b21c-dd0701e880b9",
+      "catalog_id": "2cf3e4c4-c681-4c64-b21c-dd0701e880b9",
+      "title": "移动端适配与响应式规则",
+      "description": "responsive-and-mobile-support",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "catalog_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "title": "数据模型与算法",
+      "description": "data-model-and-algorithms",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "7055f817-4469-4109-ba8f-9cc914e98615",
+      "catalog_id": "7055f817-4469-4109-ba8f-9cc914e98615",
+      "title": "多维度时间轴与调度",
+      "description": "time-scheduling",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "8cd01ab5-e0a8-4a3c-89c0-4bb8df94db98",
+      "catalog_id": "8cd01ab5-e0a8-4a3c-89c0-4bb8df94db98",
+      "title": "四象限分类与时间容量计算",
+      "description": "quadrant-and-time-capacity",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "94b6d53b-76bd-44f6-af99-6ffa8309eff0",
+      "catalog_id": "94b6d53b-76bd-44f6-af99-6ffa8309eff0",
+      "title": "JSON 备份与导入导出 API",
+      "description": "json-backup-import-export-api",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "d0b30787-1110-4b0b-981b-66d1ceda0870",
+      "catalog_id": "d0b30787-1110-4b0b-981b-66d1ceda0870",
+      "title": "领域模型与文本解析器",
+      "description": "domain-models-and-parsers",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "6997f382-8dd3-4c4c-9f87-f7d6842fae5e",
+      "catalog_id": "6997f382-8dd3-4c4c-9f87-f7d6842fae5e",
+      "title": "DeepSeek LLM 智能辅助集成",
+      "description": "deepseek-llm-integration",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "cbe3d3ea-3afe-4447-bbbe-0b464cf0afda",
+      "catalog_id": "cbe3d3ea-3afe-4447-bbbe-0b464cf0afda",
+      "title": "构建、部署与分发",
+      "description": "build-deployment-and-distribution",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "catalog_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "title": "UI 组件与主题系统",
+      "description": "ui-components-and-theming",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "f846f0a6-dd9d-423e-a5c2-7d64fdfcf576",
+      "catalog_id": "f846f0a6-dd9d-423e-a5c2-7d64fdfcf576",
+      "title": "仪式感工作流",
+      "description": "ritual-workflows",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "57d4010c-52bf-41e1-9456-fd79a1256c75",
+      "catalog_id": "57d4010c-52bf-41e1-9456-fd79a1256c75",
+      "title": "构建与打包脚本 API",
+      "description": "build-script-api",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "5bcbd973-b9cc-4f03-b469-625d9b45e363",
+      "catalog_id": "5bcbd973-b9cc-4f03-b469-625d9b45e363",
+      "title": "示例与演示主题",
+      "description": "examples-and-demos",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "9900fcd1-83d6-47e9-9310-1e7353f0801e",
+      "catalog_id": "9900fcd1-83d6-47e9-9310-1e7353f0801e",
+      "title": "多工作区与标签筛选",
+      "description": "multi-workspace",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "5e7623d6-1754-4a00-9c2f-0de6db860d0a",
+      "catalog_id": "5e7623d6-1754-4a00-9c2f-0de6db860d0a",
+      "title": "数据持久化、备份与 ICS 导出",
+      "description": "data-persistence-backup",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "catalog_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "title": "API 与集成参考",
+      "description": "api-and-integration",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "8d85b615-316c-4a18-839b-43e3f7a6f7ea",
+      "catalog_id": "8d85b615-316c-4a18-839b-43e3f7a6f7ea",
+      "title": "故障排查与常见问题",
+      "description": "troubleshooting-faq",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": "6fe585e4-c107-4c83-bc65-501ff102ba04",
+      "catalog_id": "6fe585e4-c107-4c83-bc65-501ff102ba04",
+      "title": "贡献与发布流程",
+      "description": "contributing-and-release",
+      "extend": "{}",
+      "progress_status": "completed",
+      "repo_id": "5aaadfbe-86ad-80ec-1c69-d90b94a1996e",
+      "reference_count": 0,
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    }
+  ],
+  "knowledge_relations": [
+    {
+      "id": 1,
+      "source_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "target_id": "39e503e4-e385-4a74-ac0f-a08ea28f20b7",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 2,
+      "source_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "target_id": "642aeec0-5f85-4f81-b189-b9900cb57afd",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 3,
+      "source_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "target_id": "8324be64-56e0-47f8-9449-c1d4c71e2901",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 4,
+      "source_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "target_id": "b354cdc5-8369-46c3-bde0-587ae25dd4de",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 5,
+      "source_id": "7924e6b3-fc95-4c33-b0dc-97aa242018f0",
+      "target_id": "bc361a14-3193-4a03-ad01-bc3d84342254",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 6,
+      "source_id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "target_id": "d4a6a9f5-2634-4fc5-bbd5-59935c700838",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 7,
+      "source_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "target_id": "da64fad3-0fb0-401a-b80b-decd60d3a274",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 8,
+      "source_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "target_id": "e9f5cdee-9012-41d8-9451-9d9ad86a57ec",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 9,
+      "source_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "target_id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 10,
+      "source_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "target_id": "49b719eb-1f84-4002-9e3c-d3dcab42c9a4",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 11,
+      "source_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "target_id": "5e2eb862-2af2-4e69-b54d-ed0aa26a62fe",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 12,
+      "source_id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "target_id": "6123ed48-c856-4526-9aa8-20e87d7f5db0",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 13,
+      "source_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "target_id": "8a4ad012-2b7a-414d-bfae-45dcf5a8ea67",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 14,
+      "source_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "target_id": "c23aaf7e-df4f-418b-a5b1-c34131fb1bd9",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 15,
+      "source_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "target_id": "c525e384-64ae-4ad1-8444-6f1eabb6bc40",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 16,
+      "source_id": "7924e6b3-fc95-4c33-b0dc-97aa242018f0",
+      "target_id": "e261c17a-95b7-4bd4-b736-8d1140873d51",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 17,
+      "source_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "target_id": "12e63f97-8645-4df7-8ac6-1db1c16e9e98",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 18,
+      "source_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "target_id": "1aca9428-8fdd-470e-b2b9-47858ad48df1",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 19,
+      "source_id": "1934d23e-4848-42de-b38f-176cc6bd26f3",
+      "target_id": "45f97ce1-72e2-4f52-ba21-e0570a7b8c1f",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 20,
+      "source_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "target_id": "734efa1f-5fa3-45fa-9b78-f94a4a04180a",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 21,
+      "source_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "target_id": "7c69eb9e-6c98-4ee4-bb1c-23fbdf7f4821",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 22,
+      "source_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "target_id": "7ef94592-7f91-457c-a476-b11eb7382c74",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 23,
+      "source_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "target_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 24,
+      "source_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "target_id": "0354138b-af29-4ff4-a4be-8a8bfe5e699c",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 25,
+      "source_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "target_id": "55038ab6-c5d3-4de9-addc-3cb88d7114db",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 26,
+      "source_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "target_id": "717f2880-2e51-476a-839b-8fae8361779b",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 27,
+      "source_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "target_id": "7924e6b3-fc95-4c33-b0dc-97aa242018f0",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 28,
+      "source_id": "f6016caf-6e14-4eb5-8d51-5c3530b1df84",
+      "target_id": "7c72082f-db86-4c72-ae7d-1131c4a6a943",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 29,
+      "source_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "target_id": "d24e2d55-0d91-4f34-84cb-f434868559ba",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 30,
+      "source_id": "f0a8b365-f6fe-448a-816a-09cb2681db79",
+      "target_id": "2cf3e4c4-c681-4c64-b21c-dd0701e880b9",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 31,
+      "source_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "target_id": "7055f817-4469-4109-ba8f-9cc914e98615",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 32,
+      "source_id": "6ce7d581-602b-4113-9197-f959df87246f",
+      "target_id": "8cd01ab5-e0a8-4a3c-89c0-4bb8df94db98",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 33,
+      "source_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "target_id": "94b6d53b-76bd-44f6-af99-6ffa8309eff0",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 34,
+      "source_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "target_id": "d0b30787-1110-4b0b-981b-66d1ceda0870",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 35,
+      "source_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "target_id": "6997f382-8dd3-4c4c-9f87-f7d6842fae5e",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 36,
+      "source_id": "0022e38a-8d04-4279-ade8-0203b8562ded",
+      "target_id": "cbe3d3ea-3afe-4447-bbbe-0b464cf0afda",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 37,
+      "source_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "target_id": "f846f0a6-dd9d-423e-a5c2-7d64fdfcf576",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 38,
+      "source_id": "6e0d197d-427a-4346-be84-f5382c0b8c70",
+      "target_id": "57d4010c-52bf-41e1-9456-fd79a1256c75",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 39,
+      "source_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "target_id": "9900fcd1-83d6-47e9-9310-1e7353f0801e",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    },
+    {
+      "id": 40,
+      "source_id": "34af45b0-7f3b-491a-bea8-6c348eb1c696",
+      "target_id": "5e7623d6-1754-4a00-9c2f-0de6db860d0a",
+      "source_type": "WIKI_ITEM",
+      "target_type": "WIKI_ITEM",
+      "relationship_type": "PARENT_CHILD",
+      "gmt_create": "2026-11-24T11:34:23Z",
+      "gmt_modified": "2026-11-24T11:34:23Z"
+    }
+  ]
+}

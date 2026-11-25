@@ -1,0 +1,22 @@
+layout.css:6: .app-shell {
+    6: .app-shell {
+    7: display: flex;
+    8: height: 100vh;
+    9: height: 100dvh;
+    10: overflow: hidden;
+    11: }
+layout.css:77: .side {
+    77: .side {
+    78: width: 230px;
+    79: flex: 0 0 auto;
+    80: border-right: 1px solid var(--stroke);
+    81: background: var(--bg1);
+    82: display: flex;
+    83: flex-direction: column;
+    84: padding: 14px 10px 10px;
+    85: overflow-y: auto;
+    86: overflow-x: hidden;
+    87: }
+layout.css:1594: .mtab{display:none;}
+    1594: .mtab{display:none;}
+    1595: .m-only{display:none;}

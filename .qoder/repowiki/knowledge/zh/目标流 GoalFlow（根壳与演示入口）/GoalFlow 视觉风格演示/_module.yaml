@@ -1,0 +1,28 @@
+schema_version: 1
+module_path: demos
+title: GoalFlow 视觉风格演示
+scope:
+    - demos/
+source_files: []
+depends_on: []
+related_to:
+    - path: assets
+      reason: demos 的十个单页视觉稿是对 assets 中同一产品内核（英雄卡 / 桑基精力河 / 四象限校准 / 周回顾）的多主题静态渲染，每个页面通过独立 CSS 变量复用 GoalFlow 设计语义。
+kk_module_id: 5a6d8525-9939-4f8b-9663-487f07070b61
+kk_ordinal: 1
+kk_cards:
+    architecture_design:
+        id: f3ed0797-7ee3-45a2-b80b-da964fce2152
+        title: GoalFlow 视觉风格演示
+    coding_conventions:
+        id: dd5fd118-2b61-4aa2-8063-7925a389a4b4
+        title: GoalFlow 视觉风格演示
+    overview:
+        id: d6236ab5-a289-443d-9672-4eb6cd0a4686
+        title: GoalFlow 视觉风格演示
+    tech_stack:
+        id: 13dec258-94f0-4b45-bf13-d766c028ca6d
+        title: GoalFlow 视觉风格演示
+    unique_setup_and_commands:
+        id: 889cce0d-f73f-40a1-9b96-782a702e90ce
+        title: GoalFlow 视觉风格演示

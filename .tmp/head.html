@@ -1,0 +1,85 @@
+19:   <div class="app-shell">
+20: 
+21:     <!-- 左：图标轨（主导航：今日 / 规划 / 洞察） -->
+22:     <nav class="rail" aria-label="主导航">
+23:       <div class="rail-mark" title="目标流 · GoalFlow">
+24:         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round">
+25:           <path d="M3 7c4 0 4 5 8 5s4-5 8-5" />
+26:           <path d="M3 16c4 0 4-4 8-4s4 4 8 4" />
+27:         </svg>
+28:       </div>
+29:       <button type="button" class="ric on" data-nav="today" title="今日行动（每天的主页）">☀</button>
+30:       <button type="button" class="ric" data-nav="plan" title="目标规划（输入 / 树形 / SMART）">🎯</button>
+31:       <button type="button" class="ric" data-nav="insights" title="归纳洞察（流向图 / 四象限）">📊</button>
+32:       <button type="button" class="ric" data-nav="ai" title="AI 分析（智能拆解 / SMART 体检）">🤖</button>
+33:       <span class="rail-bottom"><a class="ric" href="demos/index.html" title="风格实验室">◈</a></span>
+34:     </nav>
+35: 
+36:     <!-- 左：侧栏（工作流步骤 + 目标树 + 主题） -->
+37:     <aside class="side">
+38:       <div class="side-ws">
+39:         <span class="ws-dot"></span>
+40:         <div class="ws-tx"><b>目标流 · GoalFlow</b>
+41:           <p>本地工作区 · 数据不出机</p>
+42:         </div>
+43:       </div>
+44:       <div class="wf-bar" id="wfBar" aria-label="项目列表：可展开多个"></div>
+45:       <div class="ws-store" id="wsStore" title=""></div>
+46:       <div class="slabel">视图</div>
+47:       <button type="button" class="si on" data-nav="today"><span class="sidx">☀</span>今日行动</button>
+48:       <button type="button" class="si" data-nav="plan"><span class="sidx">🎯</span>目标规划</button>
+49:       <button type="button" class="si" data-nav="insights"><span class="sidx">📊</span>归纳洞察</button>
+50:       <button type="button" class="si" data-nav="ai"><span class="sidx">🤖</span>AI 分析</button>
+51:       <div class="slabel">仪式</div>
+52:       <button type="button" class="si" id="sideMorning">🌅 晨计划</button>
+53:       <button type="button" class="si" id="sideEvening">🌙 晚总结</button>
+54:       <button type="button" class="si" id="sideWeekPlan">🗓 周计划</button>
+55:       <button type="button" class="si" id="sideWeekReview">◔ 周回顾</button>
+56:       <div class="slabel">目标树 <span class="sprog" id="sideProg"></span></div>
+57:       <div class="side-tree" id="sideTree">
+58:         <div class="si dim">解析后在此显示目标树</div>
+59:       </div>
+60:     </aside>
+61: 
+62:     <!-- 右：主内容 -->
+63:     <div class="main">
+64:       <header class="topbar">
+65:         <span class="crumb">目标流 <i>/</i> <b id="crumbSection">今日行动</b></span>
+66:         <div class="progress-chip" id="progressChip" style="display:none" title="叶子任务完成度">
+67:           <span id="progressLbl">进度</span><span class="bar"><i id="progressFill" style="width:0%"></i></span>
+68:         </div>
+69:         <div class="spacer"></div>
+70:         <div class="topbar-actions">
+71:           <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnSearch"
+72:             title="全局搜索任务 / 标签 / 等待备注（Ctrl+K 或 /）">🔍 搜索</button>
+73:           <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost m-only" id="btnProjects"
+74:             title="项目列表：切换 / 新建 / 总览">🗂 项目</button>
+75:           <details class="tb-more" id="tbMoreMenu">
+76:             <summary title="更多操作"></summary>
+77:             <div class="tb-drop">
+78:               <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnWeekReview"
+79:                 title="周/月/季回顾 + 统计">📋 回顾</button>
+80:               <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnSettings"
+81:                 title="基础设置：每周可投入天数 × 每天小时，用于时间预算与超支警告">⚙ 设置</button>
+82:               <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnExportIcs"
+83:                 title="导出带期限叶子为 ICS（本地文件）">📅 导出 ICS</button>
+84:               <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnExportJson" title="备份目标数据">💾 备份数据</button>
+85:               <button type="button" class="gf-btn gf-btn--sm gf-btn--pill" id="btnImportJson" title="从 JSON 恢复">📂 恢复数据</button>
+86:               <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+87:             </div>
+88:           </details>
+89:           <span class="topbar-theme">
+90:             <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost" id="btnThemeCycle"
+91:               title="切换界面主题（Linear / Raycast / RPG）">◈</button>
+92:             <select id="themeSelect" class="gf-input gf-select" title="界面主题" aria-label="界面主题">
+93:               <option value="linear">Linear</option>
+94:               <option value="raycast">Raycast 玻璃 · 预览</option>
+95:               <option value="rpg">RPG 游戏 · 预览</option>
+96:             </select>
+97:             <button type="button" class="gf-btn gf-btn--sm gf-btn--pill gf-btn--ghost mode-btn" id="modeToggle"
+98:               title="切换深色 / 浅色">☾</button>
+99:           </span>
+100:         </div>
+101:         <div class="today-chip" id="todayLine"></div>
+102:       </header>
+103: 

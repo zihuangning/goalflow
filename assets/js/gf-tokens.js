@@ -99,10 +99,10 @@
     }
   }
 
-  const theme = read(THEME_STORAGE, DEFAULT_THEME, (v) => !!THEMES[v]);
-  const mode = read(MODE_STORAGE, DEFAULT_MODE, (v) => v === 'dark' || v === 'light');
+  let theme = read(THEME_STORAGE, DEFAULT_THEME, (v) => !!THEMES[v]);
+  let mode = read(MODE_STORAGE, DEFAULT_MODE, (v) => v === 'dark' || v === 'light');
 
-  const palette = THEMES[theme][mode] || THEMES[theme].dark;
+  let palette = THEMES[theme][mode] || THEMES[theme].dark;
 
   /* 立即写入 <html data-theme data-mode>，抢在首次渲染前避免闪烁 */
   if (typeof document !== 'undefined') {
@@ -113,21 +113,47 @@
   function store(key, val) {
     try { localStorage.setItem(key, val); } catch (e) {}
   }
-  function setTheme(name) {
-    if (!THEMES[name]) return;
+  /* 就地刷新当前色板（PALETTE_UR / CAT / COLORS 均为副本，app.js 持有同一引用） */
+  function refreshPalette() {
+    palette = THEMES[theme][mode] || THEMES[theme].dark;
+    PALETTE_UR.splice(0, PALETTE_UR.length, ...palette.PALETTE_UR);
+    CAT.now.color = PALETTE_UR[4];
+    CAT.core.color = PALETTE_UR[0];
+    CAT.distract.color = PALETTE_UR[3];
+    CAT.noise.color = palette.noise;
+    Object.keys(COLORS).forEach((k) => delete COLORS[k]);
+    Object.assign(COLORS, palette.COLORS);
+  }
+  /* 即时应用（不刷新页面）：先落地 dataset + 色板，保证即使 reload 被 WebView 拦截也能看到切换 */
+  function applyTheme(name) {
+    if (!THEMES[name]) return false;
+    theme = name;
     store(THEME_STORAGE, name);
+    if (typeof document !== 'undefined') document.documentElement.dataset.theme = name;
+    refreshPalette();
+    return true;
+  }
+  function applyMode(m) {
+    if (m !== 'dark' && m !== 'light') return false;
+    mode = m;
+    store(MODE_STORAGE, m);
+    if (typeof document !== 'undefined') document.documentElement.dataset.mode = m;
+    refreshPalette();
+    return true;
+  }
+  function setTheme(name) {
+    if (!applyTheme(name)) return;
     location.reload();
   }
   function setMode(m) {
-    if (m !== 'dark' && m !== 'light') return;
-    store(MODE_STORAGE, m);
+    if (!applyMode(m)) return;
     location.reload();
   }
   function toggleMode() {
     setMode(mode === 'dark' ? 'light' : 'dark');
   }
 
-  const PALETTE_UR = palette.PALETTE_UR;
+  const PALETTE_UR = palette.PALETTE_UR.slice();
 
   const CAT = {
     now: { key: 'now', label: '立即做 · 重要且紧急', color: PALETTE_UR[4] },
@@ -136,7 +162,7 @@
     noise: { key: 'noise', label: '噪音 · 不重要不紧急', color: palette.noise },
   };
 
-  const COLORS = palette.COLORS;
+  const COLORS = Object.assign({}, palette.COLORS);
 
   const STORAGE = {
     nodes: 'goalfocus.v4',
@@ -168,6 +194,8 @@
     setTheme,
     setMode,
     toggleMode,
+    applyTheme,
+    applyMode,
     PALETTE_UR,
     CAT,
     COLORS,
