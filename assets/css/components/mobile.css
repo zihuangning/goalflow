@@ -287,8 +287,8 @@
   /* 画布容器：防止双指缩放时整页跟着动 */
   .canvas-wrap { overscroll-behavior: contain; }
 
-  /* 主内容区底部留出底部 tab 高度（已存在，这里显式声明） */
-  .main-scroll { padding-bottom: 80px; }
+  /* 主内容区底部留出底部 tab 高度（含刘海屏安全区） */
+  .main-scroll { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 
   /* 键盘弹出时：输入框滚入视口 */
   /* （由 app.js 的 focusin 处理，这里只保证容器可滚动） */
@@ -1763,7 +1763,9 @@
     pointer-events: none;
   }
   header.topbar.scrolled .ab-mini { opacity: 1; transform: none; }
-  .ab-mini b { font-size: 16.5px; line-height: 1.15; color: var(--ink); font-weight: 650; }
+  .ab-mini { flex: 0 1 auto; overflow: hidden; }
+  .ab-mini b { font-size: 16.5px; line-height: 1.15; color: var(--ink); font-weight: 650;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ab-mini span { font-size: 13px; line-height: 1.25; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   .topbar-actions { margin-left: auto; gap: 0; flex-wrap: nowrap; }
@@ -1775,9 +1777,11 @@
   }
   header.topbar #btnSearch .btn-lbl { display: none; }
   .tb-more > summary { width: 44px !important; height: 44px !important; font-size: 18px !important; }
+  /* 桌面给「⋯」留的 12px 上边距会把 52px 顶栏撑到 65px */
+  header.topbar .tb-more { margin-top: 0 !important; }
 
   /* —— 大标题：随内容滚动，滚出后顶栏迷你标题淡入 —— */
-  .app-title { padding: 8px 16px 0; }
+  .app-title { display: block; padding: 8px 16px 0; }
   .app-title h1 {
     margin: 0;
     font-size: 30px; line-height: 1.12; font-weight: 700;
@@ -1795,7 +1799,8 @@
     transform: translateX(-104%);
     transition: transform .28s cubic-bezier(.32, .72, 0, 1);
     box-shadow: 0 18px 60px rgba(0, 0, 0, .55);
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 12px calc(80px + env(safe-area-inset-bottom, 0px));
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 12px calc(20px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
     overscroll-behavior: contain;
     border-right: 1px solid var(--stroke);
   }
@@ -1816,13 +1821,16 @@
 
   body.drawer-open { overflow: hidden; }
   body.drawer-open .main-scroll { overflow: hidden; }
-  .drawer-scrim { display: block; }
-  .drawer-scrim.on { opacity: 1; pointer-events: auto; }
+  /* 桌面兜底规则写在文件更后面，这里加 body 前缀提权，否则遮罩仍是 display:none */
+  body .drawer-scrim { display: block; }
+  body .drawer-scrim.on { opacity: 1; pointer-events: auto; }
 
   /* —— 底部 tab：原生指示条 + 更清楚的字号 —— */
+  .mtab { padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px)); }
   .mtab-btn {
     position: relative;
-    font-size: 12px !important;
+    padding: 4px 0 2px;
+    font-size: 13px !important;
     gap: 4px;
   }
   .mtab-btn .mtab-ic { font-size: 19px; }
@@ -1889,4 +1897,204 @@
   background: rgba(0, 0, 0, .5);
   opacity: 0; pointer-events: none; display: none;
   transition: opacity .28s;
+}
+
+/* ============================================================
+   42. 今日首屏（v7.8）：英雄卡从 484px 压到 ~270px
+   —— 原样是 主文案 88 + pill 行 132（5 个胶囊折 3 行）+ 执行栈 154。
+      pill 行改横向 chips（可滑动），执行栈收成可展开行，专注按钮独占一行当主 CTA。
+   ============================================================ */
+@media (max-width: 900px) {
+  .hero { padding: 14px 14px 12px; }
+  .hero-main { margin-bottom: 10px; }
+
+  /* 卡片右上角浮一个「✎」编辑键，标题不再被它和「已固定」挤到第二行 */
+  .hero-main { padding-right: 42px; }
+  .hero-main .hero-edit-btn {
+    position: absolute; top: -2px; right: 0;
+    width: 38px; height: 38px; min-height: 38px;
+    padding: 0; margin: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .hero-main .hero-edit-btn .btn-lbl { display: none; }
+  .hero-pin { margin-left: 2px; }
+  .hero-pin button { min-height: 30px; padding: 0 9px; font-size: 13px; }
+
+  .hero-sub {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -2px 8px;
+    padding: 2px;
+  }
+  .hero-sub::-webkit-scrollbar { display: none; }
+  .hero-sub > * { flex: 0 0 auto; }
+  .hero-sub #btnPomo25 {
+    order: 9;
+    flex: 1 0 100%;
+    margin-left: 0;
+    min-height: 44px;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  /* 执行栈：默认折叠成一行，点开才铺开 */
+  details.hero-stack { margin-top: 8px; padding: 0 12px; }
+  details.hero-stack > summary.hs-lbl {
+    display: flex; align-items: center; gap: 6px;
+    min-height: 44px; margin: 0; padding: 0;
+    list-style: none; cursor: pointer;
+  }
+  details.hero-stack > summary.hs-lbl::-webkit-details-marker { display: none; }
+  details.hero-stack > summary.hs-lbl::before { content: '▸'; font-size: 11px; color: var(--muted-2); }
+  details.hero-stack[open] > summary.hs-lbl::before { content: '▾'; }
+  details.hero-stack .hero-alt { margin-bottom: 6px; }
+  details.hero-stack .hero-alt:last-child { margin-bottom: 10px; }
+
+  /* 流程指示条：单行，✕ 不把行高撑到 44 以上 */
+  .flow-indicator { padding: 0 4px 0 10px !important; min-height: 34px; }
+  .flow-indicator .flow-close { min-height: 32px !important; height: 32px; }
+  .flow-track { line-height: 1.35; }
+}
+
+/* ============================================================
+   43. 首屏顺序（v7.8）：标题 → 今日最重要 → 指标条
+   —— 原先英雄卡前面压着 eyebrow 20px、计划带宽 77px、指标条 77px，
+     一共 174px，把「今日最重要」挤到 342px 处。这里把三块降级为单行 chips，
+     并排到英雄卡之后：hero 直接跟在大标题下面。
+   ============================================================ */
+@media (max-width: 900px) {
+  #heroWrap { display: flex; flex-direction: column; }
+  #heroWrap > .hero-eyebrow { display: none; }
+  #heroWrap > #hero { order: 1; }
+  #heroWrap > #planShare { order: 2; }
+  #heroWrap > #metricsStrip { order: 3; }
+  #heroWrap > .pomo-bar { order: 4; }
+
+  /* 计划带宽：标题行（纯说明）隐藏，chip 改成横向滑动 */
+  #planShare .ps-h, .plan-share .ps-h { display: none !important; }
+  .plan-share {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 6px 0 0;
+  }
+  .plan-share::-webkit-scrollbar { display: none; }
+  .plan-share .ps-chip {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: var(--panel-strong);
+  }
+
+  /* 指标条：折行的 3 个胶囊 → 一行可滑动 */
+  #metricsStrip { display: block !important; margin: 8px 0 0 !important; }
+  .metrics-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .metrics-strip::-webkit-scrollbar { display: none; }
+  .metrics-strip > .ms-pill { flex: 0 0 auto; }
+
+  /* 今日面板的说明句与流程指示条重复，移动端让位给任务本身 */
+  #todayPanel .today-head .hint { display: none; }
+}
+
+/* ============================================================
+   44. 今日区块小标签：11.5px → 13px（MIT / 习惯打卡 / 区块标题）
+   ============================================================ */
+@media (max-width: 900px) {
+  .cap-zero,
+  .mit-pin-lbl,
+  .today-sec-div,
+  .today-block-h,
+  .today-block-h .cnt { font-size: 13px; }
+  .mit-pin-lbl { letter-spacing: .02em; }
+
+  /* 洞察视图的思维导图（SVG 按 1:1 像素渲染、容器横向可滚），标签同步放大 */
+  .nlabel { font-size: 13px; }
+  .nlabel.sub { font-size: 12px; }
+
+  .ins-eyebrow { font-size: 13px; letter-spacing: .06em; }
+  #panelInput .input-toggle { font-size: 13px; min-height: 32px; }
+
+  /* 卡片标题比正文大一档，分区才看得清 */
+  .panel h2 { font-size: 15px; line-height: 1.35; }
+}
+
+/* ============================================================
+   45. 移动端 app 化深化（v8.1）
+   —— 布局：今日页去「panel 套 panel」→ iOS 分组卡；石头/情境 chips 横滑
+      字体：hero-main 17→21px（今日焦点仅次于大标题）
+      信息：行内 meta 默认只留 项目/🕐/📈/等待阻塞，其余 ⋯ 展开后可见
+   ============================================================ */
+@media (max-width: 900px) {
+  /* —— 布局：今日面板透明化，内部块直接成为分组卡 —— */
+  .today-panel {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .today-block {
+    border-radius: 16px;
+    margin-bottom: 12px;
+  }
+  /* 折叠区 / 英雄卡与今日块同一套分组卡圆角 */
+  .zone { border-radius: 16px; }
+  .hero { border-radius: 16px !important; }
+  /* 已完成清单同样卡片化（原为裸行） */
+  .today-checklist {
+    background: var(--panel);
+    border: 1px solid var(--stroke-soft);
+    border-radius: 16px;
+    padding: 10px 12px;
+  }
+
+  /* 大石头 / 情境筛选：折行 → 单行横滑（与提醒条同一模式） */
+  .today-rocks, .today-ctx-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .today-rocks::-webkit-scrollbar, .today-ctx-bar::-webkit-scrollbar { display: none; }
+  .today-rocks > *, .today-ctx-bar > * { flex: 0 0 auto; }
+  .rock-chip, .ctx-chip { min-height: 36px; padding: 4px 12px; font-size: 13px; }
+  .rocks-lbl, .ctx-bar-lbl { white-space: nowrap; align-self: center; }
+
+  /* —— 字体：今日焦点放大（仅移动端；桌面保持紧凑信息密度） —— */
+  .hero .hero-main { font-size: 21px !important; line-height: 1.35 !important; }
+  .app-title h1 { font-size: 32px; }
+
+  /* —— 信息暴露：行内 meta 减载；点 ⋯ 展开后恢复全量 —— */
+  .today-row:not(.expanded) .today-txt-metas .habit-recur,
+  .today-row:not(.expanded) .today-txt-metas .anchor-tag,
+  .today-row:not(.expanded) .today-txt-metas .ctx-tag,
+  .today-row:not(.expanded) .today-txt-metas .meta-dleft { display: none; }
+
+  /* —— 底部 tab 与顶栏同款玻璃质感 —— */
+  .mtab {
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    backdrop-filter: blur(18px) saturate(1.35);
+  }
 }

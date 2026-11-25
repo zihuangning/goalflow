@@ -77,6 +77,20 @@
 | 三件好事 | 晚总结 `rtGood1-3` → `meta.goodThings[dk][]`（峰终定律积极收尾） |
 | 前一晚预选 MIT | 晚总结 radio 预选（候选=未完成 top4）→ `meta.tomorrowMit{forDate,wfId,nodeId}`；晨计划 `preMit` 优先显示「🌙昨晚预选」，「✓就是它」钉 scale=day+touchedAt 并清除 /「换一个」清除回算法 MIT |
 | 移动端 H5 v6.2 | ≤900px：底部 tab `.mtab`（3 data-nav + `#mtabWeekReview`）替代 rail/侧栏；顶栏隐藏 ICS/恢复/主题下拉；弹窗全屏（≤640px，`100dvh`）；桑基图靠 `canvas-wrap overflow:auto` + SVG 显式宽高天然横滑（零改动）；四象限仅查看（`.m-only` 提示）；闹钟=页面弹窗式，`wakeCheck` 在 visibilitychange/pageshow/focus 时补跑 tickReminders/tickRitualAlarms/renderPomoBar（锁屏挂起兜底）；无 Notification 时 `requestAlarmPermission` 静默降级 |
+| **v6.4 Q2 目标线** | `meta.q2Target`（默认 50，10-90 可调）；`renderTimeAudit` 加 `.ta-q2` 块（达成✓/偏低/严重不足三档）；周回顾「核心 vs 救火」下加 Q2 时间行（timeAudit 7/30/90 复用） |
+| **v6.4 习惯 anchor** | 节点 `anchor` 字段（⚓习惯叠加，「在X之后」）；今日行 ⚓ 按钮行内编辑；执行区习惯按 anchor 聚类（`.habit-anchor-h` 分组标题），未设的沉底提醒；晨计划 `noAnchor` 提醒补设 |
+| **v6.4 快捷键+番茄暂停** | 全局 keydown：`1/2/3` 切三视图、`t` 今日、`c` `quickCapture()`（切今日+focus #ibQuick）、空格 `togglePomoPause()`；跳过输入框/修饰键/弹窗开时；番茄 `paused/remainMs` 字段，⏸/▶ 按钮；移动端 `.mtab` 中央 ⚡FAB `#mtabCapture` |
+| **v6.5 承诺卡** | 周计划 wpSave → `openCommitCard(wk,picks)`（石头清单+意图 textarea），「✍️我承诺」才落库 `weekPlans[wk]={rocks,intent,committedAt}`；周回顾 stats pane 开头 `.wr-commit` 对照块（履约 doneN/total + 逐条 ✅/○，仅 week 周期） |
+| **v6.5 梯度冲刺** | `renderHero` 中 `subtreeProgress(top).pct>=80` → `.pill-sprint`「🔥冲刺·还剩N个叶子」（目标梯度效应） |
+| **v6.5 深潜块** | 英雄卡番茄 25/50/90′ 三档（btnPomo25/50/90）；`scorePomoItem` 加权 ≥50+4、≥90+6；`renderPomoBar` `pomoMode` 按分钟显 🍅专注/长专注/🌊深潜（BRAC/ultradian） |
+| **v6.5 归档** | 工作流 `archived/archivedAt`；`isWorkflowComplete`=叶子100%完成；侧栏 `#wfBar` 拆 live/归档两区（完成项 🏆 按钮 → `archiveWorkflow` → `openArchiveCelebrate` 庆祝卡复用 #weekReviewModal；归档区 ↩恢复）；`activeWorkflows()` 过滤器排除归档——已应用于 `todayAggregatedPool`/本周承诺容量/`stagnationAlerts`/`weekPlanCandidates` 四处 |
+| **v7.9 每日时段窗口** | `meta.capacity[wfId]` 增 `winStart/winEnd`（'HH:MM'，项目设置弹窗「每日可安排」）；`wfTimeWindow(wfId)` 读取；注入 `buildAIDecomposeInput`（AI 排期必须落窗口内）；留空=全天。用途：只能休息时间做的项目（副业 19:00-22:00） |
+| **v7.9 AI 失败明示+回滚** | `callLLM` 失败写 `_llmLastError`（区分 401 key无效/402 余额不足/429 限流/网络），`lastLLMError()` 读取；`autoDecomposeGoal` 失败 → `failAndRollback` 删除刚创建的空项目（>1 项目时）+ toast 具体原因；`showDecomposeGuide(node, reason)` 副标题显示原因 |
+| **v7.9 未开始项目不进今日** | `wfStarted(wf)` 判 startDate<=今天；`todayAggregatedPool`/`dayPlanFeasibilityAll` 排除未开始项目；AI 分解的未来日期任务挂 `planDate`（'YYYY-MM-DDTHH:MM'）而非 `time`，`normalizeNode` 到期当天自动转 `time` 进今日排序 |
+| **v7.9 全局唯一 MIT** | `heroGlobalCandidates()` 跨全部已开始+未归档项目选英雄卡；`renderHero`/`syncTop` 同源；`state.topWfId` 记 MIT 所属项目；番茄 `pomo.wfId` 跨项目归账；MIT 跨项目查找 `nodeInWorkflow(topWfId,...)` |
+| **v7.9 排序+闹钟歧义** | 今日清单：有 `time` 升序 → 无 time 按 `slotRank(h0-h6)` 粗排 → focusScore；⏰=闹钟（弹通知）/🕐=计划时间（只排序不提醒），行内 title 已注明 |
+| **v8.0 今日页 UX 精简** | 原则=默认极简（MIT+清单+习惯），次级全部可点开但默认收折。①英雄卡：7pill→3pill（分类/期限/冲刺），得分+进度+节奏收进「📊得分·进度与分解」details；番茄 25/50/90 三独立按钮→主按钮+`#pomoLen` 档位下拉 ②闹钟条 8 控件→🌅/🌙时间+🔔开关+「⏰仪式」弹出菜单（晨/晚/周计划/周回顾+权限说明.am-foot）③度量条：KR pill 收进「指标N▾」`.ms-kr-fold`，移除 Top1 分 ④习惯 meta 4 段→1 条（📈x/y 🔥n，详情在 title）⑤容量 3 条→今日 1 条+「周预算▾」`.dc-fold` ⑥planShare 从 hero 上迁入 zoneStatus ⑦hero-eyebrow 删除、metricsStrip 移到 hero 与 todayPanel 之间 ⑧CSS：`.hero-pomo-group`/`.alarm-menu`（移动端 fixed 底部弹出）/MIT border 2px+金阴影/已完成后 checklist opacity .75/移动端触控 min-height 36-44px |
+| **v8.1 移动端 app 化深化** | mobile.css 第 45 节（≤900px）：①布局去「panel 套 panel」——`.today-panel` 透明化，today-block/zone/hero/已完成清单统一 16px 分组卡（iOS inset-grouped 感）②大石头/情境 chips 折行→单行横滑（同提醒条模式）③字体：hero-main 17→21px（今日焦点仅次于大标题）、app-title 30→32px ④信息减载：行内 meta 默认只留 wf-tag/🕐/📈/等待阻塞，隐藏 `.habit-recur/.anchor-tag/.ctx-tag/.meta-dleft`（剩n天 JS 新加类名），点 ⋯ 展开行恢复全量 ⑤底部 tab 玻璃加强 blur(18px) 与顶栏一致。JS 仅 1 处：剩n天 meta 加 `meta-dleft` 类 |
 
 ## Visual (v6.0 · app shell + 三视图导航 + 主题×明暗)
 - 布局：参考 demos/01-linear — `.app-shell` = 52px 图标轨 `.rail`（logo/☀今日·🎯规划·📊洞察 [data-nav]/周回顾◔/demos 链接）+ 230px 侧栏 `.side`（「视图」3 项 [data-nav] +「仪式」4 项 + 目标树 `#sideTree`+`#sideProg`）+ 主区 `.main`（顶栏含 `.topbar-theme` = `#themeSelect`+`#modeToggle` ☾/☀，+ `.main-scroll`）；`body{overflow:hidden}` 仅主区滚动；≤900px 隐藏 rail/side；选中态 `.ric.on`/`.si.on`
@@ -100,6 +114,11 @@
 - meta 字段：`scoreLog{dk:{entries[{kind,nodeId,score,reason}]}}`、`dayNotes{dk:str}`、`ritual{morning,evening,on}`；取消勾选回滚当日 done 分（`removeTodayScore`）
 - meta 字段 v5.5：`pendingActions[{id,text,fromCycle,period,status}]`、`weekPlans{wk:{rocks[{wfId,nodeId,text}]}}`；executionLog entries 增 `im/ur`（审计象限分布用）；节点字段增 `ifThen`（WOOP）
 - meta 字段 v6.3：`goodThings{dk:[s,s,s]}`、`tomorrowMit{forDate,wfId,nodeId,text}`、`lastBackupAt`、`onboarded`；**inbox 已实现**（`addInbox/clarifyInbox/inboxPending` + 今日面板 `#inboxPanel`，v6.4 捕捉入口无需重做）
+- meta 字段 v6.4：`q2Target`（10-90）；节点增 `anchor`（习惯叠加触发线索）；番茄 `state.pomo.paused/remainMs`
+- meta 字段 v6.5：`weekPlans[wk]` 增 `intent/committedAt`（承诺卡）；工作流增 `archived/archivedAt`；**PowerShell Add-Content 写 features.css 常被另一进程锁 → 改用 StrReplace 走编辑器通道**；mem0 免费额度 30 天后需自带 LLM key（2026-12-14 重置，当前 ADD 被拒）
+- meta 字段 v7.9：`capacity[wfId]` 增 `winStart/winEnd`；节点增 `planDate`（未来排期日，到期自动转 `time`）；state 增 `topWfId`（全局 MIT 所属项目）、`pomo.wfId`；`callLLM` 有 `_llmLastError`（401/402/429 区分）
+- v8.0：番茄时长来自 hero 的 `#pomoLen` 下拉（不再有 btnPomo50/90）；`renderPlanShareStrip` 挂载点仍在 `#planShare` 但元素已迁入 `#zoneStatus`；验证脚本模式沿用 `_verify-*.cjs` 全量字符串核查（注意断言别写太严——title 里的文案不算裸奔）
+- v8.1：行内 meta 按优先级分层——执行必需（wf-tag/🕐/📈/wait/block）常驻，装饰性（recur/anchor/🏷/剩n天）移动端仅 `.today-row.expanded` 可见；`hero-main` 字号在 mobile.css 16 节有全局 `!important`，移动端放大需 `.hero .hero-main` 双类 + `!important` 覆盖；index.html 批量改版本号用 PowerShell `Set-Content` 安全（中文编码与换行不受影响，diff 验证过）
 - v5.6：节点增 `createdAt`（新解析起）与 `premortem`；meta 增 `energyLog`；新节点字面量三处需同步（parseText/insertChildren/adoptPendingAction）
 - v6.0 视图拆分：`scrollToToday()`=转发 `switchView('today')`；视图切换时 main-scroll 回顶 + `history.replaceState('#/'+name)`；隐藏视图内 SVG 布局无常量外尺寸依赖（sankey 用固定 layout），但切回 insights 仍 rAF 重绘保险
 - v6.2 移动端：布局/layout.css 与 features.css 均为**展开格式**（每属性一行）且 1500-2000 行，StrReplace 需用展开格式匹配；features.css 晚于 layout.css 加载，覆盖 `.modal` 必须放 features.css；桑基 SVG `setAttribute('width'/'height', W/H)` 显式像素尺寸（993/1100 行）→ 移动端横滑零改动；闹钟可靠性=前台 30s 轮询 + wakeCheck 可见性补跑，锁屏后仍不可靠（平台限制）

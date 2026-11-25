@@ -2903,6 +2903,111 @@ button.ve-more:hover { text-decoration: underline; }
 .attn-chip.stale { color: #eb5757; border-color: rgba(235,87,87,.4); }
 .attn-chip:hover { border-color: currentColor; }
 
+/* ===== 执行区：三块合一（MIT 置顶 + 习惯子区段） ===== */
+.today-grid--single { grid-template-columns: 1fr; }
+.today-grid--single > #todayMit,
+.today-grid--single > #todayMicro { display: none; }
+.today-mit-pin { border: 1px solid rgba(224,169,79,.4); background: rgba(224,169,79,.07); border-radius: 10px; padding: 6px 10px 2px; margin: 8px 0 10px; }
+.mit-pin-lbl { display: block; font-size: 11.5px; font-weight: 600; color: #e0a94f; letter-spacing: .03em; }
+.today-mit-pin .today-row.is-top { background: transparent; margin: 0; padding: 8px 0; }
+.today-sec-div { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--muted); margin: 14px 0 4px; padding-top: 12px; border-top: 1px dashed var(--stroke-soft); letter-spacing: .03em; }
+
+/* ===== 目标规划：输入区收敛 ===== */
+#panelInput .input-toggle { margin-left: auto; border: 1px solid var(--stroke); background: transparent; color: var(--ink-2); border-radius: 999px; padding: 3px 11px; font-size: 12px; cursor: pointer; }
+#panelInput .input-toggle:hover { border-color: var(--accent); color: var(--accent); }
+#panelInput.collapsed h2 { margin-bottom: 0; }
+
+/* ===== 洞察：分组标签 ===== */
+.ins-eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; margin: 14px 2px 0; }
+.view-inner > .ins-eyebrow:first-child { margin-top: 0; }
+
+/* ===== AI 拆解：逐日排期预览 + 发给 AI 的排期上下文 ===== */
+.ai-sched-preview { margin-top: 10px; padding: 8px 10px; border: 1px solid var(--stroke-soft); border-radius: 10px; background: var(--bg1); display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.ai-sched-row { display: flex; gap: 8px; align-items: baseline; }
+.ai-sched-when { font-family: var(--font-mono); color: var(--accent); white-space: nowrap; flex-shrink: 0; }
+.ai-sched-row b { font-weight: 500; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-sched-more { color: var(--muted); font-size: 11.5px; }
+.ai-ctx-sched { margin-top: 8px; }
+.ai-ctx-sched summary { cursor: pointer; font-size: 12px; color: var(--muted); }
+.ai-ctx-sched pre { margin: 8px 0 0; padding: 10px; max-height: 260px; overflow: auto; font-size: 11.5px; line-height: 1.6; color: var(--ink-2); background: var(--bg1); border: 1px solid var(--stroke-soft); border-radius: 8px; white-space: pre-wrap; word-break: break-word; }
+
+/* ===== v6.4 · Q2 目标线 / 习惯 anchor 分组 / 番茄暂停 ===== */
+.ta-q2 { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--stroke-soft); background: var(--bg1); font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.ta-q2.ok { border-color: rgba(76,175,125,.4); background: rgba(76,175,125,.07); }
+.ta-q2.low { border-color: rgba(235,87,87,.35); background: rgba(235,87,87,.06); }
+.ta-q2-tag { font-weight: 600; color: var(--ink); }
+.ta-q2-set { margin-left: auto; display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
+.ta-q2-in { width: 46px; padding: 2px 6px; font-size: 12px; border: 1px solid var(--stroke-soft); border-radius: 6px; background: var(--bg0); color: var(--ink); }
+.habit-anchor-h { margin: 10px 0 4px; font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--accent, #5b8def); }
+.habit-anchor-h.dim { color: var(--muted); font-weight: 500; }
+.anchor-tag { font-size: 11px; color: var(--accent, #5b8def); }
+.pomo-inner b { white-space: nowrap; }
+#pomoPause { min-width: 60px; }
+
+/* ===== v8.0 今日页 UX 精簡：层级强化 + 折叠控件 ===== */
+/* 英雄卡：番茄主按钮 + 时长档位下拉合一 */
+.hero-pomo-group { display: inline-flex; align-items: stretch; margin-left: auto; }
+.hero-pomo-group .gf-btn { border-radius: 999px 0 0 999px; }
+.hero-pomo-len { width: 62px; padding: 4px 4px; font-size: 12px; border-radius: 0 999px 999px 0; border-left: none; background: var(--bg0); color: var(--ink); }
+/* 英雄卡次级 pill 收纳区 */
+.hero-more { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 6px; }
+/* 闹钟条：仪式弹出菜单 */
+.alarm-menu-wrap { position: relative; }
+.alarm-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; min-width: 210px; background: var(--bg0); border: 1px solid var(--stroke-soft); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.35); padding: 6px; }
+.alarm-menu .am-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 10px; border: none; background: transparent; color: var(--ink); font-size: 13px; border-radius: 8px; cursor: pointer; min-height: 44px; }
+.alarm-menu .am-item:hover { background: var(--bg1); }
+.alarm-menu .am-sub { font-size: 11px; color: var(--muted); }
+.alarm-menu .am-foot { padding: 8px 10px 4px; margin-top: 4px; border-top: 1px dashed var(--stroke-soft); font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+/* 度量条：KR 指标折叠 */
+.ms-kr-fold { display: inline-block; }
+.ms-kr-fold > summary { display: inline-flex; align-items: center; cursor: pointer; font-size: 12px; color: var(--muted); list-style: none; padding: 3px 8px; border: 1px dashed var(--stroke-soft); border-radius: 999px; }
+.ms-kr-fold > summary::-webkit-details-marker { display: none; }
+.ms-kr-fold[open] > summary { margin-bottom: 6px; }
+.ms-kr-body { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 6px; }
+/* 容量：周预算折叠 */
+.dc-fold { margin-top: 6px; }
+.dc-fold > summary { cursor: pointer; font-size: 11.5px; color: var(--muted); list-style: none; display: flex; align-items: center; gap: 6px; }
+.dc-fold > summary::-webkit-details-marker { display: none; }
+.dc-fold > summary::before { content: '▸'; font-size: 10px; }
+.dc-fold[open] > summary::before { content: '▾'; }
+.dc-fold .day-capacity { margin-top: 6px; }
+.dc-tag.over, .dc-fold .over .dc-tag { color: #eb5757; }
+/* 执行区层次：MIT 钉住更突出，习惯区弱化，已完成再弱化 */
+.today-mit-pin { border-width: 2px; box-shadow: 0 2px 14px rgba(224,169,79,.12); }
+.today-sec-div { margin-top: 18px; }
+.today-sec-div + .today-row, .habit-anchor-h + .today-row { opacity: .92; }
+.today-checklist { opacity: .75; margin-top: 14px; }
+.today-checklist .today-block-h { background: transparent; border-bottom-style: dashed; }
+/* 移动端：触控目标 ≥44px（mobile standards） */
+@media (max-width: 900px) {
+  .alarm-menu { position: fixed; left: 12px; right: 12px; top: auto; bottom: 76px; min-width: 0; }
+  .hero-pomo-len { width: 66px; min-height: 36px; }
+  .today-remind, .today-time, .today-est { min-height: 36px; }
+}
+
+/* ===== v6.5 · 梯度冲刺 / 承诺卡 / 归档 ===== */
+.pill-sprint { border-color: rgba(235,140,60,.5) !important; background: rgba(235,140,60,.12) !important; color: #e08c3c !important; font-weight: 600; }
+/* 承诺卡（周计划确认后） */
+.commit-card { border: 1px solid var(--stroke-soft); border-radius: 12px; padding: 16px 18px; background: var(--bg1); }
+.commit-card-h { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+.commit-card-list { margin: 0 0 12px; padding-left: 4px; list-style: none; }
+.commit-card-list li { padding: 4px 0; font-size: 13px; color: var(--ink); }
+.commit-intent { width: 100%; font-size: 13px; }
+/* 周回顾 · 承诺卡对照 */
+.wr-commit { border: 1px solid var(--stroke-soft); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; background: var(--bg1); }
+.wr-commit.all { border-color: rgba(76,175,125,.45); background: rgba(76,175,125,.06); }
+.wr-commit-h { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.wr-commit-intent { font-size: 12px; color: var(--muted); font-style: italic; margin-bottom: 8px; }
+.wr-commit-list { margin: 0; padding-left: 2px; list-style: none; }
+.wr-commit-list li { font-size: 12.5px; padding: 2px 0; color: var(--ink); }
+.wr-commit-list li.miss { color: var(--muted); }
+/* 归档区 */
+.wf-arch { color: #e0a94f !important; }
+.wf-archived { margin-top: 12px; }
+.wf-arch-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wf-arch-name { font-size: 12.5px; color: var(--ink); }
+.wf-unarch { flex-shrink: 0; }
+
 /* ===== 完成历史 · 时间线 ===== */
 .history-panel h2 { margin-bottom: 12px; }
 .hist-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
