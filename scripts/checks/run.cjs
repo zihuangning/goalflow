@@ -1,0 +1,43 @@
+/* 常驻核查统一入口：node scripts/checks/run.cjs
+   流程：node --check app.js → 版本号一致性 → 依次跑 checks 目录下 verify-*.cjs / smoke-*.cjs
+   全部通过 exit 0；任一失败 exit 1。
+   新增版本核查：直接在本目录新建 verify-vXX.cjs / smoke-vXX.cjs 即可被自动扫到。 */
+const fs = require('fs');
+const path = require('path');
+const { execFileSync } = require('child_process');
+
+const ROOT = path.join(__dirname, '..', '..');
+let failed = 0;
+
+function step(name, fn) {
+  console.log('\n=== ' + name + ' ===');
+  try { fn(); console.log('✓ ' + name); }
+  catch (e) { failed++; console.log('✗ ' + name + '\n' + (e.stdout ? e.stdout.toString() : e.message)); }
+}
+
+// 1. 语法检查
+step('node --check assets/js/app.js', () => {
+  execFileSync(process.execPath, ['--check', path.join(ROOT, 'assets/js/app.js')], { stdio: 'pipe' });
+});
+
+// 2. index.html 四处 ?v= 版本号一致
+step('index.html 资源版本号一致', () => {
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const vs = [...html.matchAll(/\?v=([\d.]+)/g)].map(m => m[1]);
+  if (!vs.length) throw new Error('未找到 ?v= 版本号');
+  if (new Set(vs).size !== 1) throw new Error('版本号不一致: ' + vs.join(', '));
+  console.log('  版本 v' + vs[0] + ' × ' + vs.length + ' 处');
+});
+
+// 3. 依次跑 checks（run.cjs/lib.cjs 除外，按文件名排序）
+const suites = fs.readdirSync(__dirname)
+  .filter(f => /^(verify|smoke)-.*\.cjs$/.test(f))
+  .sort();
+suites.forEach(f => step(f.replace('.cjs', ''), () => {
+  const out = execFileSync(process.execPath, [path.join(__dirname, f)], { stdio: 'pipe' });
+  process.stdout.write(out.toString());
+}));
+
+console.log('\n========================================');
+console.log(failed ? '❌ 共 ' + failed + ' 个环节失败' : '✅ 全部通过（' + (2 + suites.length) + ' 个环节）');
+process.exit(failed ? 1 : 0);

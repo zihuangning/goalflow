@@ -12,7 +12,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
   <script>try { var d = document.documentElement; d.dataset.theme = localStorage.getItem('goalflow.theme') || 'linear'; d.dataset.mode = localStorage.getItem('goalflow.mode') || 'dark' } catch (e) { document.documentElement.dataset.theme = 'linear'; document.documentElement.dataset.mode = 'dark' }</script>
-  <link rel="stylesheet" href="assets/css/main.css?v=8.1">
+  <link rel="stylesheet" href="assets/css/main.css?v=8.10">
 </head>
 
 <body>
@@ -139,7 +139,7 @@
               style="display:none;align-items:center;gap:8px;padding:8px 12px;margin:0 0 10px;background:var(--bg1);border-radius:var(--radius-sm);color:var(--muted);border:1px solid var(--stroke-soft)">
               <span class="flow-track">📥 捕获 → 🎯 MIT → 📋 执行 → ✅ 完成</span>
               <button type="button" class="flow-close" id="flowIndicatorClose"
-                style="border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;margin-left:8px"
+                style="border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:15px;padding:0 4px;margin-left:8px"
                 title="不再显示">✕</button>
             </div>
             <div id="todayRocks"></div>
@@ -333,42 +333,11 @@
           </div>
         </section>
 
-        <!-- ══ 视图 4：AI 分析（智能拆解 / SMART 体检） ══ -->
+        <!-- ══ 视图 4：AI 分析（使用历史 / 配置 / SMART 体检） ══
+             v8.6：移除「AI 分解目标」模块——分解入口统一收在「新建项目」流程（模板/描述触发），
+             本视图只保留历史回看、配置与 SMART 体检 -->
         <section class="view" id="view-ai" data-view="ai">
           <div class="view-inner">
-            <div class="panel" id="panelAIDecompose">
-              <h2><span class="idx">🤖</span> AI 分解目标</h2>
-              <div id="aiSmartSuggest" class="ai-suggest"></div>
-              <div class="ai-decompose-card">
-                <label class="wfm-row" style="display:block">
-                  <span
-                    style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">目标描述（一句话讲清要达成什么）</span>
-                  <textarea class="gf-input" id="aiGoalInput" rows="3"
-                    placeholder="例：3 个月内上线个人作品集网站，每周可投入 10 小时"></textarea>
-                </label>
-                <label class="wfm-row" style="display:flex;gap:8px;align-items:center;margin-top:10px">
-                  <span style="min-width:72px;font-size:13px;color:var(--muted)">时间偏好</span>
-                  <select class="gf-input" id="aiTimePreference" style="flex:1;max-width:240px">
-                    <option value="">不限（AI 自动安排）</option>
-                    <option value="morning">上午（8:00-12:00）</option>
-                    <option value="afternoon">下午（13:00-18:00）</option>
-                    <option value="evening">晚上（19:00-22:00）</option>
-                    <option value="weekday-only">仅工作日</option>
-                    <option value="weekend-only">仅周末</option>
-                  </select>
-                </label>
-                <details class="ai-context-details">
-                  <summary>📋 分解上下文（项目 · 预算 · 周期）</summary>
-                  <div class="ai-context-info" id="aiContextInfo"></div>
-                </details>
-                <div class="ai-decompose-actions">
-                  <button type="button" class="gf-btn gf-btn--primary" id="btnAIDecompose">🤖 AI 分解目标</button>
-                  <button type="button" class="gf-btn gf-btn--ghost" id="btnAIClear">清空</button>
-                </div>
-                <div class="ai-result" id="aiDecomposeResult"></div>
-              </div>
-            </div>
-
             <div class="panel" id="panelAIHistory">
               <h2><span class="idx">📜</span> AI 使用历史</h2>
               <p class="hint">记录每次 AI 分解的输入和输出，方便回顾和复用。</p>
@@ -448,9 +417,9 @@
   <!-- 等待 / 阻塞 + 催办日期 -->
   <div class="modal-mask" id="parkModal"></div>
 
-  <script src="assets/js/gf-tokens.js?v=8.1"></script>
-  <script src="assets/js/gf-demos.js?v=8.1"></script>
-  <script src="assets/js/app.js?v=8.1"></script>
+  <script src="assets/js/gf-tokens.js?v=8.10"></script>
+  <script src="assets/js/gf-demos.js?v=8.10"></script>
+  <script src="assets/js/app.js?v=8.10"></script>
   <!-- v6.6 兜底：若 app.js 异常未设置 is-ready，1.5 秒后强制显示页面，避免"按钮看不见也点不到" -->
   <script>setTimeout(function () { document.body.classList.add('is-ready') }, 1500)</script>
 </body>

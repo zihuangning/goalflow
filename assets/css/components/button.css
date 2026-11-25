@@ -12,7 +12,7 @@ button {
   color: var(--ink);
   border-radius: var(--btn-radius);
   padding: 6px 12px;
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 500;
   transition: 0.15s;
   font-family: inherit;
@@ -36,7 +36,7 @@ button:focus-visible {
 .gf-btn--sm,
 button.small {
   padding: 4px 9px;
-  font-size: 11.5px;
+  font-size: 12.5px;
 }
 
 .gf-btn--sm.gf-btn--pill,
@@ -102,7 +102,7 @@ button.ai {
 /* 域内迷你按钮（四象限等） */
 .gf-btn--mini {
   padding: 0 6px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
   border-radius: 6px;
 }

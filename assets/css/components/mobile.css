@@ -1058,6 +1058,40 @@
 .ai-history-item:hover {
   border-color: var(--accent);
 }
+
+/* v8.4 失败行内联错误 + 原始返回片段 */
+.ai-history-err {
+  font-size: 12px;
+  color: var(--ur4, #e08080);
+  margin: 2px 0 4px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.ai-history-raw {
+  margin-top: 8px;
+}
+
+.ai-history-raw summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ai-history-raw pre {
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  max-height: 160px;
+  overflow: auto;
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: var(--bg1);
+  border: 1px solid var(--stroke-soft);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+}
 .ai-history-head {
   display: flex;
   align-items: center;
@@ -1198,6 +1232,72 @@
 .ai-analyzing-hint {
   font-size: 12px;
   color: var(--muted);
+}
+
+/* v8.4 AI 分步流程演出 */
+.ai-steps {
+  list-style: none;
+  margin: 14px auto 12px;
+  padding: 0;
+  text-align: left;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ai-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted-2);
+  opacity: .55;
+  transition: opacity .3s;
+}
+
+.ai-step i {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--stroke-soft);
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.ai-step.working {
+  opacity: 1;
+  color: var(--ink);
+}
+
+.ai-step.working i {
+  border-color: var(--accent);
+  border-top-color: transparent;
+  animation: aiStepSpin .8s linear infinite;
+}
+
+.ai-step.done {
+  opacity: .9;
+  color: var(--muted);
+}
+
+.ai-step.done i {
+  border-color: var(--ok, #4cb782);
+  background: var(--ok, #4cb782);
+}
+
+.ai-step.done i::after {
+  content: '✓';
+  color: #fff;
+  line-height: 1;
+}
+
+@keyframes aiStepSpin {
+  to { transform: rotate(360deg); }
 }
 
 /* ============================================================
