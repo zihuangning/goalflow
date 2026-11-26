@@ -3,7 +3,7 @@
 用例总览：模块 × 覆盖层。生成于 2026-11-25（测试基建落地），随套件增删手动同步。
 运行方式见 [TESTING.md](TESTING.md)。
 
-**总量**：tests 12 套件 290 例（unit 215 + flow 75）+ checks 18 环节 430 项 = **720 项断言**。
+**总量**：tests 14 套件 317 例（unit 242 + flow 75）+ checks 20 环节 493 项 = **810 项断言**。
 
 ## 覆盖矩阵
 
@@ -43,6 +43,8 @@
 | 今日池预算 | budgetCap 截断/默认 dayCap/保底首任务/习惯不占预算/聚合层全局递减 | | ✅ 7 例 | | ✅ v8.11 |
 | 时间冲突纠偏 | 两个 9:00 顺开/链式/缓冲带/出日界保持/{node} 包装/backfill 全局避让+本批纠偏 | ✅ 11 例 | ✅ 7 例 | | ✅ v8.11 |
 | 仪式历史聚合 | morningPlans 打开快照/晚回顾 key 并集/周计划 committedAt 回落/回顾三存储合并/dkWeekLabel/openHistory 四 tab 入口 | ✅ 34 例 | | | ✅ v8.12 |
+| 英雄卡去重 ② 次重要 | pickNextTopId 排除 MIT/done/溢出/并列取先/阻塞让位；renderHero 移除 + topId 归一 syncTop；MIT 区承接番茄时长/取消固定/得分折叠 | ✅ 14 例 | | | ✅ v8.13 |
+| 今日页三连修 | metricsStrip 迁 zoneStatus/heroWrap 空闲零高度；② 行算法分可见；已完成区完成时刻+单项得分（scoreOfDoneEntry 倒序取最新/pomo 不算/脏数据安全）；❓ 帮助按钮化可点击 | ✅ 13 例 | | | ✅ v8.14 |
 | 自动排时 `nextFreeTimeToday` | 跨项目占用/10 分钟缓冲/不排过去/窗口满 null | | | ✅ v8.8 | ✅ v8.8 |
 | 项目删除级联 | rocks/pendingActions/tomorrowMit/planShare/capacity/habitStreaks/topWfId/番茄钟 | | ✅ 生命周期 | ✅ v8.8/v8.9 | ✅ v8.8/v8.9 |
 | 节点删除级联 | 子树删除/topId/topPin/番茄钟解绑/引用备份还原 | | ✅ 生命周期 | ✅ v8.9 35 例 | ✅ v8.9 |
@@ -55,7 +57,13 @@
 | 晚总结期限 | 明天继续/改期走 setNodeDeadline 唯一写入口 | | | | ✅ v8.10 |
 | 版本号一致性 | index.html 4 处 ?v= 同步 | | | | ✅ run.cjs |
 
-## 单元测试明细（215 例）
+## 单元测试明细（242 例）
+
+### unit-done-score.cjs · 已完成区单项得分（13，v8.14）
+scoreOfDoneEntry：命中唯一 done/多条取最新/reason 随最新/pomo 不参与/无匹配 null；dayScoreLog null/undefined/entries 非数组/空 entries 安全；entry null/缺 nodeId 安全；reason 缺省空串；null 条目跳过。
+
+### unit-nexttop.cjs · ② 次重要（14，v8.13）
+pickNextTopId：空/null/undefined 池→null、单条当选、多条取 focusScore 最高、排除 MIT 自身后取次高、排除不存在 id 不影响、done 跳过、溢出跳过（分再高不当 ②）、全 done/全溢出→null、并列取先出现者、ent 缺 node 安全、阻塞 -60 压分后让位。
 
 ### unit-schedule.cjs · 时间安排与期限族（55）
 recomputeSchedule 跨天重算：相对标签「明天」恒 daysLeft=1、昨天绝对日期逾期、仅日期无标签刷新+补 label、无期限 null 三件套、「第2周」锚定不漂移。
@@ -121,7 +129,7 @@ C backfill 本批纠偏：AI 直给两个 9:00→写库前纠成 09:00/09:40。
 ### flow-habit-strength.cjs · 习惯强度 30 天（6）
 ① 连打 10 天→50% → ② +5 天漏打→65%（净+3% 不清零）→ ③ 再加更早 5 连→90%（历史贡献在）→ ④ 低频 freqDecay=0.012→94% → ⑤ 未记录日不参与 samples=10 → ⑥ 30 天全勤 100 封顶。
 
-## checks 明细（430 项）
+## checks 明细（493 项）
 
 | 套件 | 项数 | 守什么 |
 |---|---|---|
@@ -136,6 +144,8 @@ C backfill 本批纠偏：AI 直给两个 9:00→写库前纠成 09:00/09:40。
 | verify-v8.10 | 47 | 勾选回滚/跨午夜/恢复清理/精力全链/删除统一/期限入口/streak 回退/滚动版本守卫 |
 | verify-v8.11 | 32 | 时间冲突纠偏/backfill 全局避让/池预算全局口径/溢出留池沉底/顺排提示条/文案说人话 |
 | verify-v8.12 | 37 | 仪式历史：快照/聚合纯函数/openHistory 弹窗/入口/样式/导出 |
+| verify-v8.13 | 38 | 英雄卡移除/topId 归一 syncTop/MIT 区承接番茄时长+取消固定+得分折叠/② 次重要高亮/版本号 |
+| verify-v8.14 | 25 | metricsStrip 迁位/heroWrap 空态/② 行分数/已完成时刻+得分/❓ 按钮化/滚动版本守卫 |
 | smoke-v8.2 | 15 | 排期回填 5 场景实跑 |
 | smoke-v8.7 | 10 | 今日池 6 场景实跑 |
 | smoke-v8.8 | 17 | 自动排时 5 场景+删除级联实跑 |

@@ -310,10 +310,13 @@ header.topbar {
 }
 
 .hero-wrap {
-  padding: var(--space-3) var(--space-4) 0;
+  padding: 0 var(--space-4);
   max-width: 1440px;
   margin: 0 auto;
 }
+/* v8.14: heroWrap 只剩番茄进度条（英雄卡/度量条已迁走）——计时活跃时才给顶部间距，
+   空闲时零高度不占首屏（:has 渐进增强，不支持的浏览器只是番茄条略贴顶） */
+.hero-wrap:has(.pomo-bar.show) { padding-top: var(--space-3); }
 
 .today-panel {
   max-width: 1440px;

@@ -55,7 +55,7 @@ L.assertFnContains('AI 失败弹窗系统通知', 'showAIErrorModal', "sysNotify
 L.assertFnContains('AI 失败弹窗 opt-in', 'showAIErrorModal', 'sysNotifyOptIn(');
 
 // ⑤ 渲染容错
-L.assertContains('VIEW_GROUP today 为函数数组', 'today: () => [renderHero, renderFocus');
+L.assertContains('VIEW_GROUP today 为函数数组', 'today: () => [syncTop, renderFocus');
 L.assertFnContains('renderViewGroup 逐个 try', 'renderViewGroup', "console.error('[renderViewGroup]'");
 L.assertFnContains('afterChange 全链容错', 'afterChange', "console.error('[afterChange]'");
 L.assertFnContains('afterChange safe 包装 syncTop', 'afterChange', "safe('syncTop', syncTop)");

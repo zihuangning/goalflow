@@ -432,6 +432,17 @@ function removeTodayScore(nodeId, kind) {
   log.entries = log.entries.filter(e => !(e.nodeId === nodeId && e.kind === kind));
   saveMeta();
 }
+/* v8.14: 「✅ 今日已完成」行的单项得分——从当日 scoreLog 倒序找该节点最新一条 done 记录（pomo 不算）。
+   纯函数：entry 需含 nodeId（executionLog 条目）；dayScoreLog = state.meta.scoreLog[dk]（可空）。
+   返回 {score, reason} 或 null（找不到/脏数据安全）。 */
+function scoreOfDoneEntry(entry, dayScoreLog) {
+  if (!entry || !entry.nodeId || !dayScoreLog || !Array.isArray(dayScoreLog.entries)) return null;
+  for (let i = dayScoreLog.entries.length - 1; i >= 0; i--) {
+    const e = dayScoreLog.entries[i];
+    if (e && e.kind === 'done' && e.nodeId === entry.nodeId) return { score: e.score, reason: e.reason || '' };
+  }
+  return null;
+}
 /* v8.12: 评分聚合抽成纯函数——晚回顾历史（historyEveningDays）按任意 dk 复用同一口径 */
 function summarizeScoreEntries(entries) {
   entries = entries || [];
@@ -816,6 +827,19 @@ function focusScoreParts(n) {
   return { parts, total: parts.reduce((a, p) => a + p.pts, 0) };
 }
 function focusScore(n) { return focusScoreParts(n).total; }
+/* v8.13 英雄卡去重：清单内「② 次重要」= 今日执行池里算法分最高的一条（排除 MIT 自身、已完成、溢出沉底）。
+   纯函数：入参 [{node,...}]，返回 node.id 或 null；并列取先出现者（与按时间/时段排序后的视觉顺序一致）。 */
+function pickNextTopId(entries, excludeId) {
+  let best = -Infinity, id = null;
+  (entries || []).forEach(ent => {
+    const n = ent && ent.node; if (!n || n.done) return;
+    if (excludeId && n.id === excludeId) return;
+    if (n._overflow) return;
+    const s = focusScore(n);
+    if (s > best) { best = s; id = n.id; }
+  });
+  return id;
+}
 function pickRanked(pool, limit) {
   pool = pool || state.nodes;
   if (_rankSlot && _rankSlot.pool === pool && _rankSlot.limit === limit && _rankSlot.tick === _tickN) return _rankSlot.out;
@@ -3909,7 +3933,7 @@ function startPomo(minutes) {
   document.body.classList.add('focus-timer-on');
   if (pomoTimer) clearInterval(pomoTimer);
   pomoTimer = setInterval(() => { if (pomoRemainMs() <= 0) finishPomo(true); else renderPomoBar(); }, 1000);
-  renderHero(); renderPomoBar();
+  renderPomoBar();
 }
 function stopPomo() { finishPomo(false); }
 function finishPomo(credit) {
@@ -3922,7 +3946,7 @@ function finishPomo(credit) {
   state.pomo.paused = false;
   document.body.classList.remove('focus-timer-on');
   if (pomoTimer) clearInterval(pomoTimer);
-  renderHero(); renderPomoBar(); afterChange();
+  renderPomoBar(); afterChange();
 }
 function renderPomoBar() {
   const el = document.getElementById('pomoBar'); if (!el) return;
@@ -4353,184 +4377,6 @@ function pickHeroTop(vis, ranked) {
   }
   return noHabit[0] || list[0] || null;
 }
-function renderHero() {
-  const box = document.getElementById('hero');
-  // v7.9: 跨项目全局候选 —— 今日行动的「当下最重要」从任何项目进入都相同
-  const cands = heroGlobalCandidates();
-  const noHabit = cands.filter(c => !(c.node.recur || c.node.role === 'habit'));
-  let topC = null;
-  if (state.topPin) {
-    topC = cands.find(c => c.node.id === state.topPin) || null;
-  }
-  if (!topC) topC = noHabit[0] || cands[0] || null;
-  const top = topC ? topC.node : null;
-  state.topId = top ? top.id : null;
-  if (topC) state.topWfId = topC.wfId;
-  if (!top) {
-    box.className = 'hero empty';
-    box.innerHTML = '<div class="hero-main">暂无待办——把你的目标粘进来，或点击「载入示例」。等待/阻塞的任务已自动退出竞选。</div>';
-    return;
-  }
-  const vis = state.nodes.length ? buildView(state.nodes, state.scale) : [];
-  const ranked = vis.length ? pickRanked(vis, 8) : [];
-  box.className = 'hero';
-  const dl = deadlineBadge(top, '无明确期限 · 长期主线');
-  const c = category(top.im, top.ur);
-  const why = top.overdue ? '已超期，最该立刻处理'
-    : top.daysLeft != null && top.daysLeft <= 3 ? '期限临近且重要，优先拿下'
-      : top.im >= 4 && top.ur < 4 ? '重要不紧急，是长期主线，要提前投入'
-            : '重要且紧急，立刻做';
-  const scaleTag = '当下最重要';  // v7.9: 跨项目唯一 MIT，不再随尺度/项目变
-  const isPinned = state.topPin === top.id;
-  // v7.9: 候选栈也用全局候选（不再只列当前项目）
-  const alts = (noHabit.length ? noHabit : cands).filter(c => top && c.node.id !== top.id).slice(0, 2).map(c => c.node);
-  const prog = subtreeProgress(top);
-  // v6.5 目标梯度效应：接近完成时冲刺提示（"已完成 8/10"比"还剩 2 个"更能驱动最后冲刺）
-  const sprintPill = prog && prog.pct >= 80 && prog.pct < 100
-    ? `<span class="pill pill-sprint" title="目标梯度效应：越接近完成动力越强">🔥 冲刺 · 还剩 ${prog.total - prog.done} 个叶子</span>` : '';
-  const progPill = prog ? `<span class="pill">📈 子树 ${prog.pct}%（${prog.done}/${prog.total}）</span>` : '';
-  let altHtml = '';
-  if (alts.length) {
-    // v7.8: 执行栈改成可折叠；桌面默认展开（行为不变），移动端默认收起成一行
-    const stackOpen = !(window.matchMedia && window.matchMedia('(max-width:900px)').matches);
-    altHtml = `<details class="hero-stack"${stackOpen ? ' open' : ''}><summary class="hs-lbl">执行栈 · 仍可优先（Top ${alts.length + 1} 之 ${alts.length > 1 ? '②③' : '②'}）</summary>` +
-      alts.map((n, i) => {
-        const altDl = n.deadlineDate ? (n.overdue ? `逾期 ${-n.daysLeft} 天` : `剩 ${n.daysLeft} 天`) : '无期限';
-        const altEst = n.estimate ? `约 ${n.estimate}` : '未估时';
-        const altProg = subtreeProgress(n);
-        const altProgText = altProg ? `${altProg.done}/${altProg.total}` : '';
-        return `<div class="hero-alt" data-alt-id="${n.id}">
-          <input type="checkbox" class="alt-check" data-check-id="${n.id}" title="标记完成">
-          <span class="rank">#${i + 2}</span>
-          <b class="alt-text">${esc(n.text)}</b>
-          <span class="alt-toggle" title="展开详情">▼</span>
-          <div class="alt-details">
-            <div>⏱ ${esc(altDl)} · ${esc(altEst)}${altProgText ? ` · 📈 ${altProgText}` : ''}</div>
-            <div>重要 ${n.im} · 紧急 ${n.ur}</div>
-          </div>
-        </div>`;
-      }).join('') + '</details>';
-  }
-  const pace = paceStatus(top);
-  const pacePill = pace ? `<span class="pill pace" title="相对期限应有进度">节奏 ${pace.ahead >= 0 ? '领先' : '落后'} ${Math.abs(pace.ahead)}</span>` : '';
-  const mp = metricProgress(top);
-  const mpPill = mp && mp.kind !== 'leaf' ? `<span class="pill">📊 ${mp.done}/${mp.tgt}</span>` : '';
-  // 得分分解：简化显示，只保留前 3 项
-  const fs = focusScoreParts(top);
-  // v7.7: 原先只留 pts>0 且写死「+」，导致「阻塞中 -60」这类压分项永远不显示（.neg 样式是死代码），
-  // 卡上列的加分又和 fs.total 对不上。现在正负分都展示，符号按实际。
-  const topParts = fs.parts.filter(p => p.pts !== 0 && !p.note).slice(0, 4);
-  const partsHtml = topParts.map(p => `<span class="fs-item${p.pts < 0 ? ' neg' : ''}">${esc(p.label)} <b>${p.pts > 0 ? '+' + p.pts : p.pts}</b></span>`).join('<span class="fs-sep">·</span>');
-  box.innerHTML = `<div class="hero-main"><span class="hero-star">★</span> ${scaleTag}：<b>${esc(top.text)}</b>${isPinned
-    ? `<span class="hero-pin" title="你在日历/洞察里手动固定了这件，算法暂不接管"><button type="button" id="btnUnpinTop">📌 已固定 · 取消</button></span>` : ''}
-    <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost hero-edit-btn" id="btnHeroEdit" title="编辑此任务">✎ 编辑</button></div>
-    <div class="hero-edit-form" id="heroEditForm" style="display:none">
-      <div class="hero-edit-row">
-        <label>文案</label>
-        <input type="text" class="gf-input" id="heroEditText" value="${esc(top.text)}" placeholder="任务描述">
-      </div>
-      <div class="hero-edit-row">
-        <label>期限</label>
-        <input type="date" class="gf-input" id="heroEditDeadline" value="${top.deadlineDate ? dateKey(top.deadlineDate) : ''}">
-        <input type="text" class="gf-input" id="heroEditDeadlineText" value="${esc(top.deadlineText || '')}" placeholder="或输入「周五」「月底」" style="flex:1">
-      </div>
-      <div class="hero-edit-row">
-        <label>估时</label>
-        <input type="number" class="gf-input" id="heroEditEstimate" min="1" max="999" step="5" value="${top.estimateMinutes || ''}" placeholder="分钟">
-        <label>重要</label>
-        <select class="gf-input" id="heroEditIm">
-          ${[1,2,3,4,5].map(i => `<option value="${i}"${top.im === i ? ' selected' : ''}>${i}</option>`).join('')}
-        </select>
-        <label>紧急</label>
-        <select class="gf-input" id="heroEditUr">
-          ${[1,2,3,4,5].map(i => `<option value="${i}"${top.ur === i ? ' selected' : ''}>${i}</option>`).join('')}
-        </select>
-      </div>
-      <div class="hero-edit-row">
-        <button type="button" class="gf-btn gf-btn--sm gf-btn--primary" id="btnHeroEditSave">💾 保存</button>
-        <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="btnHeroEditCancel">取消</button>
-      </div>
-    </div>
-    <div class="hero-sub">
-      <span class="pill"><span class="dot" style="background:${c.color}"></span>${c.label}</span>
-      <span class="pill">⏱ ${esc(dl)}</span>
-      ${sprintPill}
-      <span class="hero-pomo-group">
-        <button type="button" class="gf-btn gf-btn--sm gf-btn--primary" id="btnPomo25" title="番茄钟绑定当前 Top1">🍅 专注 25′</button>
-        <select class="gf-input gf-select hero-pomo-len" id="pomoLen" title="专注时长：25′ 标准 / 50′ 长专注 / 90′ 深潜（BRAC 完整周期，评分加权）">
-          <option value="25" selected>25′</option>
-          <option value="50">50′</option>
-          <option value="90">🌊 90′</option>
-        </select>
-      </span>
-    </div>
-    <details class="hero-details" id="heroDetails">
-      <summary>📊 得分 ${fs.total} · 进度与分解</summary>
-      <div class="hero-more">${progPill}${mpPill}${pacePill}</div>
-      <div class="hero-score" title="为什么选这个：${topParts.map(p => p.label).join('、')}">${partsHtml}</div>
-    </details>
-    ${altHtml}`;
-  const pb = document.getElementById('btnPomo25');
-  const pomoLen = document.getElementById('pomoLen');
-  if (pb) pb.onclick = () => startPomo(pomoLen ? +pomoLen.value || 25 : 25);
-  const up = document.getElementById('btnUnpinTop');
-  if (up) up.onclick = () => {
-    const prev = state.topPin;
-    state.topPin = null; save(); afterChange();
-    showUndoToast('已取消固定，交回算法排序', () => { state.topPin = prev; save(); afterChange(); });
-  };
-  // Hero 编辑表单
-  const editBtn = document.getElementById('btnHeroEdit');
-  const editForm = document.getElementById('heroEditForm');
-  const editSave = document.getElementById('btnHeroEditSave');
-  const editCancel = document.getElementById('btnHeroEditCancel');
-  if (editBtn && editForm) {
-    editBtn.onclick = () => { editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none'; };
-  }
-  if (editCancel && editForm) {
-    editCancel.onclick = () => { editForm.style.display = 'none'; };
-  }
-  if (editSave) {
-    editSave.onclick = () => {
-      const node = state.nodes.find(n => n.id === top.id);
-      if (!node) return;
-      const newText = document.getElementById('heroEditText').value.trim();
-      const newDeadline = document.getElementById('heroEditDeadline').value;
-      const newDeadlineText = document.getElementById('heroEditDeadlineText').value.trim();
-      const newEstimate = parseInt(document.getElementById('heroEditEstimate').value) || null;
-      const newIm = parseInt(document.getElementById('heroEditIm').value);
-      const newUr = parseInt(document.getElementById('heroEditUr').value);
-      if (newText) node.text = newText;
-      // v7.7: 走统一入口，修掉「deadlineDate = parseDeadline(...) 拿到的是对象」的类型错误
-      setNodeDeadline(node, newDeadline || newDeadlineText, aiDeadlineAnchor());
-      if (newEstimate) node.estimateMinutes = newEstimate;
-      node.im = newIm;
-      node.ur = newUr;
-      save();
-      afterChange();
-      showUndoToast('已保存修改', () => { renderHero(); });
-      editForm.style.display = 'none';
-    };
-  }
-  // Alt 展开/折叠 + 复选框
-  box.querySelectorAll('.hero-alt').forEach(el => {
-    const toggle = el.querySelector('.alt-toggle');
-    const check = el.querySelector('.alt-check');
-    const text = el.querySelector('.alt-text');
-    if (toggle) toggle.onclick = (e) => { e.stopPropagation(); el.classList.toggle('expanded'); toggle.textContent = el.classList.contains('expanded') ? '▲' : '▼'; };
-    if (text) text.onclick = (e) => { e.stopPropagation(); el.classList.toggle('expanded'); if (toggle) toggle.textContent = el.classList.contains('expanded') ? '▲' : '▼'; };
-    if (check) check.onclick = (e) => {
-      e.stopPropagation();
-      const id = check.dataset.checkId;
-      const node = state.nodes.find(n => n.id === id);
-      if (node && !node.done) {
-        node.done = true; save(); afterChange();
-        showUndoToast('已标记完成', () => { node.done = false; save(); afterChange(); });
-      }
-    };
-  });
-}
-
 /* ============ 顶部比例尺（随尺度缩放切换） ============ */
 // 把当前尺度映射成一组时间桶（像地图比例尺一样随缩放换单位）
 function timeBuckets(scale, today) {
@@ -4754,7 +4600,7 @@ function todayAggregatedPool() {
         isWfTop: !!(wfTop && n.id === wfTop.id),
       });
     });
-    // topId 由 syncTop/renderHero 统一裁定（英雄卡与 MIT 同源），这里只标记各流 Top1，不回写
+    // topId 由 syncTop 统一裁定（全页 MIT 同源），这里只标记各流 Top1，不回写
   });
   const seen = new Set();
   const out = [];
@@ -5182,14 +5028,20 @@ function todayRowHtml(entry, opts) {
   const anchorMeta = habit && n.anchor ? `<span class="today-meta anchor-tag" title="触发线索：在既有行为之后（习惯叠加）">⚓ ${esc(n.anchor)}后</span>` : '';
   const tagMeta = (n.tags && n.tags.length) ? `<span class="today-meta ctx-tag" title="情境标签">🏷 ${esc(n.tags.join(' '))}</span>` : '';
   const overflowMeta = n._overflow ? `<span class="today-meta overflow-tag" title="超出今日可投入预算（多项目共享同一每日容量），建议删减、顺延到明天或调大⚙每日投入">🌊 溢出</span>` : '';
-  return `<div class="today-row${isWfTop ? ' is-top' : ''}${habit ? ' is-habit' : ''}${isNodeParked(n) ? ' is-parked' : ''}${n._overflow ? ' is-overflow' : ''}${expanded ? ' expanded' : ''}" data-id="${n.id}" data-wf="${wfId}" draggable="true">
+  // v8.14: ② 次重要行直接显示算法分（用户反馈「看不到第二项的分数」），title 带分解明细
+  const nextScoreMeta = opts.nextTop ? (() => {
+    const fsp = focusScoreParts(n);
+    const brk = fsp.parts.filter(p => p.pts !== 0 && !p.note).slice(0, 4).map(p => `${p.label} ${p.pts > 0 ? '+' : ''}${p.pts}`).join(' · ');
+    return `<span class="today-meta next-top-score" title="② 算法分 · 分解：${esc(brk)}">② ${fsp.total}分</span>`;
+  })() : '';
+  return `<div class="today-row${isWfTop ? ' is-top' : ''}${opts.nextTop ? ' next-top' : ''}${habit ? ' is-habit' : ''}${isNodeParked(n) ? ' is-parked' : ''}${n._overflow ? ' is-overflow' : ''}${expanded ? ' expanded' : ''}" data-id="${n.id}" data-wf="${wfId}" draggable="true">
     <label class="today-check"><input type="checkbox" data-done="${n.id}" data-wf="${wfId}" aria-label="完成"></label>
     <div class="today-txt">
-      <span class="today-txt-line">${isWfTop ? '<i class="today-pfx" title="各流最重要">★</i>' : ''}${habit ? '<i class="today-pfx">🔁</i>' : ''}${isMicro ? '<i class="today-pfx">🫳</i>' : ''}<input class="today-txt-in" data-edit="${n.id}" data-wf="${wfId}" value="${esc(n.text)}" title="编辑文案 · 回车或失焦保存" aria-label="任务文案"></span>
-      <span class="today-txt-metas">${wfName ? `<span class="today-meta wf-tag">${esc(wfName)}</span>` : ''}${timeVal ? `<span class="today-meta">🕐 ${esc(timeVal)}</span>` : ''}${recurMeta}${habit ? habitMeta : (streak ? `<span class="today-meta streak" title="习惯连续天数（执行记录驱动）">🔥 ${streak.cur}天</span>` : '')}${anchorMeta}${tagMeta}${n.daysLeft != null ? `<span class="today-meta meta-dleft">${n.overdue ? '逾期' : '剩'}${Math.abs(n.daysLeft)}天</span>` : ''}${waitMeta}${blockMeta}${overflowMeta}</span>
+      <span class="today-txt-line">${opts.nextTop ? '<i class="today-pfx next-top-badge" title="② 次重要 · 今日池算法排序仅次于 MIT，值得排进下一段专注">②</i>' : ''}${isWfTop ? '<i class="today-pfx" title="各流最重要">★</i>' : ''}${habit ? '<i class="today-pfx">🔁</i>' : ''}${isMicro ? '<i class="today-pfx">🫳</i>' : ''}<input class="today-txt-in" data-edit="${n.id}" data-wf="${wfId}" value="${esc(n.text)}" title="编辑文案 · 回车或失焦保存" aria-label="任务文案"></span>
+      <span class="today-txt-metas">${nextScoreMeta}${wfName ? `<span class="today-meta wf-tag">${esc(wfName)}</span>` : ''}${timeVal ? `<span class="today-meta">🕐 ${esc(timeVal)}</span>` : ''}${recurMeta}${habit ? habitMeta : (streak ? `<span class="today-meta streak" title="习惯连续天数（执行记录驱动）">🔥 ${streak.cur}天</span>` : '')}${anchorMeta}${tagMeta}${n.daysLeft != null ? `<span class="today-meta meta-dleft">${n.overdue ? '逾期' : '剩'}${Math.abs(n.daysLeft)}天</span>` : ''}${waitMeta}${blockMeta}${overflowMeta}</span>
     </div>
     <div class="today-row-quick">
-      ${isWfTop || opts.pomo ? `<button type="button" class="gf-btn gf-btn--sm gf-btn--primary" data-pomo="${n.id}" data-wf="${wfId}" title="番茄钟 25′">🍅</button>` : ''}
+      ${isWfTop || opts.pomo ? `<button type="button" class="gf-btn gf-btn--sm gf-btn--primary" data-pomo="${n.id}" data-wf="${wfId}" title="番茄钟专注（时长取 MIT 区下拉，默认 25′）">🍅</button>` : ''}
       <button type="button" class="gf-btn gf-btn--sm gf-btn--ghost today-rowmore-btn" data-rowmore="${n.id}" title="更多操作：⏰提醒(弹通知) / 估时 / 🕐计划时间(排序用) / 预案 / 等待 / 删除" aria-expanded="${expanded}">${expanded ? '▲' : '⋯'}</button>
     </div>
     <div class="today-row-more">
@@ -5323,7 +5175,9 @@ function bindTodayPanel(root) {
     if (b.dataset.wf && b.dataset.wf !== state.activeWorkflowId) switchWorkflow(b.dataset.wf);
     state.topId = b.dataset.pomo;
     const w = workflowById(b.dataset.wf); if (w) w.topId = b.dataset.pomo;
-    startPomo(25);
+    // v8.13: 时长承接自 MIT 区下拉（原英雄卡 25/50/90 选择器），无下拉时默认 25′
+    const pl = document.getElementById('pomoLen');
+    startPomo(pl ? +pl.value || 25 : 25);
     save();
   });
   const setPark = (wfId, nodeId, status) => {
@@ -5801,8 +5655,8 @@ function renderTodayPanel() {
   ensureTodayTimeResolved(pool);
   // v8.2: 有计划时间的今日任务自动带「开始前 5 分钟」提醒（用户可改可清）
   ensureRemindDefaults(pool.map(x => x.node));
-  // MIT 与英雄卡同源：优先取 syncTop 选出的 Top1，保证「当下最重要」全页一致
-  // MIT 与英雄卡同源：topId 不在今日池（如周尺度主线）也直接展示，保证两处一致
+  // MIT 与 syncTop 同源：优先取 syncTop 选出的 Top1，保证「当下最重要」全页一致
+  // topId 不在今日池（如周尺度主线）也直接展示，保证两处一致
   // v7.9: MIT 节点可能属于其他项目（全局英雄卡）——byId 只查当前项目会漏，改用跨项目查找
   const topWfId = state.topWfId || state.activeWorkflowId;
   const topNode = state.topId ? (nodeInWorkflow(topWfId, state.topId) || byId(state.topId)) : null;
@@ -5865,12 +5719,14 @@ function renderTodayPanel() {
     const untimed = inPool.filter(ent => !ent.node.time)
       .sort((a, b) => slotRank(a.node.slot) - slotRank(b.node.slot) || focusScore(b.node) - focusScore(a.node));
     const ordered = timed.concat(untimed).concat(overflowed);
+    // v8.13 英雄卡去重：清单内高亮「② 次重要」（算法分仅次于 MIT 的一条），替代原执行栈 #2/#3
+    const nextTopId = pickNextTopId(inPool, mitId);
     const execCount = (mitEntry ? 1 : 0) + ordered.length + habitPool.length;
     // v8.7: 工作流过滤开关 —— 默认「🌐 全部项目」（MIT/今日执行跨项目一致）；点开只算当前项目
     const _curWf = workflowById(state.activeWorkflowId);
     const _curWfName = (_curWf && _curWf.name) || '当前项目';
     const wfOnlyBtn = `<button type="button" class="today-wfonly${_wfOnly ? ' on' : ''}" id="todayWfOnlyBtn" title="${_wfOnly ? ('正在只看「' + esc(_curWfName) + '」——点击恢复跨全部项目') : '默认跨全部项目（MIT/今日执行从任何项目进入都一致）——点击只看当前项目'}">${_wfOnly ? '🎯 当前项目' : '🌐 全部项目'}</button>`;
-    let sh = `<div class="today-block-h">📋 今日执行 · 按时间 <span class="cnt">${execCount}</span><span class="help-icon" title="展开行尾 ⋯ 设具体计划时间，自动按时间升序排列；未设时间的按重要度排在后面" style="cursor:help;color:var(--muted);margin-left:2px">❓</span>${wfOnlyBtn}<span style="flex:1"></span><button type="button" class="today-add" data-add="task" data-add-wf="${state.activeWorkflowId}" title="新增今日任务">＋ 任务</button><button type="button" class="today-add" data-add="habit" data-add-wf="${state.activeWorkflowId}" title="新增每日习惯">＋ 习惯</button></div>`;
+    let sh = `<div class="today-block-h">📋 今日执行 · 按时间 <span class="cnt">${execCount}</span><button type="button" class="help-icon" id="todayExecHelp" title="排序规则 · 点击展开/收起说明">❓</button>${wfOnlyBtn}<span style="flex:1"></span><button type="button" class="today-add" data-add="task" data-add-wf="${state.activeWorkflowId}" title="新增今日任务">＋ 任务</button><button type="button" class="today-add" data-add="habit" data-add-wf="${state.activeWorkflowId}" title="新增每日习惯">＋ 习惯</button></div>`;
     // v8.11: 「被吞」可见性 —— 排到明/后天（≤+3 天）的叶子给提示条，不再无声消失
     {
       const tmrw = [];
@@ -5898,7 +5754,25 @@ function renderTodayPanel() {
       sh += `<div class="empty-state">📋 暂无任务<br><span class="es-sub">从「目标规划」生成，或点右上「＋ 任务」</span><br><button type="button" class="gf-btn gf-btn--sm" style="margin-top:8px" data-add="task" data-add-wf="${state.activeWorkflowId}">＋ 新增任务</button></div>`;
     } else {
       if (mitEntry) {
-        sh += `<div class="today-mit-pin"><span class="mit-pin-lbl">🎯 MIT · 当下最重要</span>${todayRowHtml(mitEntry, { micro: true, pomo: true })}</div>`;
+        // v8.13 英雄卡去重：番茄时长下拉 / 📌取消固定 / 📊得分分解，从英雄卡迁入 MIT 区（不再整卡重复展示）
+        const mitN = mitEntry.node;
+        const mitFs = focusScoreParts(mitN);
+        const mitParts = mitFs.parts.filter(p => p.pts !== 0 && !p.note).slice(0, 4);
+        const mitPartsHtml = mitParts.map(p => `<span class="fs-item${p.pts < 0 ? ' neg' : ''}">${esc(p.label)} <b>${p.pts > 0 ? '+' + p.pts : p.pts}</b></span>`).join('<span class="fs-sep">·</span>');
+        const mitProg = subtreeProgress(mitN);
+        const mitProgPill = mitProg ? `<span class="pill">📈 子树 ${mitProg.pct}%（${mitProg.done}/${mitProg.total}）</span>` : '';
+        const mitSprint = mitProg && mitProg.pct >= 80 && mitProg.pct < 100
+          ? `<span class="pill pill-sprint" title="目标梯度效应：越接近完成动力越强">🔥 冲刺 · 还剩 ${mitProg.total - mitProg.done} 个叶子</span>` : '';
+        const mitPace = paceStatus(mitN);
+        const mitPacePill = mitPace ? `<span class="pill pace" title="相对期限应有进度">节奏 ${mitPace.ahead >= 0 ? '领先' : '落后'} ${Math.abs(mitPace.ahead)}</span>` : '';
+        const mitMp = metricProgress(mitN);
+        const mitMpPill = mitMp && mitMp.kind !== 'leaf' ? `<span class="pill">📊 ${mitMp.done}/${mitMp.tgt}</span>` : '';
+        sh += `<div class="today-mit-pin"><div class="mit-pin-head"><span class="mit-pin-lbl">🎯 MIT · 当下最重要</span>` +
+          `<select class="gf-input gf-select mit-pomo-len" id="pomoLen" title="专注时长：25′ 标准 / 50′ 长专注 / 90′ 深潜（BRAC 完整周期，评分加权）——配合行内 🍅 启动"><option value="25" selected>🍅 25′</option><option value="50">🍅 50′</option><option value="90">🌊 90′</option></select>` +
+          (state.topPin === mitN.id ? `<button type="button" class="mit-unpin" id="btnUnpinTop" title="你在日历/洞察里手动固定了这件，算法暂不接管">📌 已固定 · 取消</button>` : '') +
+          `</div>${todayRowHtml(mitEntry, { micro: true, pomo: true })}` +
+          `<details class="mit-score-fold"><summary>📊 得分 ${mitFs.total} · 进度与分解</summary><div class="hero-more">${mitProgPill}${mitMpPill}${mitPacePill}${mitSprint}</div><div class="hero-score" title="为什么选这个：${mitParts.map(p => p.label).join('、')}">${mitPartsHtml}</div></details>` +
+          `</div>`;
       }
       if (ordered.length) {
         // v8.11: 溢出区前插分隔行（沉底区块的标题）
@@ -5907,7 +5781,7 @@ function renderTodayPanel() {
           const div = (!ovfSplit && ent.node._overflow)
             ? (ovfSplit = true, `<div class="today-sec-div">🌊 溢出 · 超出今日可投入，建议顺延或删减 <span class="cnt">${overflowed.length}</span></div>`)
             : '';
-          return div + todayRowHtml(ent);
+          return div + todayRowHtml(ent, ent.node.id === nextTopId ? { nextTop: true } : undefined);
         }).join('');
       } else if (!habitPool.length) {
         sh += `<div class="empty-state">📋 暂无其他任务<br><span class="es-sub">专注 MIT 即可，或点右上「＋ 任务」追加</span></div>`;
@@ -5927,15 +5801,38 @@ function renderTodayPanel() {
     // v8.7: 工作流过滤开关接线（innerHTML 重建后需重绑）
     const wfOnlyEl = slots.querySelector('#todayWfOnlyBtn');
     if (wfOnlyEl) wfOnlyEl.onclick = () => toggleTodayWfOnly();
+    // v8.14: ❓ 可点击展开/收起排序说明（原只有 hover title——移动端无 hover，桌面用户也习惯点击）
+    const helpEl = slots.querySelector('#todayExecHelp');
+    if (helpEl) helpEl.onclick = () => {
+      const old = slots.querySelector('.today-exec-help');
+      if (old) { old.remove(); helpEl.classList.remove('on'); return; }
+      helpEl.classList.add('on');
+      helpEl.closest('.today-block-h').insertAdjacentHTML('afterend',
+        `<div class="today-exec-help">排序规则：设了「🕐 计划时间」的任务按时间升序排在最前；未设时间的按算法重要度排在其后；🌊 溢出（超今日预算）沉底。行尾 ⋯ 可设计划时间与估时；🎯 MIT 与 ② 次重要由算法钉选，不参与普通排序。</div>`);
+    };
+    // v8.13: MIT 区「📌 取消固定」（英雄卡移除后的承接入口）
+    const unpinEl = slots.querySelector('#btnUnpinTop');
+    if (unpinEl) unpinEl.onclick = () => {
+      const prev = state.topPin;
+      state.topPin = null; save(); afterChange();
+      showUndoToast('已取消固定，交回算法排序', () => { state.topPin = prev; save(); afterChange(); });
+    };
   }
   // 等待 / 阻塞区：可见但退出竞选（提醒在等什么）
   renderParkedStrip();
   const todayLog = ((state.meta && state.meta.executionLog) || {})[dateKey()] || null;
   const doneEntries = todayLog ? (todayLog.entries || []) : [];
+  // v8.14: 已完成行补「完成时刻 + 单项得分」——用户反馈完成两项后「看不到第 N 项的分数/顺序摸不着头脑」；
+  // 列表保持完成时间升序（日志 append 序），时刻戳让顺序自明
+  const scoreLogToday = (state.meta && state.meta.scoreLog) ? state.meta.scoreLog[dateKey()] : null;
   if (list) {
     list.innerHTML = `<div class="today-block-h">✅ 今日已完成 <span class="cnt">${doneEntries.length}</span></div>` +
       (doneEntries.length
-        ? doneEntries.map(en => `<div class="today-done-row"><b>${esc(en.text)}</b>${en.wfName ? `<span class="today-meta wf-tag">${esc(en.wfName)}</span>` : ''}${en.act ? `<span class="today-meta">实计 ${en.act}′</span>` : ''}</div>`).join('')
+        ? doneEntries.map(en => {
+            const dsc = scoreOfDoneEntry(en, scoreLogToday);
+            const hm = en.t ? (() => { const dt = new Date(en.t); return pad2(dt.getHours()) + ':' + pad2(dt.getMinutes()); })() : '';
+            return `<div class="today-done-row">${hm ? `<span class="today-meta done-hm" title="完成时刻 · 列表按完成先后排序">${hm}</span>` : ''}<b>${esc(en.text)}</b>${en.wfName ? `<span class="today-meta wf-tag">${esc(en.wfName)}</span>` : ''}${en.act ? `<span class="today-meta">实计 ${en.act}′</span>` : ''}${dsc ? `<span class="today-meta done-score" title="完成得分 · ${esc(dsc.reason || '按重要度/期限/时长加权')}">${dsc.score >= 0 ? '+' : ''}${dsc.score}分</span>` : ''}</div>`;
+          }).join('')
         : '<div class="empty-state">✅ 完成后会显示在这里</div>');
   }
   bindTodayPanel(mit); bindTodayPanel(micro); bindTodayPanel(slots); bindTodayPanel(list);
@@ -8695,7 +8592,7 @@ function renderSidebar() {
 // v8.8: 改为「函数数组 + 逐个 try」—— 原写法一个面板抛错会中断整组渲染
 // （如删除/新建项目后某面板在空数据态抛错 → 四象限等后续面板全部不更新，表现为「没同步更新」）
 const VIEW_GROUP = {
-  today: () => [renderHero, renderFocus, renderMetricsStrip, renderPlanShareStrip, renderTodayPanel, renderReviewBanner, updateTodayZones],
+  today: () => [syncTop, renderFocus, renderMetricsStrip, renderPlanShareStrip, renderTodayPanel, renderReviewBanner, updateTodayZones],
   plan: () => [renderSmart, renderTreeEditor],
   insights: () => [renderRhythm, renderQuadrant, renderCanvas, renderCompletionHistory],
   ai: () => [renderAIView, renderSmart],
@@ -8708,7 +8605,7 @@ function renderViewGroup(name) {
 }
 /* topId 必须在任何视图下都是最新的：英雄卡、桑基金线、侧栏 ★ 都读它 */
 function syncTop() {
-  // v7.9: 与 renderHero 同源 —— 跨项目全局候选，保证今日行动里 MIT 唯一且全项目一致
+  // v7.9: 跨项目全局候选，保证今日行动里 MIT 唯一且全项目一致（v8.13 英雄卡移除后，syncTop 是 topId 唯一裁定者）
   const cands = heroGlobalCandidates();
   const noHabit = cands.filter(c => !(c.node.recur || c.node.role === 'habit'));
   let topC = null;
@@ -9288,7 +9185,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     dkWeekLabel, historyMorningDays, historyEveningDays, historyWeekPlans, historyReviews, openHistory,
     timeAudit, weekPlanCandidates, adoptPendingAction,
     stagnationAlerts, stagnantDays, energyCurve, energyBucketNow, logEnergy,
-    focusScoreParts, isNodeParked, isNodeWaiting, isNodeBlocked, habitStrength, habitWeekLog,
+    focusScoreParts, pickNextTopId, scoreOfDoneEntry, isNodeParked, isNodeWaiting, isNodeBlocked, habitStrength, habitWeekLog,
     setNodeDeadline, convertDuePlanDate, habitRecurrence, habitTarget, habitDueToday, isRecurringTask, recurringTaskDueToday,
     resolveTimeConflicts, ensureTodayTimeResolved, todayExecutionPoolFor, backfillAISchedule,
     addInbox, clarifyInbox, inboxPending, planVsActual,
