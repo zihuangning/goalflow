@@ -4118,17 +4118,47 @@ function activateStale(wfId, nodeId) {
   n.scale = 'day'; n.touchedAt = Date.now();
   save(); afterChange();
 }
+/* v8.16: 全部活跃项目的逾期叶子（过了期限没完成）——「需要关注」新类别；
+   排除 recur/habit（循环型按节奏到期，不积累逾期语义）。与 stagnationAlerts 同遍历模式 */
+function overdueLeaves() {
+  ensureWorkflows(); flushActiveWorkflow();
+  const out = [];
+  activeWorkflows().forEach(wf => {
+    const nodes = wf.nodes || [];
+    if (!nodes.length) return;
+    computeTree(nodes);
+    nodes.filter(n => n.parentId && !n.done && n._children.length === 0 && !n.recur && n.role !== 'habit' && n.overdue).forEach(n => {
+      out.push({ wfId: wf.id, wfName: wf.name || '', node: n, _s: focusScore(n) });
+    });
+  });
+  return out.sort((a, b) => b._s - a._s);
+}
+/* v8.16: 逾期优先去重（纯函数）——同一节点同时「逾期」与「停滞」时只归逾期组（更严重），
+   返回 {od, stale} 两组互不重叠；供需要关注区块渲染与角标计数同口径 */
+function splitStaleOverdue(alerts, od) {
+  const odList = od || [];
+  const ids = new Set(odList.map(o => o && o.node && o.node.id));
+  return { od: odList, stale: (alerts || []).filter(a => !(a && a.node && ids.has(a.node.id))) };
+}
+function attentionStaleOverdue() {
+  return splitStaleOverdue(stagnationAlerts(STALE_DAYS), overdueLeaves());
+}
 function renderTodayStale() {
   const box = document.getElementById('todayStale'); if (!box) return;
-  const alerts = stagnationAlerts(STALE_DAYS);
-  if (!alerts.length) { box.innerHTML = ''; return; }
-  const rows = alerts.slice(0, 2).map(a =>
+  // v8.16: 逾期并入——同一节点只归一组（逾期优先），与角标计数同口径（attentionStaleOverdue）
+  const { od, stale } = attentionStaleOverdue();
+  if (!od.length && !stale.length) { box.innerHTML = ''; return; }
+  const odRows = od.slice(0, 2).map(a =>
+    `<div class="stale-row od"><span class="stale-t" title="${esc(a.node.text)}">${esc(a.node.text.length > 18 ? a.node.text.slice(0, 18) + '…' : a.node.text)}</span>
+     <span class="stale-m">已逾期 ${-a.node.daysLeft} 天 · ${esc(a.wfName)}</span>
+     <button type="button" class="gf-btn gf-btn--sm" data-stale="${a.node.id}" data-wf="${a.wfId}" title="提到今日清单（期限不变，今日区里可改期/完成）">⚡ 激活到今日</button></div>`).join('');
+  const staleRows = stale.slice(0, 2).map(a =>
     `<div class="stale-row"><span class="stale-t" title="${esc(a.node.text)}">${esc(a.node.text.length > 18 ? a.node.text.slice(0, 18) + '…' : a.node.text)}</span>
      <span class="stale-m">${a.days >= 999 ? '从未激活' : a.days + ' 天无动静'} · ${esc(a.wfName)}</span>
      <button type="button" class="gf-btn gf-btn--sm" data-stale="${a.node.id}" data-wf="${a.wfId}" title="钉入今日清单并标记激活">⚡ 激活到今日</button></div>`).join('');
   box.innerHTML = `<details class="fold warn" data-fold="stale"${foldOpen('stale') ? ' open' : ''}>
-    <summary>⚠️ 停滞预警<span class="fold-sum">${alerts.length} 项 ${STALE_DAYS} 天+ 无动静</span></summary>
-    <div class="fold-body"><div class="today-stale">${rows}</div></div>
+    <summary>⚠️ 停滞·逾期<span class="fold-sum">${od.length + stale.length} 项（🚨逾期 ${od.length} · ⏸停滞 ${stale.length}）</span></summary>
+    <div class="fold-body"><div class="today-stale">${odRows}${staleRows}</div></div>
   </details>`;
   bindFoldPersist(box, 'stale');
   box.querySelectorAll('[data-stale]').forEach(b => b.onclick = () => activateStale(b.dataset.wf, b.dataset.stale));
@@ -4338,10 +4368,11 @@ function renderMetricsStrip() {
     const h = Math.min(14, 2 + d.count * 3);
     return `<span class="ms-spark" title="${d.key}：完成 ${d.count} 项" style="height:${h}px"></span>`;
   }).join('');
-  // v8.0 UX 精简：默认只留 2 个关键 pill（叶子进度 + 本周动量）；KR/目标 pill 收进「指标」折叠
+  // v8.0 UX 精简：默认只留关键 pill；KR/目标 pill 收进「指标」折叠
+  // v8.16: 叶子% 与页头顶栏 progressChip 同数据重复 → 从条内移除（页头常驻）；
+  // 本周动量 title 写明口径（跨项目 7 天），与页头叶子%（当前项目总进度）区分
   const corePills = [
-    lp ? `<span class="ms-pill">叶子 <b>${lp.pct}%</b> <small>${lp.done}/${lp.total}</small></span>` : '',
-    `<span class="ms-pill ms-mom" title="近 7 天勾选叶子 · 写入执行记录 JSON">本周完成 <b>${mom.done}</b> · 估 ${mom.est}′ / 实 ${mom.act}′ <span class="ms-sparks">${spark}</span></span>`,
+    `<span class="ms-pill ms-mom" title="跨全部项目 · 近 7 天勾选完成的叶子数与估/实时长（口径与页头「叶子%」不同：那是当前项目总进度）· 写入执行记录 JSON">本周完成 <b>${mom.done}</b> · 估 ${mom.est}′ / 实 ${mom.act}′ <span class="ms-sparks">${spark}</span></span>`,
   ].filter(Boolean);
   const krPills = krs.map(n => {
     const mp = metricProgress(n); if (!mp) return '';
@@ -4350,9 +4381,13 @@ function renderMetricsStrip() {
     const confBtn = n.role === 'KR'
       ? ` <button type="button" class="ms-conf" data-confkr="${n.id}" title="KR 信心打卡（每周一次）：当前信心 ${n.conf ? n.conf + '/5' : '未评'}${n.confNote ? ' · ' + esc(n.confNote) : ''}">${n.conf ? '💪' + n.conf : '💪'}</button>`
       : '';
-    return `<span class="ms-pill" title="${esc(n.text)}${n.role === 'KR' ? ' · 信心 ' + (n.conf || '—') + '/5' : ''}">${tag} ${mp.done}/${mp.tgt} <b>${mp.pct}%</b>${pace ? ` · Δ${pace.ahead >= 0 ? '+' : ''}${pace.ahead}` : ''}${confBtn}</span>`;
+    // v8.16: pill title 写明 Δ 口径（与时间进度的差值），不再是个裸符号；
+    // pill 上加节点名前缀（截 8 字）——树里多个结构相似的目标节点进度相同时 pill 两两雷同、无法分辨（用户反馈「是重复的」）
+    const paceTxt = pace ? ` · Δ${pace.ahead >= 0 ? '+' : ''}${pace.ahead} = 比时间进度${pace.ahead >= 0 ? '超前' : '落后'} ${Math.abs(pace.ahead)}` : '';
+    const name8 = esc((n.text || '').slice(0, 8));
+    return `<span class="ms-pill" title="${esc(n.text)} · ${tag}进度${paceTxt}${n.role === 'KR' ? ' · 信心 ' + (n.conf || '—') + '/5（每周自评把握）' : ''}">${tag}·${name8} ${mp.done}/${mp.tgt} <b>${mp.pct}%</b>${pace ? ` · Δ${pace.ahead >= 0 ? '+' : ''}${pace.ahead}` : ''}${confBtn}</span>`;
   }).filter(Boolean);
-  el.innerHTML = `<div class="metrics-strip">${corePills.join('')}${krPills.length ? `<details class="ms-kr-fold"><summary>指标 ${krPills.length} ▾</summary><div class="ms-kr-body">${krPills.join('')}</div></details>` : ''}</div>`;
+  el.innerHTML = `<div class="metrics-strip">${corePills.join('')}${krPills.length ? `<details class="ms-kr-fold"><summary title="当前项目的关键结果/习惯/带数字目标的节点进度（最多 8 个）· Δ = 与时间进度的差 · 💪 = 信心打卡">指标 ${krPills.length} ▾</summary><div class="ms-kr-body">${krPills.join('')}</div></details>` : ''}</div>`;
   // KR 信心打卡：进度数字之外，再问「你有多大把握」
   el.querySelectorAll('[data-confkr]').forEach(b => b.onclick = () => {
     const n = byId(b.dataset.confkr); if (!n) return;
@@ -4689,7 +4724,9 @@ function warnIfOverCapacity(context) {
     alert(`⚠️ 本项目本周预算已超支\n\n${context || '当前计划'}所在项目本周承诺约 ${fmtHours(f.projEst)} 小时，而本项目可投入只有 ${fmtHours(f.projCap)} 小时（全局减去其他项目占用后），超出 ${fmtHours(f.projEst - f.projCap)} 小时。\n\n建议：删减/推迟任务、延长项目周期，或在 ⚙ 设置中调整每周投入。`);
     return true;
   }
-  if (f.over) {
+  // v8.16: 全局分支仅在有全局容量配置时走——无配置时 weekCapGlobal 回落单项目容量，
+  // est（全部项目合计）vs cap（单项目）口径错配会假超支弹窗（与今日状态区周预算同根因）
+  if (f.over && f.global) {
     alert(`⚠️ 全局本周时间预算已超支\n\n全部项目本周合计约 ${fmtHours(f.est)} 小时，而每周可投入 ${fmtHours(f.cap)} 小时（工作日 ${c.globalWorkdayHours || c.hoursPerDay}h × 5 + 周末 ${c.globalWeekendHours || 0}h × 2），超出 ${fmtHours(f.est - f.cap)} 小时。\n\n建议：删减/推迟任务、延长项目周期，或在 ⚙ 设置中调整每周投入。`);
     return true;
   }
@@ -5028,11 +5065,12 @@ function todayRowHtml(entry, opts) {
   const anchorMeta = habit && n.anchor ? `<span class="today-meta anchor-tag" title="触发线索：在既有行为之后（习惯叠加）">⚓ ${esc(n.anchor)}后</span>` : '';
   const tagMeta = (n.tags && n.tags.length) ? `<span class="today-meta ctx-tag" title="情境标签">🏷 ${esc(n.tags.join(' '))}</span>` : '';
   const overflowMeta = n._overflow ? `<span class="today-meta overflow-tag" title="超出今日可投入预算（多项目共享同一每日容量），建议删减、顺延到明天或调大⚙每日投入">🌊 溢出</span>` : '';
-  // v8.14: ② 次重要行直接显示算法分（用户反馈「看不到第二项的分数」），title 带分解明细
+  // v8.14: ② 次重要行直接显示优先级分（用户反馈「看不到第二项的分数」），title 带分解明细
+  // v8.15: 「算法分」→「优先级分」并写明用途——与「今日表现分」（完成累计）区分，避免同名异义
   const nextScoreMeta = opts.nextTop ? (() => {
     const fsp = focusScoreParts(n);
     const brk = fsp.parts.filter(p => p.pts !== 0 && !p.note).slice(0, 4).map(p => `${p.label} ${p.pts > 0 ? '+' : ''}${p.pts}`).join(' · ');
-    return `<span class="today-meta next-top-score" title="② 算法分 · 分解：${esc(brk)}">② ${fsp.total}分</span>`;
+    return `<span class="today-meta next-top-score" title="② 优先级分：算法排序用，决定「谁先做的」——不是完成评价｜分解：${esc(brk)}">② 优先 ${fsp.total}</span>`;
   })() : '';
   return `<div class="today-row${isWfTop ? ' is-top' : ''}${opts.nextTop ? ' next-top' : ''}${habit ? ' is-habit' : ''}${isNodeParked(n) ? ' is-parked' : ''}${n._overflow ? ' is-overflow' : ''}${expanded ? ' expanded' : ''}" data-id="${n.id}" data-wf="${wfId}" draggable="true">
     <label class="today-check"><input type="checkbox" data-done="${n.id}" data-wf="${wfId}" aria-label="完成"></label>
@@ -5546,9 +5584,10 @@ function renderTodayAttnPill() {
   const due = parkedEntries().filter(e => followUpDue(e.node));
   const stale = stagnationAlerts(STALE_DAYS);
   if (!due.length && !stale.length) { box.innerHTML = ''; return; }
+  // v8.15: chip title 写明口径（与「需要关注」角标的全部事项区分），且超 3 条时补「等」
   box.innerHTML =
-    (due.length ? `<button type="button" class="attn-chip due" data-attn="due" title="${esc(due.slice(0, 3).map(e => e.node.text).join(' / '))}">📣 ${due.length} 需催办</button>` : '') +
-    (stale.length ? `<button type="button" class="attn-chip stale" data-attn="stale" title="${esc(stale.slice(0, 3).map(a => a.node.text).join(' / '))}">⚠️ ${stale.length} 停滞</button>` : '');
+    (due.length ? `<button type="button" class="attn-chip due" data-attn="due" title="到期的跟进：暂停事项里设了跟进时间且到点了（全部暂停项在「需要关注」里）｜${esc(due.slice(0, 3).map(e => e.node.text).join(' / '))}${due.length > 3 ? ' 等' : ''}">📣 ${due.length} 需催办</button>` : '') +
+    (stale.length ? `<button type="button" class="attn-chip stale" data-attn="stale" title="停滞：重要但 ${STALE_DAYS} 天没碰过的叶子｜${esc(stale.slice(0, 3).map(a => a.node.text).join(' / '))}${stale.length > 3 ? ' 等' : ''}">⚠️ ${stale.length} 停滞</button>` : '');
   box.querySelectorAll('[data-attn]').forEach(b => b.onclick = () => {
     const att = document.getElementById('zoneAttention');
     if (att) att.open = true;
@@ -5674,11 +5713,11 @@ function renderTodayPanel() {
       <span>今日可做完性</span><span class="dc-bar"><i style="width:${pct}%"></i></span>
       <span class="dc-num">预估 ${d.est}′ / ${fmtHours(d.cap)}h</span><span class="dc-tag">${d.over ? `超出 ${d.est - d.cap}′` : '可承载'}</span>
     </div>
-    <details class="dc-fold"><summary>周预算 ${wk.over ? '<span class="dc-tag over">⚠ 超支</span>' : ''}</summary>
-      <div class="day-capacity${wk.over ? ' over' : ''}" title="全部项目本周承诺合计 vs 全局每周容量">
+    <details class="dc-fold"><summary title="本周承诺时长 vs 可投入容量：全局行统计全部项目合计（需在⚙设置全局小时），本项目行只看当前项目">周预算 ${wk.global ? (wk.over ? '<span class="dc-tag over">⚠ 超支</span>' : '<span class="dc-tag">✓</span>') : (wk.projOver ? '<span class="dc-tag over">⚠ 本项目超支</span>' : '')}</summary>
+      ${wk.global ? `<div class="day-capacity${wk.over ? ' over' : ''}" title="全部项目本周承诺合计 vs 全局每周容量（⚙设置里的工作日/周末小时）">
         <span>本周总预算</span><span class="dc-bar"><i style="width:${wpct}%"></i></span>
         <span class="dc-num">已承诺 ${fmtHours(wk.est)}h / ${fmtHours(wk.cap)}h${wk.free >= 0 ? ' · 余 ' + fmtHours(wk.free) + 'h' : ' · 超 ' + fmtHours(-wk.free) + 'h'}</span>
-      </div>
+      </div>` : `<div class="hint dc-no-global">🌐 全局周预算未设置（全部项目合计 ${fmtHours(wk.est)}h）——⚙ 设置里填「工作日/周末可投入小时」后，这里显示全局预算与超支判定</div>`}
       <div class="day-capacity${wk.projOver ? ' over' : ''}" title="仅当前项目本周承诺 vs 当前项目净可投入（全局 − 其他项目占用）">
         <span>本项目预算</span><span class="dc-bar"><i style="width:${ppg}%"></i></span>
         <span class="dc-num">${fmtHours(wk.projEst)}h / ${fmtHours(wk.projCap)}h${wk.projFree >= 0 ? ' · 余 ' + fmtHours(wk.projFree) + 'h' : ' · 超 ' + fmtHours(-wk.projFree) + 'h'}</span>
@@ -5771,7 +5810,7 @@ function renderTodayPanel() {
           `<select class="gf-input gf-select mit-pomo-len" id="pomoLen" title="专注时长：25′ 标准 / 50′ 长专注 / 90′ 深潜（BRAC 完整周期，评分加权）——配合行内 🍅 启动"><option value="25" selected>🍅 25′</option><option value="50">🍅 50′</option><option value="90">🌊 90′</option></select>` +
           (state.topPin === mitN.id ? `<button type="button" class="mit-unpin" id="btnUnpinTop" title="你在日历/洞察里手动固定了这件，算法暂不接管">📌 已固定 · 取消</button>` : '') +
           `</div>${todayRowHtml(mitEntry, { micro: true, pomo: true })}` +
-          `<details class="mit-score-fold"><summary>📊 得分 ${mitFs.total} · 进度与分解</summary><div class="hero-more">${mitProgPill}${mitMpPill}${mitPacePill}${mitSprint}</div><div class="hero-score" title="为什么选这个：${mitParts.map(p => p.label).join('、')}">${mitPartsHtml}</div></details>` +
+          `<details class="mit-score-fold"><summary title="优先级分：算法排序用，决定「先做谁」——不是完成评价（那个在📊今日状态里看表现分）">📊 优先级 ${mitFs.total} · 为什么排最前</summary><div class="hero-more">${mitProgPill}${mitMpPill}${mitPacePill}${mitSprint}</div><div class="hero-score" title="为什么选这个：${mitParts.map(p => p.label).join('、')}">${mitPartsHtml}</div></details>` +
           `</div>`;
       }
       if (ordered.length) {
@@ -5850,16 +5889,39 @@ function updateTodayZones() {
   const att = document.getElementById('zoneAttention');
   const st = document.getElementById('zoneStatus');
   const fo = document.getElementById('zoneFocus');
-  const ids = ['onboardCard', 'todayBackupBar', 'todayBurnout', 'todayStale', 'todayParked', 'inboxPanel'];
-  let n = 0;
-  ids.forEach(id => { const el = document.getElementById(id); if (el && el.innerHTML.trim()) n++; });
-  const rb = document.getElementById('reviewBanner'); if (rb && rb.classList.contains('show')) n++;
+  // v8.15: badge 数「实际事项」而非非空区块——旧口径下收件箱 pend=0 但 someday 有货时
+  // inboxPanel 仍渲染「已清空」占位（innerHTML 非空）→ 点掉后数字还在却找不到内容；
+  // 且 onboard 欢迎卡/备份提示混入计数，「关注的东西不对」
+  const _so = attentionStaleOverdue();
+  const odN = _so.od.length, staleN = _so.stale.length;
+  const parkedN = parkedEntries().length;
+  const inboxN = inboxPending().length;
+  let tipN = 0;
+  ['todayBackupBar', 'todayBurnout'].forEach(id => { const el = document.getElementById(id); if (el && el.innerHTML.trim()) tipN++; });
+  const rb = document.getElementById('reviewBanner'); if (rb && rb.classList.contains('show')) tipN++;
+  const n = odN + staleN + parkedN + inboxN + tipN;
   const badge = document.getElementById('attentionBadge');
-  if (badge) badge.textContent = n ? `(${n})` : '';
+  if (badge) {
+    badge.textContent = n ? `(${n})` : '';
+    badge.title = n ? `需要关注 ${n} 项 = 🚨逾期 ${odN} + ⚠️停滞 ${staleN} + ⏸暂停 ${parkedN} + 📥待澄清 ${inboxN} + 💡提示 ${tipN}` : '';
+  }
   if (att) {
     const onboard = document.getElementById('onboardCard');
-    att.open = (onboard && onboard.innerHTML.trim()) ? true : zoneOpenPref('zoneAttention', false);
+    const hasOnboard = !!(onboard && onboard.innerHTML.trim());
+    att.open = hasOnboard ? true : zoneOpenPref('zoneAttention', false);
     bindZonePersist(att);
+    // v8.15: 全部清空时给明确空态（否则展开是一片空白，以为数字出 bug）
+    const body = att.querySelector('.zone-body');
+    let empty = document.getElementById('attentionEmpty');
+    if (n === 0 && !hasOnboard) {
+      if (!empty && body) {
+        empty = document.createElement('div');
+        empty.id = 'attentionEmpty';
+        empty.className = 'hint attention-empty';
+        body.appendChild(empty);
+      }
+      if (empty) empty.textContent = '✨ 没有需要关注的事——逾期 / 停滞 / 暂停 / 待澄清都已清空';
+    } else if (empty) empty.remove();
   }
   if (st) {
     st.open = zoneOpenPref('zoneStatus', false);
@@ -5868,7 +5930,9 @@ function updateTodayZones() {
     if (sum) {
       const ts = todayScore();
       const d = dayPlanFeasibilityAll();
-      sum.textContent = `${ts.total} 分 · ${ts.grade || '—'} · ${d.over ? `超出预算 ${d.est - d.cap}′` : '可承载'}`;
+      // v8.15: 「分」→「表现分」+ title 说口径，与 MIT 的「优先级分」区分（同名异义曾是最大困惑源）
+      sum.textContent = `${ts.total} 表现分 · ${ts.grade || '—'} · ${d.over ? `超出预算 ${d.est - d.cap}′` : '可承载'}`;
+      sum.title = '今日表现分：已完成事项的加分累计（日目标 100 分，番茄另计）｜可做完性：今日清单预估时长是否超出可支配时间';
     }
   }
   if (fo) { fo.open = zoneOpenPref('zoneFocus', false); bindZonePersist(fo); }
@@ -6023,17 +6087,22 @@ function renderFocus() {
     const est = n.estimateMinutes != null ? `<span class="dl">⏳ ${n.estimateMinutes}分</span>` : '';
     const act = n.actualMinutes != null ? `<span class="dl">✓ ${n.actualMinutes}分</span>` : '';
     const rk = rank != null ? `<span class="dl">#${rank}</span>` : '';
-    const todayBtn = showToday ? `<button type="button" class="gf-btn gf-btn--sm gf-btn--primary fitem-today" data-today="${n.id}" title="把这条加入今天任务">→今天</button>` : '';
+    // v8.16: 备选区所有行都能「→今天」（原只有 Backlog 两条 lane 有按钮）；
+    // 已在今日清单的（已排时间/排到今日/今天到期）显示标记而非按钮——重复点击会把已排时间顺延
+    const inToday = !!(n.time || n.planDate === dateKey() || n.daysLeft === 0);
+    const todayBtn = inToday
+      ? '<span class="dl fitem-in-today" title="已在今日清单（见上方「今日执行」区）">✓ 今日</span>'
+      : (showToday ? `<button type="button" class="gf-btn gf-btn--sm gf-btn--primary fitem-today" data-today="${n.id}" title="把这条加入今天任务（自动排空闲时间，可撤回）">→今天</button>` : '');
     return `<div class="fitem ${n.overdue ? 'overdue' : ''}">${rk}${esc(n.text)}${dl}${slot}${est}${act}${todayBtn}</div>`;
   };
   const sc = state.scale === 'all' ? '全部' : (SCALE_LABEL[state.scale] + '重点');
-  const top3Html = top3.length ? `<div class="fgroup top3"><h3>★ 可完成焦点 Top ${top3.length}<span class="cnt">算法排序 · 不含 Backlog</span></h3>${top3.map((n, i) => li(n, i + 1)).join('')}</div>` : '';
+  const top3Html = top3.length ? `<div class="fgroup top3"><h3>★ 可完成焦点 Top ${top3.length}<span class="cnt">算法排序 · 不含 Backlog</span></h3>${top3.map((n, i) => li(n, i + 1, true)).join('')}</div>` : '';
   const lanes = backlogLanes();
   const lane = arr => arr.length ? arr.map(n => li(n, null, true)).join('') : '<div class="hint" style="color:var(--muted-2)">暂无</div>';
   box.innerHTML = `<div class="empty-hint">当前视图：${sc}${state.scale === 'all' ? '（含各尺度）' : ''}</div>
     ${top3Html}
-    <div class="fgroup now"><h3>🔴 立即做（重要且紧急）<span class="cnt">${now.length} 项</span></h3>${now.length ? now.map(n => li(n)).join('') : '<div class="hint" style="color:var(--muted-2)">暂无</div>'}</div>
-    <div class="fgroup core"><h3>🔵 核心投入（重要不紧急）<span class="cnt">${core.length} 项</span></h3>${core.length ? core.map(n => li(n)).join('') : '<div class="hint" style="color:var(--muted-2)">暂无</div>'}</div>
+    <div class="fgroup now"><h3>🔴 立即做（重要且紧急）<span class="cnt">${now.length} 项</span></h3>${now.length ? now.map(n => li(n, null, true)).join('') : '<div class="hint" style="color:var(--muted-2)">暂无</div>'}</div>
+    <div class="fgroup core"><h3>🔵 核心投入（重要不紧急）<span class="cnt">${core.length} 项</span></h3>${core.length ? core.map(n => li(n, null, true)).join('') : '<div class="hint" style="color:var(--muted-2)">暂无</div>'}</div>
     <div class="fgroup backlog lw"><h3>🌊 上周未完成 Backlog<span class="cnt">${lanes.lastWeek.length} 项</span></h3>${lane(lanes.lastWeek)}</div>
     <div class="fgroup backlog nm"><h3>🔭 下月预告<span class="cnt">${lanes.nextMonth.length} 项</span></h3>${lane(lanes.nextMonth)}</div>`;
   box.querySelectorAll('[data-today]').forEach(b => b.onclick = () => promoteNodeToToday(b.dataset.today));
@@ -8139,7 +8208,7 @@ function openRitualModal(kind) {
         <div class="mh-sub">完成 ${ts.count} 项 · 🍅 ${ts.pomos} 个 · 专注 ${ts.focusMin}′ · 未完成 ${undone.length} 项（逐条处置）</div></div>
         <span class="mh-x" id="rtClose">×</span></div>
       <div class="rt-body">
-        <div class="rt-total"><span>今日总评分</span><b>${ts.total}</b><i class="ts-grade">${ts.grade}</i></div>
+        <div class="rt-total"><span title="已完成事项的加分累计（日目标 100 分，番茄另计）">今日表现分</span><b>${ts.total}</b><i class="ts-grade">${ts.grade}</i></div>
         <div class="rt-list">${rows || '<div class="hint">今天还没有评分记录——明天从 MIT 开始，完成叶子或番茄钟即可自动评分。</div>'}</div>
         ${undone.length ? `<div class="rt-dispo-h" id="rtDispoH">🧹 待处置 ${dispoPend.length} 项（明天继续 / 改期 / 放弃）</div><div class="rt-list dispo-list" id="rtDispoList">${dispoRows || '<div class="hint">全部处置完毕 🎉</div>'}</div>${dispoDoneHtml}` : '<div class="hint">今日清单全部完成 🎉</div>'}
         ${goodHtml}
@@ -8550,13 +8619,13 @@ function renderTodayScore() {
   const box = document.getElementById('todayScore'); if (!box) return;
   const ts = todayScore();
   if (!ts.entries.length) {
-    box.innerHTML = '<div class="today-score ts-empty"><span class="hint">完成叶子任务或结束一个番茄钟后，这里会自动给出每项评分与今日总评分（日目标 100 分）。</span></div>';
+    box.innerHTML = '<div class="today-score ts-empty"><span class="hint">完成叶子任务或结束一个番茄钟后，这里会自动累计「今日表现分」（日目标 100 分）。</span></div>';
     return;
   }
   const pct = clamp(Math.round(ts.total), 0, 100);
   const last = ts.entries[ts.entries.length - 1];
   box.innerHTML =`<div class="today-score">
-    <div class="ts-main"><span class="ts-label">今日总评分</span><b class="ts-num">${ts.total}</b><i class="ts-grade">${ts.grade}</i></div>
+    <div class="ts-main"><span class="ts-label" title="今日表现分：已完成事项的加分累计（日目标 100 分，番茄另计）——与清单里 MIT/② 的「优先级分」（决定先做谁）是两回事">今日表现分</span><b class="ts-num">${ts.total}</b><i class="ts-grade">${ts.grade}</i></div>
     <div class="ts-bar"><i style="width:${pct}%"></i></div>
     <div class="ts-pills">
       <span>完成 ${ts.count} 项</span><span>🍅 ${ts.pomos} 个 · 专注 ${ts.focusMin}′</span>
@@ -9185,7 +9254,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     dkWeekLabel, historyMorningDays, historyEveningDays, historyWeekPlans, historyReviews, openHistory,
     timeAudit, weekPlanCandidates, adoptPendingAction,
     stagnationAlerts, stagnantDays, energyCurve, energyBucketNow, logEnergy,
-    focusScoreParts, pickNextTopId, scoreOfDoneEntry, isNodeParked, isNodeWaiting, isNodeBlocked, habitStrength, habitWeekLog,
+    focusScoreParts, pickNextTopId, scoreOfDoneEntry, splitStaleOverdue, overdueLeaves, isNodeParked, isNodeWaiting, isNodeBlocked, habitStrength, habitWeekLog,
     setNodeDeadline, convertDuePlanDate, habitRecurrence, habitTarget, habitDueToday, isRecurringTask, recurringTaskDueToday,
     resolveTimeConflicts, ensureTodayTimeResolved, todayExecutionPoolFor, backfillAISchedule,
     addInbox, clarifyInbox, inboxPending, planVsActual,

@@ -3146,3 +3146,18 @@ button.ve-more:hover { text-decoration: underline; }
 .help-icon { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; padding: 0 4px; margin-left: 2px; border-radius: 50%; line-height: 1.4; transition: background .12s, color .12s; }
 .help-icon:hover, .help-icon.on { background: var(--bg1); color: var(--ink); }
 .today-exec-help { margin: 4px 0 8px; padding: 8px 12px; background: var(--bg1); border: 1px solid var(--stroke-soft); border-radius: var(--radius-sm); font-size: 12.5px; color: var(--ink-2); line-height: 1.7; }
+
+/* ===== v8.15 数字口径澄清 + 需要关注计数修正 ===== */
+/* 「需要关注」全部清空时的明确空态（否则展开一片空白，以为数字出 bug） */
+.attention-empty { padding: 10px 14px; line-height: 1.6; }
+/* 「需要关注」角标可悬停看构成（停滞+暂停+待澄清+提示） */
+.zone-badge[title] { cursor: help; }
+
+/* ===== v8.16 周预算口径/备选区全可入今日/逾期并入需要关注 ===== */
+/* 备选区「已在今日」标记（替代按钮，防重复点击把已排时间顺延） */
+.fitem-in-today { color: var(--accent); font-weight: 600; }
+/* 需要关注里的逾期行：红色调（比停滞的黄色更紧急） */
+.stale-row.od .stale-m { color: #e0533d; }
+.stale-row.od .stale-t { color: #e0533d; }
+/* 全局周预算未设置时的引导行 */
+.dc-no-global { padding: 6px 10px; line-height: 1.6; }

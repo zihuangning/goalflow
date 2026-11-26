@@ -12,7 +12,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
   <script>try { var d = document.documentElement; d.dataset.theme = localStorage.getItem('goalflow.theme') || 'linear'; d.dataset.mode = localStorage.getItem('goalflow.mode') || 'dark' } catch (e) { document.documentElement.dataset.theme = 'linear'; document.documentElement.dataset.mode = 'dark' }</script>
-  <link rel="stylesheet" href="assets/css/main.css?v=8.14">
+  <link rel="stylesheet" href="assets/css/main.css?v=8.16">
 </head>
 
 <body>
@@ -166,7 +166,7 @@
 
           <!-- 区 3 · 提醒：需要关注（默认折叠 + 角标） -->
           <details class="zone zone-attention" id="zoneAttention">
-            <summary>🔔 需要关注 <span class="zone-badge" id="attentionBadge"></span></summary>
+            <summary title="停滞/暂停/待澄清等着办的事 + 备份/倦怠等系统提示；角标 = 实际事项数（悬停看构成）">🔔 需要关注 <span class="zone-badge" id="attentionBadge"></span></summary>
             <div class="zone-body">
               <div class="review-banner" id="reviewBanner">
                 <span>本周还未做周回顾——花 2 分钟对齐「做了啥、核心投入、下周深潜块」。</span>
@@ -417,9 +417,9 @@
   <!-- 等待 / 阻塞 + 催办日期 -->
   <div class="modal-mask" id="parkModal"></div>
 
-  <script src="assets/js/gf-tokens.js?v=8.14"></script>
-  <script src="assets/js/gf-demos.js?v=8.14"></script>
-  <script src="assets/js/app.js?v=8.14"></script>
+  <script src="assets/js/gf-tokens.js?v=8.16"></script>
+  <script src="assets/js/gf-demos.js?v=8.16"></script>
+  <script src="assets/js/app.js?v=8.16"></script>
   <!-- v6.6 兜底：若 app.js 异常未设置 is-ready，1.5 秒后强制显示页面，避免"按钮看不见也点不到" -->
   <script>setTimeout(function () { document.body.classList.add('is-ready') }, 1500)</script>
 </body>

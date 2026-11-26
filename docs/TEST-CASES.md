@@ -3,7 +3,7 @@
 用例总览：模块 × 覆盖层。生成于 2026-11-25（测试基建落地），随套件增删手动同步。
 运行方式见 [TESTING.md](TESTING.md)。
 
-**总量**：tests 14 套件 317 例（unit 242 + flow 75）+ checks 20 环节 493 项 = **810 项断言**。
+**总量**：tests 16 套件 333 例（unit 258 + flow 75）+ checks 22 环节 552 项 = **885 项断言**。
 
 ## 覆盖矩阵
 
@@ -45,6 +45,8 @@
 | 仪式历史聚合 | morningPlans 打开快照/晚回顾 key 并集/周计划 committedAt 回落/回顾三存储合并/dkWeekLabel/openHistory 四 tab 入口 | ✅ 34 例 | | | ✅ v8.12 |
 | 英雄卡去重 ② 次重要 | pickNextTopId 排除 MIT/done/溢出/并列取先/阻塞让位；renderHero 移除 + topId 归一 syncTop；MIT 区承接番茄时长/取消固定/得分折叠 | ✅ 14 例 | | | ✅ v8.13 |
 | 今日页三连修 | metricsStrip 迁 zoneStatus/heroWrap 空闲零高度；② 行算法分可见；已完成区完成时刻+单项得分（scoreOfDoneEntry 倒序取最新/pomo 不算/脏数据安全）；❓ 帮助按钮化可点击 | ✅ 13 例 | | | ✅ v8.14 |
+| 数字口径澄清 + 关注计数修正 | 三种「分」改名互指（优先级/表现/单项加分）；需要关注角标数条目而非非空区块（onboard 不计/someday-only 不计）；角标 title 构成公式；全清空空态；悬停说明链 | | | | ✅ v8.15 |
+| 周预算口径/备选入今日/逾期并入 | 周预算 wk.global 分支（无配置不错配假超支）+ 弹窗同根守卫；备选区 Top3/四象限全有「→今天」+ 已在今日显示标记；overdueLeaves + splitStaleOverdue 逾期优先去重（渲染与角标同口径）；metricsStrip 去叶子% + 口径 title | ✅ 16 例 | | | ✅ v8.16 |
 | 自动排时 `nextFreeTimeToday` | 跨项目占用/10 分钟缓冲/不排过去/窗口满 null | | | ✅ v8.8 | ✅ v8.8 |
 | 项目删除级联 | rocks/pendingActions/tomorrowMit/planShare/capacity/habitStreaks/topWfId/番茄钟 | | ✅ 生命周期 | ✅ v8.8/v8.9 | ✅ v8.8/v8.9 |
 | 节点删除级联 | 子树删除/topId/topPin/番茄钟解绑/引用备份还原 | | ✅ 生命周期 | ✅ v8.9 35 例 | ✅ v8.9 |
@@ -57,7 +59,10 @@
 | 晚总结期限 | 明天继续/改期走 setNodeDeadline 唯一写入口 | | | | ✅ v8.10 |
 | 版本号一致性 | index.html 4 处 ?v= 同步 | | | | ✅ run.cjs |
 
-## 单元测试明细（242 例）
+## 单元测试明细（258 例）
+
+### unit-overdue.cjs · 逾期停滞去重（16，v8.16）
+splitStaleOverdue：双空/无重叠各保留、重叠时 od 全保留+stale 去重（逾期优先）、全重叠 stale 清空、去重后总数=去重节点数、null/undefined 双参安全、alerts 含缺 node/null 不炸且安全侧保留（只删确定重复）、od 含缺 node 不误删。
 
 ### unit-done-score.cjs · 已完成区单项得分（13，v8.14）
 scoreOfDoneEntry：命中唯一 done/多条取最新/reason 随最新/pomo 不参与/无匹配 null；dayScoreLog null/undefined/entries 非数组/空 entries 安全；entry null/缺 nodeId 安全；reason 缺省空串；null 条目跳过。
@@ -146,6 +151,8 @@ C backfill 本批纠偏：AI 直给两个 9:00→写库前纠成 09:00/09:40。
 | verify-v8.12 | 37 | 仪式历史：快照/聚合纯函数/openHistory 弹窗/入口/样式/导出 |
 | verify-v8.13 | 38 | 英雄卡移除/topId 归一 syncTop/MIT 区承接番茄时长+取消固定+得分折叠/② 次重要高亮/版本号 |
 | verify-v8.14 | 25 | metricsStrip 迁位/heroWrap 空态/② 行分数/已完成时刻+得分/❓ 按钮化/滚动版本守卫 |
+| verify-v8.15 | 26 | 角标数条目（停滞+暂停+待澄清+提示/onboard 不计）/title 构成公式/全清空空态/三种「分」改名互指/attn chip 口径+「等」/滚动版本守卫 |
+| verify-v8.16 | 33 | 周预算 global 分支+弹窗守卫/备选区三区按钮+在今日标记/metricsStrip 去重+口径 title+KR pill 节点名前缀/逾期并入（overdueLeaves/splitStaleOverdue/双组/角标构成）/滚动版本守卫 |
 | smoke-v8.2 | 15 | 排期回填 5 场景实跑 |
 | smoke-v8.7 | 10 | 今日池 6 场景实跑 |
 | smoke-v8.8 | 17 | 自动排时 5 场景+删除级联实跑 |

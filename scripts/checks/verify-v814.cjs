@@ -29,7 +29,7 @@ L.assertContains('hero-wrap 空闲零高度（:has 渐进增强）', '.hero-wrap
 // ② ② 行分数 + 已完成区时刻/得分
 L.assertFnContains('② 行显示算法分', 'todayRowHtml', 'next-top-score');
 L.assertFnContains('② 分数来自 focusScoreParts', 'todayRowHtml', 'focusScoreParts(n)');
-L.assertFnContains('② 分数 title 带分解', 'todayRowHtml', '② 算法分 · 分解：');
+L.assertFnContains('② 分数 title 带分解（v8.15 改名优先级分）', 'todayRowHtml', '② 优先级分：算法排序用');
 L.assertFnContains('已完成区查单项得分', 'renderTodayPanel', 'scoreOfDoneEntry(en, scoreLogToday)');
 L.assertFnContains('已完成行完成时刻', 'renderTodayPanel', 'done-hm');
 L.assertFnContains('已完成行单项得分', 'renderTodayPanel', 'done-score');
