@@ -2527,6 +2527,10 @@
 .today-row.is-parked { opacity: .55; }
 .wait-tag { color: #e0a94f; }
 .block-tag { color: #eb5757; }
+/* v8.11: 溢出任务（超出今日可投入预算）降权显示 + 顺排提示条 */
+.today-row.is-overflow { opacity: .62; }
+.overflow-tag { color: #7ea8e0; }
+.today-shifted-hint { font-size: 12px; color: var(--dim, #8a93ab); padding: 4px 2px 8px; line-height: 1.5; }
 .gf-btn.wait-on { background: rgba(224, 169, 79, .18); border-color: rgba(224, 169, 79, .5); }
 .gf-btn.block-on { background: rgba(235, 87, 87, .18); border-color: rgba(235, 87, 87, .5); }
 .today-parked { border: 1px dashed var(--line, rgba(255, 255, 255, .1)); border-radius: 12px; padding: 10px 12px; margin: 10px 0; }
@@ -3096,3 +3100,23 @@ button.ve-more:hover { text-decoration: underline; }
 .ht-txt { color: var(--ink); flex: 1; min-width: 0; }
 .ht-wf { color: var(--accent-2); font-size: 12px; flex-shrink: 0; }
 .ht-empty { font-size: 13.5px; color: var(--muted); padding: 8px 0; }
+
+/* ===== v8.12 仪式历史（晨计划 / 晚回顾 / 周计划 / 周期回顾记录） ===== */
+.his-body { padding-top: 4px; }
+.his-day { border: 1px solid var(--stroke-soft); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; background: var(--panel-strong); }
+.his-date { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.his-live { font-size: 11px; font-weight: 600; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 8px; }
+.his-time { margin-left: auto; font-size: 12px; font-weight: 400; color: var(--muted-2); }
+.his-mit { margin-top: 6px; font-size: 13.5px; color: var(--ink); }
+.his-mit.dim { color: var(--muted-2); }
+.his-pre { margin-left: 6px; font-size: 11px; color: var(--muted-2); }
+.his-meta { margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+.his-meta b { color: var(--ink); }
+.his-score { font-size: 15px; }
+.his-goods { margin-top: 6px; font-size: 12.5px; color: var(--ink-2); line-height: 1.7; }
+.his-quote { margin-top: 6px; padding-left: 8px; border-left: 2px solid var(--gold); font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
+.his-rocks { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--ink-2); line-height: 1.8; }
+.his-dim { font-size: 11px; color: var(--muted-2); }
+.his-det { margin-top: 6px; font-size: 12.5px; }
+.his-qa { margin-top: 6px; font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
+.his-qa b { color: var(--ink); }

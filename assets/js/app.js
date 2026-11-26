@@ -329,6 +329,8 @@ function ensureScoreMeta() {
   if (!state.meta.planShare) state.meta.planShare = {};
   if (!state.meta.eveningDispo) state.meta.eveningDispo = {};
   if (!state.meta.goodThings) state.meta.goodThings = {};
+  // v8.12 仪式历史：晨计划打开快照（每天一条，dk 键）
+  if (!state.meta.morningPlans) state.meta.morningPlans = {};
 }
 
 /* v7.7: 期限措辞的唯一出口。旧代码两处各写一份「剩余 N 天 / 已逾期 N 天」，
@@ -430,14 +432,19 @@ function removeTodayScore(nodeId, kind) {
   log.entries = log.entries.filter(e => !(e.nodeId === nodeId && e.kind === kind));
   saveMeta();
 }
-function todayScore() {
-  ensureScoreMeta();
-  const entries = (state.meta.scoreLog[dateKey()] || { entries: [] }).entries;
+/* v8.12: 评分聚合抽成纯函数——晚回顾历史（historyEveningDays）按任意 dk 复用同一口径 */
+function summarizeScoreEntries(entries) {
+  entries = entries || [];
   const total = entries.reduce((a, e) => a + (e.score || 0), 0);
   const pomos = entries.filter(e => e.kind === 'pomo').length;
   const dones = entries.filter(e => e.kind === 'done').length;
   return { total, count: dones, pomos, focusMin: pomos * 25, entries, grade: scoreGrade(total) };
 }
+function scoreForDk(dk) {
+  ensureScoreMeta();
+  return summarizeScoreEntries((state.meta.scoreLog[dk] || { entries: [] }).entries);
+}
+function todayScore() { return scoreForDk(dateKey()); }
 function setNodeDone(n, checked) {
   if (checked && isRecurringTask(n)) {
     if (n.estimateMinutes && n.actualMinutes == null) n.actualMinutes = n.estimateMinutes;
@@ -1273,6 +1280,15 @@ function backfillAISchedule(collected, anchorD) {
     if (!dk && hm) dk = dateKey();
     if (dk && hm) bump(dk, hmToMin(hm), n.estimateMinutes || 30);
   });
+  // v8.11: 全局避让 —— 项目里已存在的今日 time / 各日 planDate 占用也计入，
+  // 否则新批次（第二次 AI 拆解）的顺排块会与旧任务撞车（两个 9:00 的来源之一）。
+  const batchIds = new Set(collected.map(n => n.id));
+  (state.nodes || []).forEach(n => {
+    if (!n || n.done || batchIds.has(n.id)) return;
+    if (n.time) bump(dateKey(), hmToMin(n.time), n.estimateMinutes || 30);
+    const pd = String(n.planDate || '');
+    if (pd.length >= 16) bump(pd.slice(0, 10), hmToMin(pd.slice(11, 16)), n.estimateMinutes || 30);
+  });
   // ② 缺 date / 缺 start 同一遍处理：先定日（缺则从 max(今天,anchor) 顺排，当日窗口装不下换次日），
   //    再放进当日窗口（顺接已排块；塞不下贴窗口尾，优先保证「有时间」），每块只 bump 一次避免二次避让。
   let cursor = new Date(Math.max((anchorD && !isNaN(anchorD.getTime())) ? anchorD.getTime() : 0, today0().getTime()));
@@ -1300,6 +1316,9 @@ function backfillAISchedule(collected, anchorD) {
   });
   // ③ slot 清理（与正常路径一致：>1 天不挂 slot）
   tasks.forEach(n => { if (n.daysLeft != null && n.daysLeft > 1) n.slot = ''; });
+  // ④ v8.11: 本批今日块冲突纠偏 —— AI 直接给多个叶子相同 start 时（① 只记账不改它），
+  // 在写库前把重叠块顺延开；未来日期的 planDate 由到当天的 ensureTodayTimeResolved 兜底。
+  resolveTimeConflicts(tasks.filter(n => n.time));
 }
 
 // 降级方案：AI 不可用时显示引导
@@ -2769,6 +2788,39 @@ function ensureRemindDefaults(nodes) {
     dirty = true;
   });
   if (dirty) save();
+}
+/* v8.11: 时间冲突纠偏 —— AI 可能给多个叶子相同的 start（两个 9:00），手动改时间也会撞。
+   网页层兜底：按 time 升序扫描，当前块与前一块占用区间 [s, s+dur+GAP) 重叠则顺延到占用尾，
+   链式传导（09:00/09:00/09:00 各30′ → 09:00/09:40/10:20）。直接改入参 node.time，
+   调用方决定 save。返回 {changed, moves:[{id,from,to}]}。 */
+function resolveTimeConflicts(nodes, opts) {
+  opts = opts || {};
+  const GAP = opts.gapMinutes != null ? opts.gapMinutes : 10;
+  const list = (nodes || []).map(x => (x && x.node) || x).filter(n => n && !n.done && n.time);
+  list.sort((a, b) => String(a.time).localeCompare(String(b.time)));
+  const moves = [];
+  let occEnd = -1; // 前一块占用尾（分钟，含间隔）
+  list.forEach(n => {
+    const s = hmToMin(n.time);
+    const dur = Math.max(+(n.estimateMinutes) || 30, 5);
+    if (occEnd >= 0 && s < occEnd) {
+      if (occEnd + dur > 24 * 60) { occEnd = Math.max(occEnd, s + dur + GAP); return; }  // 顺延出日界：保持原样（比逆序强）
+      const ns = occEnd;
+      moves.push({ id: n.id, from: n.time, to: minToHm(ns) });
+      n.time = minToHm(ns);
+      occEnd = ns + dur + GAP;
+    } else {
+      occEnd = s + dur + GAP;
+    }
+  });
+  return { changed: moves.length, moves };
+}
+/* v8.11: 渲染前 ensure 式纠偏（像 ensureRemindDefaults）——只在真改了时间时 save。
+   须在 ensureRemindDefaults 之前跑（提醒时间以纠偏后的 time 为准）。 */
+function ensureTodayTimeResolved(pool) {
+  const r = resolveTimeConflicts((pool || []).map(x => x.node));
+  if (r.changed) save();
+  return r;
 }
 function requestAlarmPermission() {
   // v6.2 移动端/微信内：无桌面通知 API，静默降级（页面内弹窗式闹钟不依赖它）
@@ -4606,7 +4658,9 @@ function renderRhythm() {
 }
 
 /* ============ 今日行动（执行台 · 跨工作流聚合） ============ */
-function todayExecutionPoolFor(nodes) {
+/* v8.11: budgetCap 可传——聚合层按全局日容量 dayCapGlobal() 逐项目递减分配，
+   避免「N 个项目各排满各自 dayCap → 合计 N×dayCap 必超全局」的结构性超负荷。 */
+function todayExecutionPoolFor(nodes, budgetCap) {
   if (!nodes || !nodes.length) return [];
   computeTree(nodes);
   const leaves = nodes.filter(n => n.parentId && n._children.length === 0 && !n.done && !isNodeParked(n));
@@ -4642,15 +4696,17 @@ function todayExecutionPoolFor(nodes) {
     if (ah !== bh) return ah ? -1 : 1;
     return focusScore(b) - focusScore(a);
   }).forEach(n => { if (!seen.has(n.id)) { seen.add(n.id); sorted.push(n); } });
-  // 今日容量硬约束：估时累计超「每天可投入」后，后续任务进「溢出」而非今日清单
-  let budget = dayCap();
+  // 今日容量硬约束：估时累计超「每天可投入」后，后续任务标「溢出」降权显示
+  let budget = (budgetCap != null) ? budgetCap : dayCap();
   const out = [];
   sorted.forEach(n => {
     ensureEstimate(n, true);
     const est = n.estimateMinutes || 0;
     const habit = n.recur || n.role === 'habit';
     // 习惯不计容量（打卡型），其余计
-    if (!habit && est > budget && out.length) { n._overflow = true; return; }
+    // v8.11: 溢出任务留在池里（_overflow 降权 + 「🌊 溢出」行标记），不再无声丢弃——
+    // 丢弃会让用户觉得「任务被吞」；消费方按需过滤（heroGlobalCandidates / ICS 已 filter）
+    if (!habit && est > budget && out.length) { n._overflow = true; out.push(n); return; }
     n._overflow = false;
     if (!habit) budget -= est;
     out.push(n);
@@ -4663,7 +4719,15 @@ function todayAggregatedPool() {
   ensureWorkflows();
   flushActiveWorkflow();
   const items = [];
-  activeWorkflows().forEach(wf => {  // v6.5: 归档项目不进今日汇总
+  // v8.11: 全局日预算递减分配 —— 当前项目优先，后续项目用剩余预算；
+  // 合计天然 ≤ dayCapGlobal()，「超负荷」只在单项目就排不下时出现（真超载）。
+  let budgetLeft = dayCapGlobal();
+  const wfs = activeWorkflows().slice().sort((a, b) => {  // v6.5: 归档项目不进今日汇总
+    if (a.id === state.activeWorkflowId) return -1;
+    if (b.id === state.activeWorkflowId) return 1;
+    return 0;
+  });
+  wfs.forEach(wf => {
     if (_wfOnly && wf.id !== state.activeWorkflowId) return;  // v8.7: 「只看当前项目」过滤
     if (!wfStarted(wf)) return;  // v7.9: 未开始的项目（startDate 在未来）不进今日
     const nodes = wf.nodes || [];
@@ -4681,8 +4745,10 @@ function todayAggregatedPool() {
       const pinned = nodes.find(n => n.id === state.topPin && !n.done);
       if (pinned) wfTop = pinned;
     }
-    const pool = todayExecutionPoolFor(nodes);
+    const pool = todayExecutionPoolFor(nodes, budgetLeft);
     pool.forEach(n => {
+      // 池内实际占用的预算从全局余量扣减（习惯/溢出不计）
+      if (!n._overflow && !(n.recur || n.role === 'habit')) budgetLeft -= (n.estimateMinutes || 0);
       items.push({
         node: n, wfId: wf.id, wfName: wf.name || '目标流',
         isWfTop: !!(wfTop && n.id === wfTop.id),
@@ -5115,11 +5181,12 @@ function todayRowHtml(entry, opts) {
   const blockMeta = isNodeBlocked(n) ? `<span class="today-meta block-tag" title="${esc(n.waitNote || '被阻塞')}">🚫 阻塞${n.waitNote ? ' · ' + esc(n.waitNote) : ''}</span>` : '';
   const anchorMeta = habit && n.anchor ? `<span class="today-meta anchor-tag" title="触发线索：在既有行为之后（习惯叠加）">⚓ ${esc(n.anchor)}后</span>` : '';
   const tagMeta = (n.tags && n.tags.length) ? `<span class="today-meta ctx-tag" title="情境标签">🏷 ${esc(n.tags.join(' '))}</span>` : '';
-  return `<div class="today-row${isWfTop ? ' is-top' : ''}${habit ? ' is-habit' : ''}${isNodeParked(n) ? ' is-parked' : ''}${expanded ? ' expanded' : ''}" data-id="${n.id}" data-wf="${wfId}" draggable="true">
+  const overflowMeta = n._overflow ? `<span class="today-meta overflow-tag" title="超出今日可投入预算（多项目共享同一每日容量），建议删减、顺延到明天或调大⚙每日投入">🌊 溢出</span>` : '';
+  return `<div class="today-row${isWfTop ? ' is-top' : ''}${habit ? ' is-habit' : ''}${isNodeParked(n) ? ' is-parked' : ''}${n._overflow ? ' is-overflow' : ''}${expanded ? ' expanded' : ''}" data-id="${n.id}" data-wf="${wfId}" draggable="true">
     <label class="today-check"><input type="checkbox" data-done="${n.id}" data-wf="${wfId}" aria-label="完成"></label>
     <div class="today-txt">
       <span class="today-txt-line">${isWfTop ? '<i class="today-pfx" title="各流最重要">★</i>' : ''}${habit ? '<i class="today-pfx">🔁</i>' : ''}${isMicro ? '<i class="today-pfx">🫳</i>' : ''}<input class="today-txt-in" data-edit="${n.id}" data-wf="${wfId}" value="${esc(n.text)}" title="编辑文案 · 回车或失焦保存" aria-label="任务文案"></span>
-      <span class="today-txt-metas">${wfName ? `<span class="today-meta wf-tag">${esc(wfName)}</span>` : ''}${timeVal ? `<span class="today-meta">🕐 ${esc(timeVal)}</span>` : ''}${recurMeta}${habit ? habitMeta : (streak ? `<span class="today-meta streak" title="习惯连续天数（执行记录驱动）">🔥 ${streak.cur}天</span>` : '')}${anchorMeta}${tagMeta}${n.daysLeft != null ? `<span class="today-meta meta-dleft">${n.overdue ? '逾期' : '剩'}${Math.abs(n.daysLeft)}天</span>` : ''}${waitMeta}${blockMeta}</span>
+      <span class="today-txt-metas">${wfName ? `<span class="today-meta wf-tag">${esc(wfName)}</span>` : ''}${timeVal ? `<span class="today-meta">🕐 ${esc(timeVal)}</span>` : ''}${recurMeta}${habit ? habitMeta : (streak ? `<span class="today-meta streak" title="习惯连续天数（执行记录驱动）">🔥 ${streak.cur}天</span>` : '')}${anchorMeta}${tagMeta}${n.daysLeft != null ? `<span class="today-meta meta-dleft">${n.overdue ? '逾期' : '剩'}${Math.abs(n.daysLeft)}天</span>` : ''}${waitMeta}${blockMeta}${overflowMeta}</span>
     </div>
     <div class="today-row-quick">
       ${isWfTop || opts.pomo ? `<button type="button" class="gf-btn gf-btn--sm gf-btn--primary" data-pomo="${n.id}" data-wf="${wfId}" title="番茄钟 25′">🍅</button>` : ''}
@@ -5568,6 +5635,7 @@ function renderTodayAlarmBar() {
         <button type="button" class="am-item" id="btnEveningRitual">🌙 晚总结<span class="am-sub">评分 + 三件好事</span></button>
         <button type="button" class="am-item" id="btnWeekPlan">🗓 周计划<span class="am-sub">本周大石头</span></button>
         <button type="button" class="am-item" id="btnWeekReviewBar">◔ 周回顾<span class="am-sub">周/月/季统计</span></button>
+        <button type="button" class="am-item" id="btnHistory">📜 历史<span class="am-sub">晨/晚/周仪式记录</span></button>
         <div class="am-foot">${permTag} ${permAct}</div>
       </div>
     </div>`;
@@ -5614,6 +5682,8 @@ function renderTodayAlarmBar() {
   if (bw) bw.onclick = () => openWeekPlan();
   const br = document.getElementById('btnWeekReviewBar');
   if (br) br.onclick = () => openWeekReview();
+  const bh = document.getElementById('btnHistory');
+  if (bh) bh.onclick = () => openHistory();
 }
 
 // v7.7 需要关注汇总信号外露：执行区头部只放两个可点数字，细节仍在「需要关注」里
@@ -5726,6 +5796,9 @@ function renderTodayPanel() {
     return;
   }
   const pool = todayAggregatedPool();
+  // v8.11: 渲染前时间冲突纠偏 —— 不论来源（AI/手动/导入/跨天转换），今日叶子时间不许重叠；
+  // 须在 ensureRemindDefaults 之前（提醒时间以纠偏后的 time 为准）
+  ensureTodayTimeResolved(pool);
   // v8.2: 有计划时间的今日任务自动带「开始前 5 分钟」提醒（用户可改可清）
   ensureRemindDefaults(pool.map(x => x.node));
   // MIT 与英雄卡同源：优先取 syncTop 选出的 Top1，保证「当下最重要」全页一致
@@ -5735,7 +5808,7 @@ function renderTodayPanel() {
   const topNode = state.topId ? (nodeInWorkflow(topWfId, state.topId) || byId(state.topId)) : null;
   const mitEntry = pool.find(x => x.node.id === state.topId)
     || (topNode && !topNode.done ? { node: topNode, wfId: topWfId, wfName: (workflowById(topWfId) || {}).name || '', isWfTop: true } : null)
-    || pool.find(x => x.isWfTop) || pool[0] || null;
+    || pool.find(x => x.isWfTop && !x.node._overflow) || pool.find(x => !x.node._overflow) || pool[0] || null;  // v8.11: 溢出任务不当 MIT
   const d = dayPlanFeasibilityAll();
   if (cap) {
     const pct = pctOf(d.est, d.cap);
@@ -5743,9 +5816,9 @@ function renderTodayPanel() {
     const wpct = pctOf(wk.est, wk.cap);
     const ppg = pctOf(wk.projEst, wk.projCap);
     // v8.0 UX 精简：默认只留「今日可做完性」一条；本周/本项目预算收进折叠
-    cap.innerHTML = `<div class="day-capacity${d.over ? ' over' : ''}" title="全部项目今日预估合计 vs 全局每日容量">
+    cap.innerHTML = `<div class="day-capacity${d.over ? ' over' : ''}" title="全部项目今日候选任务预估合计 vs 你在⚙设置里的每日可投入。清单主区已按该预算收敛，超出项标「🌊 溢出」，建议删减或顺延">
       <span>今日可做完性</span><span class="dc-bar"><i style="width:${pct}%"></i></span>
-      <span class="dc-num">预估 ${d.est}′ / ${fmtHours(d.cap)}h</span><span class="dc-tag">${d.over ? '超负荷' : '可承载'}</span>
+      <span class="dc-num">预估 ${d.est}′ / ${fmtHours(d.cap)}h</span><span class="dc-tag">${d.over ? `超出 ${d.est - d.cap}′` : '可承载'}</span>
     </div>
     <details class="dc-fold"><summary>周预算 ${wk.over ? '<span class="dc-tag over">⚠ 超支</span>' : ''}</summary>
       <div class="day-capacity${wk.over ? ' over' : ''}" title="全部项目本周承诺合计 vs 全局每周容量">
@@ -5785,16 +5858,42 @@ function renderTodayPanel() {
     // 按具体计划时间升序排列；未设时间的按算法重要度排在后面
     // v7.9: 无 time 但有 slot（h0…h6 时段）也参与粗排，排在同时段的无时段任务之前
     const slotRank = s => { const m = /^h(\d)$/.exec(s || ''); return m ? +m[1] : 99; };
-    const timed = taskPool.filter(ent => ent.node.time).sort((a, b) => a.node.time.localeCompare(b.node.time));
-    const untimed = taskPool.filter(ent => !ent.node.time)
+    // v8.11: 溢出任务（超今日预算）沉底降权，不与主区按时间混排
+    const inPool = taskPool.filter(ent => !ent.node._overflow);
+    const overflowed = taskPool.filter(ent => ent.node._overflow);
+    const timed = inPool.filter(ent => ent.node.time).sort((a, b) => a.node.time.localeCompare(b.node.time));
+    const untimed = inPool.filter(ent => !ent.node.time)
       .sort((a, b) => slotRank(a.node.slot) - slotRank(b.node.slot) || focusScore(b.node) - focusScore(a.node));
-    const ordered = timed.concat(untimed);
+    const ordered = timed.concat(untimed).concat(overflowed);
     const execCount = (mitEntry ? 1 : 0) + ordered.length + habitPool.length;
     // v8.7: 工作流过滤开关 —— 默认「🌐 全部项目」（MIT/今日执行跨项目一致）；点开只算当前项目
     const _curWf = workflowById(state.activeWorkflowId);
     const _curWfName = (_curWf && _curWf.name) || '当前项目';
     const wfOnlyBtn = `<button type="button" class="today-wfonly${_wfOnly ? ' on' : ''}" id="todayWfOnlyBtn" title="${_wfOnly ? ('正在只看「' + esc(_curWfName) + '」——点击恢复跨全部项目') : '默认跨全部项目（MIT/今日执行从任何项目进入都一致）——点击只看当前项目'}">${_wfOnly ? '🎯 当前项目' : '🌐 全部项目'}</button>`;
     let sh = `<div class="today-block-h">📋 今日执行 · 按时间 <span class="cnt">${execCount}</span><span class="help-icon" title="展开行尾 ⋯ 设具体计划时间，自动按时间升序排列；未设时间的按重要度排在后面" style="cursor:help;color:var(--muted);margin-left:2px">❓</span>${wfOnlyBtn}<span style="flex:1"></span><button type="button" class="today-add" data-add="task" data-add-wf="${state.activeWorkflowId}" title="新增今日任务">＋ 任务</button><button type="button" class="today-add" data-add="habit" data-add-wf="${state.activeWorkflowId}" title="新增每日习惯">＋ 习惯</button></div>`;
+    // v8.11: 「被吞」可见性 —— 排到明/后天（≤+3 天）的叶子给提示条，不再无声消失
+    {
+      const tmrw = [];
+      const dk1 = dateKey(new Date(today0().getTime() + 86400000));
+      const dk3 = dateKey(new Date(today0().getTime() + 3 * 86400000));
+      activeWorkflows().forEach(wf => {
+        if (!wfStarted(wf)) return;
+        (wf.nodes || []).forEach(n => {
+          if (!n || n.done || !n.parentId) return;
+          if ((wf.nodes || []).some(x => x.parentId === n.id)) return;  // 只要叶子
+          const pd = String(n.planDate || '');
+          if (pd.length >= 10 && pd.slice(0, 10) >= dk1 && pd.slice(0, 10) <= dk3) {
+            tmrw.push({ n, wfName: wf.name || '', dk: pd.slice(0, 10), hm: pd.length >= 16 ? pd.slice(11, 16) : '' });
+          }
+        });
+      });
+      if (tmrw.length) {
+        tmrw.sort((a, b) => a.dk.localeCompare(b.dk) || a.hm.localeCompare(b.hm));
+        const lbl = dk => dk === dk1 ? '明天' : (dk === dateKey(new Date(today0().getTime() + 2 * 86400000)) ? '后天' : dk.slice(5));
+        const tops = tmrw.slice(0, 3).map(t => `${esc(t.n.text.slice(0, 12))}（${lbl(t.dk)}${t.hm ? ' ' + t.hm : ''}）`).join('、');
+        sh += `<div class="today-shifted-hint" title="这些叶子排到了今后几天，到当天会自动转入今日清单">🗓 ${tmrw.length} 项排在今后几天：${tops}${tmrw.length > 3 ? ` 等 ${tmrw.length} 项` : ''}</div>`;
+      }
+    }
     if (!execCount) {
       sh += `<div class="empty-state">📋 暂无任务<br><span class="es-sub">从「目标规划」生成，或点右上「＋ 任务」</span><br><button type="button" class="gf-btn gf-btn--sm" style="margin-top:8px" data-add="task" data-add-wf="${state.activeWorkflowId}">＋ 新增任务</button></div>`;
     } else {
@@ -5802,7 +5901,14 @@ function renderTodayPanel() {
         sh += `<div class="today-mit-pin"><span class="mit-pin-lbl">🎯 MIT · 当下最重要</span>${todayRowHtml(mitEntry, { micro: true, pomo: true })}</div>`;
       }
       if (ordered.length) {
-        sh += ordered.map(ent => todayRowHtml(ent)).join('');
+        // v8.11: 溢出区前插分隔行（沉底区块的标题）
+        let ovfSplit = false;
+        sh += ordered.map(ent => {
+          const div = (!ovfSplit && ent.node._overflow)
+            ? (ovfSplit = true, `<div class="today-sec-div">🌊 溢出 · 超出今日可投入，建议顺延或删减 <span class="cnt">${overflowed.length}</span></div>`)
+            : '';
+          return div + todayRowHtml(ent);
+        }).join('');
       } else if (!habitPool.length) {
         sh += `<div class="empty-state">📋 暂无其他任务<br><span class="es-sub">专注 MIT 即可，或点右上「＋ 任务」追加</span></div>`;
       }
@@ -5865,7 +5971,7 @@ function updateTodayZones() {
     if (sum) {
       const ts = todayScore();
       const d = dayPlanFeasibilityAll();
-      sum.textContent = `${ts.total} 分 · ${ts.grade || '—'} · ${d.over ? '超负荷' : '可承载'}`;
+      sum.textContent = `${ts.total} 分 · ${ts.grade || '—'} · ${d.over ? `超出预算 ${d.est - d.cap}′` : '可承载'}`;
     }
   }
   if (fo) { fo.open = zoneOpenPref('zoneFocus', false); bindZonePersist(fo); }
@@ -7989,7 +8095,7 @@ function openRitualModal(kind) {
     const wk = weekKey();
     const hasPlan = !!(state.meta.weekPlans && state.meta.weekPlans[wk]);
     const pendings = (state.meta.pendingActions || []).filter(a => a.status === 'pending').slice(0, 3);
-    const listHtml = pool.slice(0, 6).map(ent => {
+    const listHtml = pool.filter(ent => !ent.node._overflow).slice(0, 6).map(ent => {  // v8.11: 预览只列预算内任务
       const n = ent.node;
       return `<div class="rt-row"><span class="rt-t">${ent.isWfTop ? '★ ' : ''}${esc(n.text)}</span><span class="rt-m">${esc(ent.wfName || '')}${n.estimateMinutes ? ` · ${n.estimateMinutes}′` : ''}</span></div>`;
     }).join('');
@@ -8010,10 +8116,18 @@ function openRitualModal(kind) {
     const noAnchor = pool.filter(ent => (ent.node.recur || ent.node.role === 'habit') && !ent.node.done && !(ent.node.anchor || '').trim());
     const anchorHtml = noAnchor.length ? `<details class="rt-preview"><summary>⚓ ${noAnchor.length} 个习惯还没设触发线索</summary>
       <div class="hint">「在[既有行为]之后，我就[习惯]」——早餐后/通勤后这类线索，比裸时间承诺更可靠。回今日面板点习惯行尾的 ⚓ 补上。</div></details>` : '';
+    // v8.12 仪式历史：打开即快照留痕（⏰ 到点弹出 / 手动打开都算做过晨计划），「📜 历史」页可查；
+    // 同一天重复打开只刷新记录时间与 MIT 选择，语义=「今天最后一次看到的晨计划」
+    state.meta.morningPlans[dk] = {
+      at: Date.now(),
+      mit: mitEntry ? { wfId: mitEntry.wfId || '', nodeId: mitEntry.node.id, text: mitEntry.node.text, pre: !!preMit } : null,
+      poolN: pool.length, est: d.est, cap: d.cap, pendN: pendings.length
+    };
+    saveMeta();
     overlay.innerHTML =`<div class="modal modal-wide">
       <div class="modal-head"><div class="mh-ic">🌅</div>
         <div><div class="mh-tt">早安 · 制订今日计划</div>
-        <div class="mh-sub">昨日总评分 ${yTotal || '—'} · 今日已收敛 ${pool.length} 项 · 预估 ${d.est}′ / 容量 ${d.cap}′${d.over ? '（超负荷，建议删减）' : ''}</div></div>
+        <div class="mh-sub">昨日总评分 ${yTotal || '—'} · 今日已收敛 ${pool.length} 项 · 预估 ${d.est}′ / 每日可投入 ${d.cap}′${d.over ? `（超出 ${d.est - d.cap}′，建议删减或顺延）` : ''}</div></div>
         <span class="mh-x" id="rtClose">×</span></div>
       <div class="rt-body">
         ${hasPlan ? '' : '<div class="rt-weekplan-tip">本周还没排大石头 <button type="button" class="gf-btn gf-btn--sm" id="rtWeekPlan">🗓 先排本周大石头</button></div>'}
@@ -8401,6 +8515,137 @@ function renderTodayRocks() {
     const n = nodeInWorkflow(b.dataset.wf, b.dataset.rockDone);
     if (n) { setNodeDoneInWorkflow(b.dataset.wf, b.dataset.rockDone, !n.done); afterChange(); }
   });
+}
+
+/* ============ v8.12 仪式历史（晨计划 / 晚回顾 / 周计划 / 周期回顾记录） ============ */
+/* 聚合层是纯函数（meta 入参、不读 state），unit-history 直接 require 可测；
+   openHistory 只做渲染 + 活状态标注（大石头履约实时查 nodeInWorkflow，节点被删标「已移除」）。 */
+function dkWeekLabel(dk) {
+  const p = String(dk || '').split('-').map(Number);
+  if (p.length !== 3 || !p[0] || !p[1] || !p[2]) return dk || '';
+  const d = new Date(p[0], p[1] - 1, p[2]);
+  return p[1] + '月' + p[2] + '日 周' + '日一二三四五六'[d.getDay()];
+}
+function historyMorningDays(meta) {
+  const mp = (meta && meta.morningPlans) || {};
+  return Object.keys(mp).sort().reverse().map(dk => Object.assign({ dk }, mp[dk]));
+}
+function historyEveningDays(meta) {
+  if (!meta) return [];
+  const keys = new Set();
+  [meta.scoreLog, meta.dayNotes, meta.goodThings].forEach(m => Object.keys(m || {}).forEach(k => keys.add(k)));
+  Object.keys(meta.eveningDispo || {}).forEach(k => keys.add(String(k).split('|')[0]));
+  return [...keys].filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort().reverse().map(dk => {
+    const sc = summarizeScoreEntries(((meta.scoreLog || {})[dk] || { entries: [] }).entries);
+    const goods = ((meta.goodThings || {})[dk] || []).filter(Boolean);
+    const note = (meta.dayNotes || {})[dk] || '';
+    const dispo = { continue: 0, defer: 0, drop: 0 };
+    Object.keys(meta.eveningDispo || {}).forEach(k => {
+      if (String(k).split('|')[0] !== dk) return;
+      const a = meta.eveningDispo[k];
+      if (dispo[a] !== undefined) dispo[a]++;
+    });
+    return { dk, total: sc.total, grade: sc.grade, count: sc.count, pomos: sc.pomos, focusMin: sc.focusMin, goods, note, dispo };
+  });
+}
+function historyWeekPlans(meta) {
+  const wp = (meta && meta.weekPlans) || {};
+  return Object.keys(wp).sort().reverse().map(wk => ({
+    wk, rocks: (wp[wk] && wp[wk].rocks) || [], intent: (wp[wk] && wp[wk].intent) || '',
+    committedAt: (wp[wk] && (wp[wk].committedAt || wp[wk].savedAt)) || 0
+  }));
+}
+function historyReviews(meta) {
+  if (!meta) return [];
+  const out = [];
+  Object.keys(REVIEW_STORE).forEach(cycle => {
+    (meta[REVIEW_STORE[cycle]] || []).forEach(r => out.push(Object.assign({ cycle }, r)));
+  });
+  return out.sort((a, b) => String(b.savedAt || '').localeCompare(String(a.savedAt || '')));
+}
+const HISTORY_TABS = [
+  { k: 'morning', icon: '🌅', label: '晨计划', sub: '每天打开晨计划时自动留痕' },
+  { k: 'evening', icon: '🌙', label: '晚回顾', sub: '评分 · 未完成处置 · 三件好事 · 一句话总结' },
+  { k: 'week', icon: '🗓', label: '周计划', sub: '每周大石头与承诺卡 · 履约对照' },
+  { k: 'review', icon: '📋', label: '周期回顾', sub: '保存过的周 / 月 / 季回顾' },
+];
+const REVIEW_FIELD_LABELS = { highlight: '高光时刻', lesson: '最大教训', theme: '下月主题词', okr: 'OKR/KR 得分', align: '对齐年度目标', bet: '下季战略赌注', gold: '金线推进', core: '核心投入几成', block: '下周深潜块', exec: '执行/偏差反馈', wins: '本周小赢', next: '下周期调整行动', commit: '一句承诺' };
+function openHistory(tab) {
+  tab = HISTORY_TABS.some(t => t.k === tab) ? tab : 'morning';
+  const overlay = document.getElementById('historyModal'); if (!overlay) return;
+  ensureScoreMeta();
+  const meta = state.meta;
+  const todayDk = dateKey();
+  let body = '';
+  if (tab === 'morning') {
+    const days = historyMorningDays(meta);
+    body = days.length ? days.map(r => {
+      const at = r.at ? new Date(r.at) : null;
+      return `<div class="his-day">
+        <div class="his-date">${dkWeekLabel(r.dk)}${r.dk === todayDk ? '<span class="his-live">今天</span>' : ''}<span class="his-time">${at ? '记录于 ' + pad2(at.getHours()) + ':' + pad2(at.getMinutes()) : ''}</span></div>
+        ${r.mit ? `<div class="his-mit">🐸 MIT：${esc(r.mit.text)}${r.mit.pre ? '<span class="his-pre">🌙昨晚预选</span>' : ''}</div>` : '<div class="his-mit dim">（未记录到 MIT）</div>'}
+        <div class="his-meta">清单 ${r.poolN || 0} 项 · 预估 ${r.est || 0}′ / 容量 ${r.cap || 0}′${(r.est || 0) > (r.cap || 0) ? '（超负荷）' : ''}${r.pendN ? ` · 回顾行动待确认 ${r.pendN} 条` : ''}</div>
+      </div>`;
+    }).join('') : '<div class="hint">还没有晨计划记录——每天第一次打开晨计划（⏰ 到点自动弹，或侧栏 🌅 晨计划手动打开）会自动留痕。</div>';
+  } else if (tab === 'evening') {
+    const days = historyEveningDays(meta);
+    body = days.length ? days.map(r => {
+      const dN = r.dispo.continue + r.dispo.defer + r.dispo.drop;
+      return `<div class="his-day">
+        <div class="his-date">${dkWeekLabel(r.dk)}${r.dk === todayDk ? '<span class="his-live">今天 · 进行中</span>' : ''}</div>
+        <div class="his-meta"><b class="his-score">${r.total}</b> 分 <i class="ts-grade">${r.grade}</i> · 完成 ${r.count} 项 · 🍅 ${r.pomos} 个 · 专注 ${r.focusMin}′</div>
+        ${dN ? `<div class="his-meta">未完成处置 → 明天继续 ${r.dispo.continue} · 改期 ${r.dispo.defer} · 放弃 ${r.dispo.drop}</div>` : ''}
+        ${r.goods.length ? `<div class="his-goods">${r.goods.map(g => `<div>✨ ${esc(g)}</div>`).join('')}</div>` : ''}
+        ${r.note ? `<div class="his-quote">「${esc(r.note)}」</div>` : ''}
+      </div>`;
+    }).join('') : '<div class="hint">还没有晚回顾记录——完成叶子 / 番茄钟会自动评分，晚总结（🌙）保存三件好事与一句话总结后都会出现在这里。</div>';
+  } else if (tab === 'week') {
+    const plans = historyWeekPlans(meta);
+    const curWk = weekKey();
+    body = plans.length ? plans.map(p => {
+      const doneN = p.rocks.filter(r => { const n = nodeInWorkflow(r.wfId, r.nodeId); return n && n.done; }).length;
+      const full = p.rocks.length > 0 && doneN === p.rocks.length;
+      return `<div class="his-day">
+        <div class="his-date">${dkWeekLabel(p.wk)} 起${p.wk === curWk ? '<span class="his-live">本周 · 进行中</span>' : ''}<span class="his-time">${p.committedAt ? '承诺于 ' + new Date(p.committedAt).toLocaleDateString() : ''}</span></div>
+        <div class="his-meta">🪨 履约 <b>${doneN}/${p.rocks.length}</b>${full ? ' · 全部兑现 🎉' : ''}</div>
+        ${p.intent ? `<div class="his-quote">「${esc(p.intent)}」</div>` : ''}
+        <ul class="his-rocks">${p.rocks.map(r => {
+          const n = nodeInWorkflow(r.wfId, r.nodeId);
+          const st = n ? (n.done ? '✅' : '○') : '🗑';
+          return `<li>${st} ${esc((n && n.text) || r.text)}${!n ? '<span class="his-dim">（已从树移除）</span>' : ''}</li>`;
+        }).join('')}</ul>
+      </div>`;
+    }).join('') : '<div class="hint">还没有周计划记录——周一早上到点自动弹，或侧栏「🗓 周计划」随时排下本周大石头。</div>';
+  } else {
+    const rows = historyReviews(meta);
+    body = rows.length ? rows.map(r => {
+      const snap = r.statsSnapshot || {};
+      const answers = Object.keys(REVIEW_FIELD_LABELS)
+        .filter(k => typeof r[k] === 'string' && r[k].trim())
+        .map(k => `<div class="his-qa"><b>${REVIEW_FIELD_LABELS[k]}</b>：${esc(r[k]).replace(/\n/g, '<br>')}</div>`).join('');
+      return `<div class="his-day">
+        <div class="his-date">${reviewCycleLabel(r.cycle)} · ${esc(r.period || r.week || '')}<span class="his-time">${r.savedAt ? new Date(r.savedAt).toLocaleDateString() + ' 保存' : ''}</span></div>
+        ${snap.total !== undefined ? `<div class="his-meta">完成 ${snap.total} 项 · 核心象限占比 ${snap.corePct}%</div>` : ''}
+        ${answers ? `<details class="his-det"><summary>🕯 仪式问答</summary>${answers}</details>` : ''}
+      </div>`;
+    }).join('') : '<div class="hint">还没有保存过周期回顾——侧栏「◔ 周回顾」可切换周 / 月 / 季，保存后在这里留档。</div>';
+  }
+  const sub = (HISTORY_TABS.find(t => t.k === tab) || {}).sub || '';
+  overlay.innerHTML = `<div class="modal modal-wide" role="dialog">
+    <div class="modal-head"><div class="mh-ic">📜</div>
+      <div><div class="mh-tt">仪式历史</div><div class="mh-sub">${sub} · 仅存本机</div></div>
+      <span class="mh-x" id="hisClose">×</span></div>
+    <div class="wr-cycle">${HISTORY_TABS.map(t => `<button type="button" class="wr-ctab${t.k === tab ? ' on' : ''}" data-htab="${t.k}">${t.icon} ${t.label}</button>`).join('')}</div>
+    <div class="rt-body his-body">${body}</div>
+  </div>`;
+  overlay.classList.add('show');
+  overlay.querySelector('#hisClose').onclick = closeHistory;
+  overlay.querySelectorAll('[data-htab]').forEach(b => b.onclick = () => openHistory(b.dataset.htab));
+  overlay.onclick = e => { if (e.target === overlay) closeHistory(); };
+}
+function closeHistory() {
+  const overlay = document.getElementById('historyModal');
+  if (overlay) { overlay.classList.remove('show'); overlay.innerHTML = ''; }
 }
 
 /* ============ 今日总评分（自动评分汇总） ============ */
@@ -8896,6 +9141,7 @@ if (typeof document !== 'undefined') {
     bindRit('sideMorning', () => openRitualModal('morning'));
     bindRit('sideEvening', () => openRitualModal('evening'));
     bindRit('sideWeekPlan', () => openWeekPlan());
+    bindRit('sideHistory', () => openHistory());   // v8.12 仪式历史
     // URL 深链：#/today|plan|insights 切视图；#day|week|month|year|all 设尺度并跳到「归纳洞察」
     // #calendar 或 #cal=2026-11-24 → 直接进「归纳洞察 · 日历视角」并选中该日
     const syncViewbar = () => {
@@ -9038,11 +9284,13 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     treeOrder, pickTop, pickRanked, leafProgress, subtreeProgress, urColor, buildView, sankeyLayout,
     wrapLabel, inferScale, smartEval, smartQuestions, decomposeSuggestions, serializeNodes, weekKey,
     computeWeekStats, computePeriodStats, ensureVE, isQuickWin, inferRecur, parseEstimateMinutes, metricProgress, paceStatus, backlogLanes, exportICS, nodesToIndentedText, periodKey,
-    scoreDoneItem, scorePomoItem, scoreGrade, todayScore,
+    scoreDoneItem, scorePomoItem, scoreGrade, todayScore, scoreForDk, summarizeScoreEntries,
+    dkWeekLabel, historyMorningDays, historyEveningDays, historyWeekPlans, historyReviews, openHistory,
     timeAudit, weekPlanCandidates, adoptPendingAction,
     stagnationAlerts, stagnantDays, energyCurve, energyBucketNow, logEnergy,
     focusScoreParts, isNodeParked, isNodeWaiting, isNodeBlocked, habitStrength, habitWeekLog,
     setNodeDeadline, convertDuePlanDate, habitRecurrence, habitTarget, habitDueToday, isRecurringTask, recurringTaskDueToday,
+    resolveTimeConflicts, ensureTodayTimeResolved, todayExecutionPoolFor, backfillAISchedule,
     addInbox, clarifyInbox, inboxPending, planVsActual,
     archiveWorkflow, unarchiveWorkflow, isWorkflowComplete, activeWorkflows, openCommitCard, togglePomoPause, quickCapture,
     GoalFlowTheme: typeof GoalFlowTheme !== 'undefined' ? GoalFlowTheme : GF,

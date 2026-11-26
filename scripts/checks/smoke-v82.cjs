@@ -25,7 +25,9 @@ const stubs = {
   save: () => {},
 };
 
-const ctx = L.buildCtx(['parseAIStart', 'wfTimeWindows', 'backfillAISchedule'], stubs);
+// v8.11 时间纠偏接入 backfillAISchedule 尾部（④ 写库前冲突顺延）——提取列表必须带上，
+// 否则 eval 上下文里 resolveTimeConflicts 未定义（v8.9 教训：抽共用助手要同步更新提取列表）
+const ctx = L.buildCtx(['parseAIStart', 'wfTimeWindows', 'backfillAISchedule', 'resolveTimeConflicts'], stubs);
 
 // ---- parseAIStart 格式兼容 ----
 const cases = { '19点': '19:00', '19点30分': '19:30', '7:30pm': '19:30', '19.30': '19:30', '19:30': '19:30', '7': '07:00', '': '' };

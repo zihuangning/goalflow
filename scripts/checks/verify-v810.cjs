@@ -25,6 +25,10 @@ console.log('== v8.10 核查 ==');
 L.assertFnContains('setNodeDone 出口统一 saveMeta', 'setNodeDone', 'saveMeta();');
 L.assertFnContains('setNodeDone 勾选仍更新习惯', 'setNodeDone', 'updateHabitStreak(n, state.activeWorkflowId, true);');
 L.assertFnContains('setNodeDone 取消仍回滚习惯', 'setNodeDone', 'updateHabitStreak(n, state.activeWorkflowId, false);');
+// ①+ 取消打卡 streak 回退非清零（flow-time-travel 发现：连续 N 天误点取消 🔥N→0）
+L.assertFnContains('updateHabitStreak 取消回退 cur-1', 'updateHabitStreak', 'const prev = (rec.cur || 1) - 1;');
+L.assertFnContains('updateHabitStreak 回退 lastDate 到昨天', 'updateHabitStreak', 'rec.lastDate = dateKey(yest);');
+L.assertFnNotContains('updateHabitStreak 不再直接清零', 'updateHabitStreak', "rec.lastDate = '';\n      rec.cur = 0;");
 
 // ② 取消勾选 executionLog 对称回滚
 L.assertFnContains('removeExecutionLogEntry 从尾部找最新一条', 'removeExecutionLogEntry', 'let i = dayLog.entries.length - 1');
@@ -81,7 +85,10 @@ L.assertNotContains('晚总结不再手搓期限字段', 'n.deadlineDate = tmr; 
 L.assertNotContains('晚总结不再手搓 dl 字段', 'n.deadline = dl.label; n.deadlineDate = dl.date;');
 
 // 版本号（最新版 verify 承担）
-L.assertContains('index.html 版本号 8.10', '?v=8.10', html);
+// 滚动版本守卫：跟随 index.html 当前版本（每次升版不再改这里）；残留检查锁定已退役版本
+const curV = (html.match(/\?v=([\d.]+)/) || [])[1];
+L.assertContains('index.html 版本号为当前滚动版（' + curV + '）', '?v=' + curV, html);
+L.assertNotContains('index.html 无残留 8.10', '?v=8.10', html);
 L.assertNotContains('index.html 无残留 8.9', '?v=8.9', html);
 
 process.exit(L.summary('verify-v810') ? 1 : 0);

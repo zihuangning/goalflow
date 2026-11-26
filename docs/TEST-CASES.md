@@ -3,7 +3,7 @@
 用例总览：模块 × 覆盖层。生成于 2026-11-25（测试基建落地），随套件增删手动同步。
 运行方式见 [TESTING.md](TESTING.md)。
 
-**总量**：tests 8 套件 155 例（unit 126 + flow 29）+ checks 14 环节 229 项 = **384 项断言**。
+**总量**：tests 12 套件 290 例（unit 215 + flow 75）+ checks 18 环节 430 项 = **720 项断言**。
 
 ## 覆盖矩阵
 
@@ -33,8 +33,16 @@
 | 今日执行 | promoteNodeToToday 自动排时/撤回还原/clarifyInbox 入树/撤回/adoptPendingAction 同流刷新/跨流往返 | | ✅ 6 例 | ✅ v8.8/v8.9 | ✅ v8.8 |
 | 收件箱 | captureInboxFromText 时间词→提醒/过去时间不设提醒/澄清五分支/目标流不存在容错 | | ✅ 10 例 | | |
 | AI 排期回填 | 多窗口/顺排 bump/窗口满换次日/recur 补窗口/anchor 容忍 | | | ✅ v8.2 15 例 | ✅ v8.2 |
-| 提醒系统 | 默认回填/换天重置/手动关不回填/三通道告警 | | | | ✅ v8.3 |
+| 提醒系统 | 默认回填/换天重置/手动关不回填/三通道告警 | | ✅ 时间旅行 | | ✅ v8.3/v8.10 |
+| 跨天 streak | 连续/中断/防重/取消回退 cur-1（v8.10 修复） | | ✅ 时间旅行 | | ✅ v8.10 |
+| 跨天分桶 | executionLog/打卡 log/dailyCompletions 按 dk 隔离、取消只动当天桶 | | ✅ 时间旅行 | ✅ v8.10 | ✅ v8.10 |
+| 期限重算 | recomputeSchedule 跨天自适应/「第2周」锚定不漂移/setNodeDeadline 五字段 | ✅ unit-schedule | | | ✅ v8.10 |
+| 排期过夜 | planDate 到期转 time/未来不动/已完成不动/已有 time 不覆盖 | ✅ unit-schedule | ✅ 时间旅行 | ✅ v8.10 | ✅ v8.10 |
+| 周期判定 | habitDueToday 七型/interval 锚点推算/recurringTask 当天完成不再到期 | ✅ unit-schedule | | | |
 | 今日池 | planDate 排除规则/planDate=今天不排除/逾期补救/快赢未来排除 | | | ✅ v8.7 10 例 | ✅ v8.7 |
+| 今日池预算 | budgetCap 截断/默认 dayCap/保底首任务/习惯不占预算/聚合层全局递减 | | ✅ 7 例 | | ✅ v8.11 |
+| 时间冲突纠偏 | 两个 9:00 顺开/链式/缓冲带/出日界保持/{node} 包装/backfill 全局避让+本批纠偏 | ✅ 11 例 | ✅ 7 例 | | ✅ v8.11 |
+| 仪式历史聚合 | morningPlans 打开快照/晚回顾 key 并集/周计划 committedAt 回落/回顾三存储合并/dkWeekLabel/openHistory 四 tab 入口 | ✅ 34 例 | | | ✅ v8.12 |
 | 自动排时 `nextFreeTimeToday` | 跨项目占用/10 分钟缓冲/不排过去/窗口满 null | | | ✅ v8.8 | ✅ v8.8 |
 | 项目删除级联 | rocks/pendingActions/tomorrowMit/planShare/capacity/habitStreaks/topWfId/番茄钟 | | ✅ 生命周期 | ✅ v8.8/v8.9 | ✅ v8.8/v8.9 |
 | 节点删除级联 | 子树删除/topId/topPin/番茄钟解绑/引用备份还原 | | ✅ 生命周期 | ✅ v8.9 35 例 | ✅ v8.9 |
@@ -47,7 +55,22 @@
 | 晚总结期限 | 明天继续/改期走 setNodeDeadline 唯一写入口 | | | | ✅ v8.10 |
 | 版本号一致性 | index.html 4 处 ?v= 同步 | | | | ✅ run.cjs |
 
-## 单元测试明细（126 例）
+## 单元测试明细（215 例）
+
+### unit-schedule.cjs · 时间安排与期限族（55）
+recomputeSchedule 跨天重算：相对标签「明天」恒 daysLeft=1、昨天绝对日期逾期、仅日期无标签刷新+补 label、无期限 null 三件套、「第2周」锚定不漂移。
+setNodeDeadline：「明天」五字段同步、清空六字段、「第2周」留锚=今天、绝对日期不留锚、Date 对象输入。
+convertDuePlanDate：昨天/今天到期转 time、明天不动、已完成不动、无时间部分清 planDate 不塞 time、已有 time 不覆盖。
+habitDueToday/habitTarget：daily、weekdays（一✓六✗，目标 5）、weekends（六日✓）、weekly 一三五（目标 3）、monthly 15 号、interval 每 3 天锚点推算、timesPerWeek 每天可打（目标 N）、旧 recur/timesPerWeek 兼容。
+isRecurringTask/recurringTaskDueToday：recurrence 非习惯✓、recur/role=habit✗、今天已完成不再到期、昨天完成仍到期、从未完成到期。
+resolveTimeConflicts（v8.11）：两个 9:00→09:00/09:40、链式三个、不重叠不动、缓冲带内也算撞、done/无 time 跳过、顺延出日界保持原样、自定义 gap、缺省估时 30′、{node} 包装也认。
+
+### unit-history.cjs · 仪式历史聚合族（34）
+聚合总分/完成数（pomo 不算）/番茄数/专注时长/92 分 A 与 todayScore 同口径/空与 null 安全。
+dkWeekLabel：周一/周日/垃圾输入原样/空输入。
+晨计划历史：倒序/字段携带/dk 注入/空 null 安全。晚回顾：key 并集倒序/聚合评分/三件好事过滤/总结携带/处置计数/仅处置也入列/空串返空。
+周计划：倒序/rocks 携带/committedAt 回落 savedAt/intent 缺省/空安全。
+回顾合并：三存储合并/savedAt 倒序/cycle 标记/字段保留/null 安全。
 
 ### unit-parse.cjs · 解析族（33）
 期限：今天 0 天、明天 1 天、后天 2 天、label 归一、不逾期、YYYY-MM-DD label+daysLeft、12月31日跨年到未来最近一次、下周三=下自然周周三、3天后、两周内 14 天、第2周=锚点+13 天、过去日期逾期、无期限 null 三件套。
@@ -76,7 +99,15 @@ energyBucketNow：5-12=am/12-18=pm/其余 eve。
 smartEval：模糊 smart=false+s1m1+3gap 规则来源、完整 smart=true+s3m3r3t3、AI 路径优先 fromAI、AI s=1 不具体 gap。
 smartQuestions：含衡量指标/完成时间/必追拆解。decomposeSuggestions：读书/销售/运动/默认。
 
-## 流程测试明细（29 例）
+## 流程测试明细（75 例）
+
+### flow-today-pool.cjs · 今日池容量与时间纠偏（7，v8.11）
+A 池预算：budget=60 两任务各 60′→一进一溢出、不传默认 dayCap(240) 全进、budget=0 首个保底进、习惯不占预算。
+B backfill 全局避让：旧任务占今日 09:00+60′→新批缺省任务顺到 10:10、旧任务占「明天」→今天顺排不受影响。
+C backfill 本批纠偏：AI 直给两个 9:00→写库前纠成 09:00/09:40。
+
+### flow-time-travel.cjs · 时间旅行·跨天（39）
+可控时钟 `__now` 模拟跨午夜。A 习惯 streak：d0 打卡→d1 连打 cur=2→重复勾防重→**d1 取消 cur 回退 1/lastDate 回昨天（v8.10 bug 修复验证：原实现直接清零）**→再勾恢复→断 2 天打卡重置 cur=1/best 保留→cur=1 取消归零+重复取消 no-op。B 打卡日志跨天分桶+d4/d5 各自独立、计数型 targetDone 跨天累积+同日防重+取消对称回退、低频 freqDecay=0.012。C _remindOff：当天关不回填→换天重置+自动回填开始前 5 分钟、00:03 边界（前 5 分钟是昨天不设置）、已有提醒不覆盖、已完成不回填。D 执行日志跨天：取消昨天勾的任务只查当天桶——昨天历史保留不建空桶、节点状态仍复位、换天重勾两天计数各自独立。E 排期任务过夜：明天排期今天不转换→过夜自动转 time 进今日。
 
 ### flow-goal-lifecycle.cjs · 项目全生命周期（7）
 ① doParse 树就位 → ② 手工加引用（石头/打卡/置顶）→ ③ applyWorkflowTemplate 整树替换旧引用全清 → ④ deleteNode 级联清石头+undo 一并还原 → ⑤ deleteWorkflow 最后项目重建空白默认+石头清空 → ⑥ clearAll 清空+引用全清+undo 全量还原。
@@ -90,7 +121,7 @@ smartQuestions：含衡量指标/完成时间/必追拆解。decomposeSuggestion
 ### flow-habit-strength.cjs · 习惯强度 30 天（6）
 ① 连打 10 天→50% → ② +5 天漏打→65%（净+3% 不清零）→ ③ 再加更早 5 连→90%（历史贡献在）→ ④ 低频 freqDecay=0.012→94% → ⑤ 未记录日不参与 samples=10 → ⑥ 30 天全勤 100 封顶。
 
-## checks 明细（357 项）
+## checks 明细（430 项）
 
 | 套件 | 项数 | 守什么 |
 |---|---|---|
@@ -102,7 +133,9 @@ smartQuestions：含衡量指标/完成时间/必追拆解。decomposeSuggestion
 | verify-v8.7 | 20 | 模板时间检测/今日池过滤/顶栏全局池 |
 | verify-v8.8 | 37 | 自动排时/项目删除级联/confirmModal/通知/容错链 |
 | verify-v8.9 | 33 | 三级引用清理/删除级联/整树替换/clearAll |
-| verify-v8.10 | 43 | 勾选回滚/跨午夜/恢复清理/精力全链/删除统一/期限入口 |
+| verify-v8.10 | 47 | 勾选回滚/跨午夜/恢复清理/精力全链/删除统一/期限入口/streak 回退/滚动版本守卫 |
+| verify-v8.11 | 32 | 时间冲突纠偏/backfill 全局避让/池预算全局口径/溢出留池沉底/顺排提示条/文案说人话 |
+| verify-v8.12 | 37 | 仪式历史：快照/聚合纯函数/openHistory 弹窗/入口/样式/导出 |
 | smoke-v8.2 | 15 | 排期回填 5 场景实跑 |
 | smoke-v8.7 | 10 | 今日池 6 场景实跑 |
 | smoke-v8.8 | 17 | 自动排时 5 场景+删除级联实跑 |

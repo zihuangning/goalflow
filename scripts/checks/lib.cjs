@@ -69,4 +69,26 @@ function summary(suite) {
   return failed;
 }
 
-module.exports = { ROOT, APP_JS, ok, bad, assertContains, assertNotContains, grabFn, assertFnContains, assertFnNotContains, buildCtx, summary };
+/* Windows 偶发：node 子进程输出完整（[suite] N 通过, 0 失败）但以 3221226505
+   （0xC0000409 STATUS_STACK_BUFFER_OVERRUN，libuv/管道层崩溃）异常退出——与测试逻辑无关。
+   策略：catch 后若 stdout 汇总行证明全过 → 重试 1 次；仍崩但内容仍全过 → 按过处理（flaky 标注）。
+   真失败（输出含「M 失败」/无输出/崩溃堆栈）不匹配 okPattern，原样抛出。 */
+const { execFileSync } = require('child_process');
+function runSuite(file, okPattern) {
+  const pat = okPattern || /\[[^\]]+\] \d+ 通过, 0 失败/;
+  try {
+    return { out: execFileSync(process.execPath, [file], { stdio: 'pipe' }).toString(), flaky: false, crashedTwice: false };
+  } catch (e) {
+    const out = e.stdout ? e.stdout.toString() : '';
+    if (!pat.test(out)) throw e;
+    try {
+      return { out: execFileSync(process.execPath, [file], { stdio: 'pipe' }).toString(), flaky: true, crashedTwice: false };
+    } catch (e2) {
+      const out2 = e2.stdout ? e2.stdout.toString() : '';
+      if (pat.test(out2)) return { out: out2, flaky: true, crashedTwice: true };
+      throw e2;
+    }
+  }
+}
+
+module.exports = { ROOT, APP_JS, ok, bad, assertContains, assertNotContains, grabFn, assertFnContains, assertFnNotContains, buildCtx, summary, runSuite };
