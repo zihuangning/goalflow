@@ -2187,14 +2187,222 @@
 
   /* —— 信息暴露：行内 meta 减载；点 ⋯ 展开后恢复全量 —— */
   .today-row:not(.expanded) .today-txt-metas .habit-recur,
+  .today-row:not(.expanded) .gf-row-meta .habit-recur,
   .today-row:not(.expanded) .today-txt-metas .anchor-tag,
+  .today-row:not(.expanded) .gf-row-meta .anchor-tag,
   .today-row:not(.expanded) .today-txt-metas .ctx-tag,
-  .today-row:not(.expanded) .today-txt-metas .meta-dleft { display: none; }
+  .today-row:not(.expanded) .gf-row-meta .ctx-tag,
+  .today-row:not(.expanded) .today-txt-metas .meta-dleft,
+  .today-row:not(.expanded) .gf-row-meta .meta-dleft { display: none; }
 
   /* —— 底部 tab 与顶栏同款玻璃质感 —— */
   .mtab {
     background: color-mix(in srgb, var(--bg) 78%, transparent);
     -webkit-backdrop-filter: blur(18px) saturate(1.35);
     backdrop-filter: blur(18px) saturate(1.35);
+  }
+}
+
+/* ============================================================
+   46. v8.17 移动端溢出整顿（图标/按钮/番茄条/行内动作）
+   —— 根因：纯 emoji 按钮加中文后变宽；flex 子项默认 min-width:auto 撑破父盒
+   ============================================================ */
+@media (max-width: 900px) {
+  /* 页面横向绝不溢出 */
+  .main, .main-scroll, .view, .today-panel, .zone, .zone-body {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  /* 番茄条：整行可折；任务名截断；按钮不挤出 */
+  .pomo-bar, .pomo-bar.show { max-width: 100%; box-sizing: border-box; }
+  .pomo-inner {
+    gap: 8px;
+    padding: 10px 12px;
+    max-width: 100%;
+  }
+  .pomo-task { flex: 1 1 100%; max-width: 100%; }
+  .pomo-t, .pomo-pct { flex: 0 0 auto; }
+  .pomo-prog { flex: 1 1 100%; min-width: 0; height: 6px; }
+  .pomo-inner .gf-btn { min-height: 40px; padding: 0 12px; }
+
+  /* MIT 头行：时长下拉 + 取消固定不撑破 */
+  .mit-pin-head { max-width: 100%; }
+  .mit-pomo-len { max-width: 42%; min-width: 0; }
+  .mit-unpin { max-width: 100%; }
+
+  /* 今日行：快捷区与文案分列，按钮可折行 */
+  .today-row { max-width: 100%; min-width: 0; }
+  .today-txt { min-width: 0; flex: 1 1 auto; }
+  .today-row-quick {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 100%;
+  }
+  .today-row-quick .gf-btn { white-space: nowrap; }
+  .today-acts {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .today-acts .gf-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .today-timing { max-width: 100%; }
+  .today-timing input { max-width: 100%; min-width: 0; }
+
+  /* 备选区 fitem：→今天 不溢出 */
+  .fitem {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .fitem .fitem-today, .fitem .fitem-in-today { flex: 0 0 auto; margin-left: auto; }
+
+  /* 折叠区 summary / 角标 */
+  .zone > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+  }
+  .zone-badge { flex: 0 0 auto; }
+
+  /* 关注 chips / 容量条 */
+  .attn-chip, .day-capacity, .dc-fold { max-width: 100%; box-sizing: border-box; }
+  .day-capacity { flex-wrap: wrap; min-width: 0; }
+  .dc-bar { min-width: 0; flex: 1 1 80px; }
+
+  /* 项目总览 KR 行 */
+  .po-kr { max-width: 100%; }
+  .po-kr-m { font-size: 12px; }
+}
+
+/* ============================================================
+   47. v8.18 今日页顶部减负
+   —— 大标题「今日」与顶栏迷你标题 / 面板内容重复；仪式条状态文案占行；
+      空番茄区仍占位。改为：今日视图藏 .app-title、顶栏常显 ab-mini、
+      藏闹钟状态句、无番茄时收起 heroWrap，让 MIT 尽快进首屏。
+   ============================================================ */
+@media (max-width: 900px) {
+  body[data-view="today"] .app-title { display: none !important; }
+  body[data-view="today"] header.topbar .ab-mini {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  /* 规划/洞察仍保留大标题；滚出后再靠 ab-mini */
+  body:not([data-view="today"]) .app-title { display: block; }
+
+  .today-alarm-bar .today-alarm-st { display: none !important; }
+  .today-head { margin: 0 0 6px; padding: 0; }
+  .today-head-row { margin: 0; }
+  #heroWrap:not(:has(.pomo-bar.show)) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #view-today.view { padding-top: 2px; }
+  .today-panel { margin-top: 0 !important; }
+}
+
+/* ============================================================
+   48. v8.19 移动端降级：查看 + 勾选 + 捕捉 + 简单改时
+   —— 去重入口；行操作只留提醒/时间/删除；闹钟条去时间编辑；
+      底栏 今日|捕捉|更多；深度编辑回桌面。
+   ============================================================ */
+@media (max-width: 900px) {
+  /* 顶栏：明暗已进 ⋯；主题区整块 d-only；搜索保留图标 */
+  header.topbar .topbar-theme { display: none !important; }
+
+  /* 闹钟条：只留开关 + 仪式菜单（晨晚时间改到⚙设置） */
+  .today-alarm-bar .alarm-set { display: none !important; }
+
+  /* 行内展开：只要提醒 + 计划时间 + 删除；深度动作桌面做 */
+  .today-est { display: none !important; }
+  .today-acts [data-micro],
+  .today-acts [data-woop],
+  .today-acts [data-anchor],
+  .today-acts [data-habitedit],
+  .today-acts [data-recurredit],
+  .today-acts [data-wait],
+  .today-acts [data-block],
+  .today-acts [data-tags] { display: none !important; }
+  .today-ifthen,
+  .today-tags-wrap { display: none !important; }
+
+  /* MIT：藏得分折叠/取消固定；番茄启动仍保留 */
+  .mit-score-fold,
+  .mit-unpin { display: none !important; }
+
+  /* 过滤/备选「→今天」偏桌面决策 */
+  .today-wfonly,
+  .fitem-today { display: none !important; }
+
+  /* 底栏「更多」sheet */
+  .mtab-more-sheet {
+    position: fixed; inset: 0; z-index: 70;
+    display: flex; align-items: flex-end; justify-content: center;
+    background: rgba(0, 0, 0, .45);
+    padding: 0 12px calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+  .mtab-more-sheet[hidden] { display: none !important; }
+  .mtab-more-card {
+    width: min(100%, 420px);
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 16px 16px 12px 12px;
+    padding: 8px;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, .35);
+  }
+  .mtab-more-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; min-height: 48px;
+    padding: 10px 14px; margin: 0;
+    border: 0; border-radius: 10px;
+    background: transparent; color: var(--ink);
+    font: inherit; font-size: 15px; text-align: left; cursor: pointer;
+  }
+  .mtab-more-item:active { background: var(--panel-strong); }
+  .mtab-more-item .mms-sub {
+    margin-left: auto; font-size: 12px; color: var(--muted);
+  }
+  .mtab-more-item#mtabMoreClose {
+    justify-content: center; color: var(--muted); margin-top: 4px;
+  }
+  #mtabMore.on { color: var(--ink); }
+}
+
+/* ============================================================
+   49. v8.20/v8.21 移动端：顶栏去闹钟仪式；待办并入 ab-mini；底栏五键
+   ============================================================ */
+@media (max-width: 900px) {
+  /* 闹钟/仪式整条隐藏（入口改抽屉「仪式」+ ⚙ 基础设置） */
+  #todayAlarmBar,
+  .today-alarm-bar { display: none !important; }
+
+  /* v8.21: 问候作主标题、待办/完成作副标题（renderAppTitle → abMini / abMiniSub） */
+  body[data-view="today"] .ab-mini b {
+    font-size: 15.5px;
+    font-weight: 650;
+    max-width: 52vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 弹窗关闭钮触控放大 */
+  .modal-head .mh-x,
+  .search-modal .gs-x {
+    min-width: 44px;
+    min-height: 44px;
   }
 }

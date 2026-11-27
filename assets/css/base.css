@@ -56,6 +56,18 @@ body.is-ready .wrap { transition-delay: 0.06s; }
   }
 }
 
+/* v8.27 · 全局键盘焦点（补充 button.css 里的 .gf-btn） */
+a:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 2px;
+  border-radius: calc(var(--btn-radius, 6px) * 0.6);
+}
+
 /* 工具类 */
 .gf-hint {
   font-size: 12.5px;

@@ -2,9 +2,10 @@
    所有 checks/*.cjs（除 run.cjs）通过 require('./lib.cjs') 使用。 */
 const fs = require('fs');
 const path = require('path');
+const { ROOT, logicSource } = require('../app-scripts.cjs');
 
-const ROOT = path.join(__dirname, '..', '..');
-const APP_JS = fs.readFileSync(path.join(ROOT, 'assets/js/app.js'), 'utf8');
+/* 业务三文件拼接，供 grabFn / 字符串断言扫描全量逻辑 */
+const APP_JS = logicSource();
 
 let passed = 0, failed = 0;
 const failures = [];

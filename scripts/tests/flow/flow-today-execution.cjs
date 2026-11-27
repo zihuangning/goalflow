@@ -22,6 +22,12 @@ const stubs = {
   switchWorkflow: id => { stubs.__sw.push(id); stubs.state.activeWorkflowId = id; const w = stubs.workflowById(id); if (w) stubs.state.nodes = w.nodes; },
   flushActiveWorkflow: () => { const w = stubs.workflowById(stubs.state.activeWorkflowId); if (w) w.nodes = stubs.state.nodes; },
   byId: id => stubs.state.nodes.find(n => n.id === id),
+  // v8.23: promoteNodeToToday 改走 setNodeDeadline + stampNodeTimeDk
+  setNodeDeadline: (n, val) => {
+    n.deadline = val; n.deadlineText = val;
+    n.deadlineDate = stubs.today0(); n.daysLeft = 0; n.overdue = false;
+  },
+  stampNodeTimeDk: (n, dk) => { if (!n) return; if (n.time) n.timeDk = dk || stubs.dateKey(); else n.timeDk = ''; },
   appendActionLeaf: (text, opts) => { const node = { id: 'leaf' + (++stubs.__nid), parentId: 'root', text, scale: 'day', estimateMinutes: (opts && opts.est) || 30 }; stubs.state.nodes.push(node); return node; },
   wfTimeWindows: wfId => [{ start: '19:00', end: '22:00', mins: 180 }],
   __ac: 0, __sw: [], __undo: null, __nid: 0,

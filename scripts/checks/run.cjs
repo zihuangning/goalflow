@@ -15,12 +15,14 @@ function step(name, fn) {
   catch (e) { failed++; console.log('✗ ' + name + '\n' + (e.stdout ? e.stdout.toString() : e.message)); }
 }
 
-// 1. 语法检查
-step('node --check assets/js/app.js', () => {
-  execFileSync(process.execPath, ['--check', path.join(ROOT, 'assets/js/app.js')], { stdio: 'pipe' });
+// 1. 语法检查（拆分后的三业务文件）
+['gf-model.js', 'gf-ui.js', 'app.js'].forEach(f => {
+  step('node --check assets/js/' + f, () => {
+    execFileSync(process.execPath, ['--check', path.join(ROOT, 'assets/js', f)], { stdio: 'pipe' });
+  });
 });
 
-// 2. index.html 四处 ?v= 版本号一致
+// 2. index.html ?v= 版本号一致（含多 script）
 step('index.html 资源版本号一致', () => {
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const vs = [...html.matchAll(/\?v=([\d.]+)/g)].map(m => m[1]);

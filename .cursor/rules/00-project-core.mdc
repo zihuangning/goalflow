@@ -1,0 +1,51 @@
+---
+description: GoalFlow 纯前端项目的核心架构、协作方式与交付标准
+alwaysApply: true
+---
+
+# 项目核心规则
+
+## 技术栈与目标
+
+- **形态**：纯前端 SPA，无构建、无后端权威状态；双击/`file://` 或静态托管即可用。
+- **入口**：`index.html`；逻辑 `assets/js/app.js`；令牌 `assets/js/gf-tokens.js`；示例 `assets/js/gf-demos.js`；样式 `assets/css/**`（`gf-` 前缀）。
+- **状态**：`state.workflows[]`（项目）+ `state.nodes`（当前流镜像）+ `state.meta`；持久化 `goalfocus.workflows.v2`（+ `.bak`）与 `goalfocus.meta.v1`。
+- **成功标准**：改动范围准确、数据不丢不脏、`?v=` 同步、对应层测试通过；不声称「仅靠目测已验证」。
+
+## 工作方式
+
+1. 修改前先读相关函数、调用链与 `openmemory.md` Patterns；不要凭假设平行实现。
+2. 只修改完成当前任务所需的代码，不顺手大重构或引入框架。
+3. 遵循现有命名与封装：`newNode`、`setNodeDeadline`、`confirmModal`、`buildModalHtml`/`openModalMask`、三级 `purge*`。
+4. 错误与失败必须可见（弹窗/toast/提示），禁止静默当成功；渲染链路用已有 `safe`/`try` 模式，勿拆掉容错。
+5. 未经明确要求，不新增无关说明文档或示例页。
+6. **并行会话**：同工作区可能有另一 Agent；改前 Grep/Read 确认当前文本；发现对方更高版本号时取更高者，勿回滚对方文件。
+
+## 静态资源与版本
+
+- 改 `assets/js/*`、`assets/css/*` 或 `index.html` 内引用时，**四处** `?v=`（css + 三 script）必须同号 bump。
+- 新功能的结构守卫写 `scripts/checks/verify-v*.cjs`；行为场景写 `smoke-v*.cjs`；纯逻辑写 `scripts/tests/unit/`；跨函数旅程写 `scripts/tests/flow/`。
+
+## 验证（默认）
+
+```powershell
+node --check assets/js/app.js
+node scripts/checks/run.cjs
+node scripts/tests/run.cjs
+# 大改 / 发版前：
+node scripts/tests/run.cjs --with-checks
+```
+
+- 改 bug：先写能红的复现测试，再修，再确认变绿。
+- 仅改文案/CSS 视觉：至少 bump `?v=` + 相关 verify（若有）或手动说明未跑全量原因。
+
+## 产品边界（硬）
+
+- 默认路径保持 **本地 localStorage**；不要把「必须登录 / 必须云同步」做成主流程。
+- 不引入诊疗承诺、站内交易、社交裂变式增长玩法（个人效能工具定位）。
+- LLM 调用可 stub；真实 Key 只存用户本机设置，禁止写入仓库与记忆。
+
+## OpenMemory
+
+- `project_id`: `zihuangning/goalflow`
+- 改码三阶段：搜记忆/索引 → 实现中检查点再搜 → 结束更新 `openmemory.md`（MCP 不可用时跳过 MCP，只维护本地文件）

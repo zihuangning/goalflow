@@ -42,7 +42,9 @@ L.assertFnContains('scoreOfDoneEntry 脏数据安全', 'scoreOfDoneEntry', 'retu
 L.assertContains('❓ 改为按钮', '<button type="button" class="help-icon" id="todayExecHelp"');
 L.assertFnContains('❓ 绑定在 renderTodayPanel', 'renderTodayPanel', "querySelector('#todayExecHelp')");
 L.assertFnContains('❓ 点击插入说明行', 'renderTodayPanel', 'today-exec-help');
-L.assertFnContains('❓ 说明含排序规则', 'renderTodayPanel', '排序规则：设了「🕐 计划时间」');
+// v8.23: 帮助文案扩展置顶/跨日，锁关键片段
+L.assertFnContains('❓ 说明含排序规则', 'renderTodayPanel', '排序规则：');
+L.assertFnContains('❓ 说明含计划时间', 'renderTodayPanel', '计划时间');
 L.assertFnContains('❓ 再点收起', 'renderTodayPanel', 'old.remove()');
 
 // ④ 样式 + 导出 + 版本
@@ -55,6 +57,6 @@ L.assertContains('导出 scoreOfDoneEntry', 'scoreOfDoneEntry,');
 // 滚动版本守卫：跟随 index.html 当前版本（升版不再改这里——verify-v810/v813 同模式）
 const curV = (html.match(/\?v=([\d.]+)/) || [])[1];
 const vCount = (html.match(new RegExp('\\?v=' + String(curV).replace(/\./g, '\\.'), 'g')) || []).length;
-(vCount === 4 ? L.ok : L.bad)('index.html 4 处版本号（当前滚动版 ' + curV + '）', '实际 ' + vCount + ' 处');
+(vCount >= 4 && new Set([...html.matchAll(/\?v=([\d.]+)/g)].map(m => m[1])).size === 1 ? L.ok : L.bad)('index.html 版本号一致且 ≥4 处（' + curV + ' ×' + vCount + '）', '实际 ' + vCount);
 
 process.exit(L.summary('verify-v814') ? 1 : 0);

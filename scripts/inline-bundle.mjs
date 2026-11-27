@@ -2,13 +2,17 @@
 /**
  * 将 index.html + assets 内联为单文件 dist/index-standalone.html
  * 用法: node scripts/inline-bundle.mjs
+ * 脚本顺序与 scripts/app-scripts.cjs 的 APP_SCRIPT_PARTS 一致。
  */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
+const require = createRequire(import.meta.url);
+const { APP_SCRIPT_PARTS } = require('./app-scripts.cjs');
 
 function expandCss(filePath) {
   const dir = path.dirname(filePath);
@@ -26,18 +30,17 @@ function bundle() {
   const mainCss = path.join(root, 'assets/css/main.css');
   const css = expandCss(mainCss);
 
-  const tokensJs = fs.readFileSync(path.join(root, 'assets/js/gf-tokens.js'), 'utf8');
-  const demosJs = fs.readFileSync(path.join(root, 'assets/js/gf-demos.js'), 'utf8');
-  const appJs = fs.readFileSync(path.join(root, 'assets/js/app.js'), 'utf8');
+  const jsBlob = APP_SCRIPT_PARTS.map(rel => fs.readFileSync(path.join(root, rel), 'utf8')).join('\n;\n');
 
   html = html.replace(
     /<link rel="stylesheet" href="assets\/css\/main\.css(\?[^"]*)?">\s*/i,
     `<style>\n${css}\n</style>\n`
   );
 
+  // 连续 script 标签（数量可变）整段替换为一个内联 script
   html = html.replace(
-    /<script src="assets\/js\/gf-tokens\.js(\?[^"]*)?"><\/script>\s*<script src="assets\/js\/gf-demos\.js(\?[^"]*)?"><\/script>\s*<script src="assets\/js\/app\.js(\?[^"]*)?"><\/script>/i,
-    `<script>\n${tokensJs}\n${demosJs}\n${appJs}\n</script>`
+    /(?:<script src="assets\/js\/[^"]+"><\/script>\s*)+/i,
+    `<script>\n${jsBlob}\n</script>\n`
   );
 
   const outDir = path.join(root, 'dist');
@@ -46,7 +49,7 @@ function bundle() {
   fs.writeFileSync(outFile, html, 'utf8');
 
   const kb = (Buffer.byteLength(html, 'utf8') / 1024).toFixed(1);
-  console.log(`Wrote ${outFile} (${kb} KB)`);
+  console.log(`Wrote ${outFile} (${kb} KB) · ${APP_SCRIPT_PARTS.length} scripts`);
 }
 
 bundle();

@@ -26,7 +26,8 @@ L.assertFnContains('resolveTimeConflicts 出日界保持原样', 'resolveTimeCon
 L.assertFnContains('resolveTimeConflicts 返回 moves', 'resolveTimeConflicts', 'return { changed: moves.length, moves };');
 L.assertFnContains('ensureTodayTimeResolved dirty 才落盘', 'ensureTodayTimeResolved', 'if (r.changed) save();');
 L.assertFnContains('renderToday 渲染前纠偏', 'renderTodayPanel', 'ensureTodayTimeResolved(pool);');
-L.assertFnContains('renderToday 提醒默认值仍在', 'renderTodayPanel', 'ensureRemindDefaults(pool.map(x => x.node));');
+// v8.18: MIT 可能跨项目，改为 remindNodes（池 + MIT）再 ensureRemindDefaults
+L.assertFnContains('renderToday 提醒默认值仍在', 'renderTodayPanel', 'ensureRemindDefaults(remindNodes)');
 
 // ② backfill 全局避让 + 尾部纠偏
 L.assertFnContains('backfill 避让项目已占用', 'backfillAISchedule', 'const batchIds = new Set(collected.map(n => n.id));');
@@ -44,9 +45,11 @@ L.assertFnContains('todayAggregatedPool 预算传入池', 'todayAggregatedPool',
 // ④ 溢出留池 + 渲染分区
 L.assertFnContains('溢出任务留在池里', 'todayExecutionPoolFor', 'if (!habit && est > budget && out.length) { n._overflow = true; out.push(n); return; }');
 L.assertFnContains('renderToday MIT 排除溢出', 'renderTodayPanel', 'pool.find(x => x.isWfTop && !x.node._overflow)');
-L.assertFnContains('renderToday 溢出沉底', 'renderTodayPanel', 'const ordered = timed.concat(untimed).concat(overflowed);');
+// v8.23: 排序抽到 sortTodayExecEntries，溢出仍沉底
+L.assertFnContains('renderToday 走统一排序', 'renderTodayPanel', 'sortTodayExecEntries');
+L.assertContains('溢出沉底在 sortTodayExecEntries', '.concat(overflowed)', L.APP_JS);
 L.assertFnContains('renderToday 溢出分隔行', 'renderTodayPanel', '🌊 溢出 · 超出今日可投入，建议顺延或删减');
-L.assertFnContains('todayRowHtml 溢出行 class', 'todayRowHtml', "${n._overflow ? ' is-overflow' : ''}");
+L.assertFnContains('todayRowHtml 溢出行 class', 'todayRowHtml', "n._overflow ? 'is-overflow'");
 L.assertFnContains('todayRowHtml 溢出标记', 'todayRowHtml', '🌊 溢出');
 L.assertContains('晨计划预览只列预算内', 'pool.filter(ent => !ent.node._overflow).slice(0, 6)');
 L.assertContains('CSS 溢出降权', '.today-row.is-overflow { opacity: .62; }', css);

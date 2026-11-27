@@ -1,0 +1,39 @@
+---
+description: GoalFlow 前端 UI / 设计系统 / 弹窗与移动端约束（改 index.html、assets/css、渲染函数时遵守）
+globs:
+  - index.html
+  - assets/css/**
+  - assets/js/gf-tokens.js
+  - assets/js/app.js
+alwaysApply: false
+---
+
+# 前端与设计系统
+
+## 设计真源
+
+1. 先读 [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) 与 `assets/css/tokens.css`。
+2. 组件前缀 **`gf-`**：按钮用 `.gf-btn` 及修饰符；输入用 `.gf-input`；勿引入 Inter/Roboto 以外的「默认 AI 审美」乱炖（主题已有 Linear/Raycast/RPG）。
+3. 主题双维度：`data-theme` + `data-mode`；改色走 token / `gf-tokens.js` 的 `THEMES`，禁止页面散落魔法色（金/iris 例外须写进 token）。
+
+## 弹窗与确认
+
+- 新弹窗优先 `buildModalHtml` + `openModalMask`；关闭钮用标准 `mh-x`（可点、足够触控）。
+- 用户确认：`confirmModal`（Promise），**禁止**依赖原生 `confirm`/`alert` 作为唯一路径（WebView 会吞）。
+- 遮罩点击关闭与 Esc 行为与现有 modal 一致。
+
+## 今日 / 渲染
+
+- 今日分区顺序与去重口径以 `openmemory.md` Components 为准；改池子过滤时注释写清「为什么排除」。
+- 被过滤/溢出的任务要有可见性（提示条 / `_overflow`），禁止无声丢弃。
+- 容量类指标：分子分母同口径；全局 vs 单项目勿错配。
+
+## 移动端（≤900px）
+
+- 触控目标约 40–44px；图标按钮带中文或可点击帮助，勿只靠 hover `title`。
+- 溢出：父 `max-width:100%` + 子 `min-width:0` + 必要 `flex-wrap`。
+- 用现有 `.d-only` / `body[data-view]` 分层，勿另造一套导航。
+
+## 版本
+
+改 CSS/JS 后 bump `index.html` 全部 `?v=`。

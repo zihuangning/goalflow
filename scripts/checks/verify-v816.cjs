@@ -41,13 +41,11 @@ L.assertFnContains('已在今日显示标记而非按钮', 'renderFocus', 'fitem
 L.assertFnContains('在今日判定含已排时间', 'renderFocus', 'n.time || n.planDate === dateKey() || n.daysLeft === 0');
 L.assertContains('在今日标记样式', '.fitem-in-today {', css);
 
-// ④ metricsStrip 去重+说明
+// ④ metricsStrip 去重（v8.17 起 KR 整块迁出今日 → 只断言「本周完成」仍在；KR 相关改 verify-v817）
 L.assertFnNotContains('条内不再有叶子 pill（页头常驻）', 'renderMetricsStrip', '叶子 <b>${lp.pct}%</b>');
+L.assertFnContains('本周动量仍在今日状态', 'renderMetricsStrip', '本周完成');
 L.assertFnContains('本周动量 title 写明跨项目口径', 'renderMetricsStrip', '跨全部项目 · 近 7 天');
-L.assertFnContains('动量 title 与页头叶子%区分', 'renderMetricsStrip', '那是当前项目总进度');
-L.assertFnContains('指标折叠 summary 加 title', 'renderMetricsStrip', '当前项目的关键结果/习惯/带数字目标的节点进度');
-L.assertFnContains('KR pill title 写明 Δ 口径', 'renderMetricsStrip', '比时间进度');
-L.assertFnContains('KR pill 带节点名前缀（区分雷同进度）', 'renderMetricsStrip', '${tag}·${name8}');
+L.assertFnNotContains('v8.17 起今日不再展指标折叠', 'renderMetricsStrip', 'ms-kr-fold');
 
 // ① 逾期并入需要关注
 L.assertFnContains('overdueLeaves 排除 recur/habit', 'overdueLeaves', "!n.recur && n.role !== 'habit' && n.overdue");
@@ -68,6 +66,6 @@ L.assertContains('导出 splitStaleOverdue', 'splitStaleOverdue,');
 L.assertContains('导出 overdueLeaves', 'overdueLeaves,');
 const curV = (html.match(/\?v=([\d.]+)/) || [])[1];
 const vCount = (html.match(new RegExp('\\?v=' + String(curV).replace(/\./g, '\\.'), 'g')) || []).length;
-(vCount === 4 ? L.ok : L.bad)('index.html 4 处版本号（当前滚动版 ' + curV + '）', '实际 ' + vCount + ' 处');
+(vCount >= 4 && new Set([...html.matchAll(/\?v=([\d.]+)/g)].map(m => m[1])).size === 1 ? L.ok : L.bad)('index.html 版本号一致且 ≥4 处（' + curV + ' ×' + vCount + '）', '实际 ' + vCount);
 
 process.exit(L.summary('verify-v816') ? 1 : 0);

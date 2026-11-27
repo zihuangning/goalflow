@@ -22,12 +22,15 @@ const stubs = {
   // stub 必须含 activeWorkflowId + meta.capacity，否则 wfTimeWindows 拿默认窗口导致结果偏移
   state: { activeWorkflowId: 'wf1', meta: { capacity: { wf1: { wins: [{ start: '19:00', mins: 180 }] } } } },
   setNodeDeadline: (n, dk) => { n.deadlineDate = new Date(dk + 'T00:00:00'); n.daysLeft = dk === dkOf() ? 0 : 1; },
+  // v8.23: backfill 写今日 time 后盖章 timeDk
+  stampNodeTimeDk: (n, dk) => { if (!n) return; if (n.time) n.timeDk = dk || dkOf(); else n.timeDk = ''; },
   save: () => {},
 };
 
 // v8.11 时间纠偏接入 backfillAISchedule 尾部（④ 写库前冲突顺延）——提取列表必须带上，
 // 否则 eval 上下文里 resolveTimeConflicts 未定义（v8.9 教训：抽共用助手要同步更新提取列表）
-const ctx = L.buildCtx(['parseAIStart', 'wfTimeWindows', 'backfillAISchedule', 'resolveTimeConflicts'], stubs);
+// v8.21: wfTimeWindows 无项目窗口时回落 globalTimeWindows——提取列表必须带上
+const ctx = L.buildCtx(['parseAIStart', 'wfTimeWindows', 'backfillAISchedule', 'resolveTimeConflicts', 'globalTimeWindows', 'winsTotalHours'], stubs);
 
 // ---- parseAIStart 格式兼容 ----
 const cases = { '19点': '19:00', '19点30分': '19:30', '7:30pm': '19:30', '19.30': '19:30', '19:30': '19:30', '7': '07:00', '': '' };

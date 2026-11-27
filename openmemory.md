@@ -5,14 +5,24 @@
 
 **project_id:** zihuangning/goalflow
 
+## Agent / 工程流程（从 wechat_fitness 适配）
+- **入口:** [`AGENTS.md`](AGENTS.md) · 规则 `.cursor/rules/00-project-core.mdc`（always）+ `10-frontend.mdc`（UI globs）
+- **Preflight / 六阶段:** `docs/preflight/goalflow.md` · `docs/preflight/six-stage-workflow.md`
+- **场景工作流:** `docs/dev/agent-scenario-workflows.md`（新功能/Bug/测试/UI）
+- **Skill 指南:** `docs/dev/project-skills-guide.md`
+- **桥接 Skill:** `@goalflow-engineering` · `@goalflow-test-case-generator`（需求依据/待确认，对齐四层测试）
+- **自检关键词:** `.cursor/hooks/RULES_CHECKLIST.md`（`前端检查` / `测试检查` / `工程检查`）
+- **勿迁入:** Flutter/Go/商店/Firebase 技能与第二套测试驾驶舱；思想对齐知行仓，执行真源仍是本仓 node scripts
+
 ## Architecture
-- **入口:** `index.html` + `assets/css/main.css` + `assets/js/{gf-tokens,gf-demos,app}.js`
-- **设计系统:** `gf-` 前缀组件；`docs/DESIGN-SYSTEM.md`
-- **状态:** `state.workflows[]` **项目**（目标流）：`id/name/tags[]/startDate/endDate/description/color + nodes/topId`；`state.activeWorkflowId`；`state.nodes` 为当前流镜像；`state.meta` 周回顾等
-- **持久化:** `goalfocus.workflows.v2` 主键 + `goalfocus.workflows.bak` 镜像（每次 save 双写）；加载顺序 v2→bak→v1→单树；`console` 有诊断（`goalflowStorageReport()`）；`beforeunload` 兜底保存；`meta.lastSavedAt` 显示于侧栏 `#wsStore`；`goalfocus.meta.v1`（回顾/执行/评分）
+- **入口:** `index.html` + `assets/css/main.css` + `assets/js/{gf-tokens,gf-demos,gf-model,gf-ui,app}.js`（顺序由 `scripts/app-scripts.cjs` `APP_SCRIPT_PARTS` 统一；inline-bundle / requireApp / checks `APP_JS` 同清单）
+- **设计系统:** `gf-` 前缀；`docs/DESIGN-SYSTEM.md`（Linear 工作台锁定；三视图+MIT pin+zone；存储键权威表；快捷键表）
+- **状态:** `state.workflows[]` **项目** + `state.activeWorkflowId` + `state.nodes` 镜像 + `state.meta`（含 `prefs.simpleMode` 默认 true）
+- **持久化:** 权威数据 `goalfocus.*`；UI prefs `goalflow.*`；遗留只读 v1/v3；特例 `gf_llm_key`
 - **核心算法:** `parseText` → `focusScore` / `pickRanked` → `buildView` + `sankeyLayout`
-- **测试钩子:** `module.exports` 导出 82 纯函数（node 26 可直接 require，仅 ExperimentalWarning localStorage 提示）
-- **测试体系:** 四层——`scripts/checks/`（verify 字符串守卫+smoke 冒烟，按版本 v8.2~v8.16，22 环节 552 项）+ `scripts/tests/`（unit 9 套件 258 例真 require 单测 + flow 6 套件 75 例 grabFn+stub 用户旅程；含 unit-schedule 时间安排与期限族、flow-time-travel 跨天旅程、flow-today-pool 池容量与纠偏、unit-history 仪式历史聚合、unit-nexttop ② 次重要、unit-done-score 已完成单项得分、unit-overdue 逾期停滞去重）。运行：`node scripts/tests/run.cjs [--with-checks]`。文档 `docs/TESTING.md`（体系+约定）+ `docs/TEST-CASES.md`（用例矩阵）
+- **测试钩子:** `module.exports` 在 `app.js` 末尾；Node 经 `requireApp()` 拼接编译（不可分别 require 三文件）
+- **测试体系:** `scripts/checks/`（verify+smoke →v8.28）+ `scripts/tests/`；`node scripts/tests/run.cjs [--with-checks]`
+- **v8.24–8.28 优化 backlog:** 弹窗壳铺完（特例 Smart/搜索）→ 三文件拆分 → 空闲「人/项目收窄」→ rowChrome + Things 降噪 → tokens/a11y → simpleMode+动效
 
 ## User Defined Namespaces
 - （留空）
@@ -22,10 +32,10 @@
 
 | 区域 | 作用 |
 |------|------|
-| 今日行动 `#todayPanel` | **分区去重**（v6.3，v8.11 扩）：MIT（唯一，排除溢出）→ 执行清单按时间升序（渲染前 `ensureTodayTimeResolved` 冲突纠偏）→ 🌊 溢出沉底区（超全局日预算降权，v8.11）→ 习惯打卡（recur/habit + 🔥streak）→ ✅ 今日已完成（executionLog 当日）；清单头有 🗓 顺排提示条（排到明/后天的叶子可见性）；行内 ⏰/时长/时段；`#todayAlarmBar` |
+| 今日行动 `#todayPanel` | **分区去重**（v6.3，v8.11 扩）：MIT（唯一，排除溢出）→ 执行清单按时间升序（渲染前 `ensureTodayTimeResolved` 冲突纠偏）→ 🌊 溢出沉底区（超全局日预算降权，v8.11）→ 习惯打卡（recur/habit + 🔥streak）→ ✅ 今日已完成（executionLog 当日，**v8.18 默认折叠**）；有 time 必有 time−5 提醒（MIT 同口径）；清单头有 🗓 顺排提示条；行内 ⏰/时长/时段；`#todayAlarmBar` |
 | 项目总览 `#projectModal` | 点项目名打开：整体/分支进度条、今日待办数、近 7 天执行（估/实/偏差）、习惯连续；入口 🗺 重新规划 + ✎ 设置 |
 | 规划向导 `#planWizardModal` | 必经步骤（【里程碑】【例行】【习惯】【行动】，decomposeSuggestions 预填）→ 生成子节点：里程碑按达成日均排 deadline、例行 recur week、习惯 day+slot、行动 day+30′；新建项目后引导至目标规划 |
-| 多项目 `#wfBar` | **手风琴列表**（v6.2）：独立区块（非 side-ws 内），可多展开；展开 = 项目本地概览（标签/时间段/叶子进度条/树预览/今日待办数），不含视图链接——视图归下方「视图」导航（项目选哪个目标，视图选怎么看）；✎ 设置；＋新建；底部 **项目关系**（共享标签 × 时间段重叠）；展开状态存 `meta.wfExpanded` |
+| 多项目 `#wfBar` | **手风琴列表**（v6.2）：独立区块（非 side-ws 内），可多展开；展开 = 项目本地概览（标签/时间段/叶子进度条/树预览/今日待办数），不含视图链接——视图归下方「视图」导航；✎ 设置；＋新建；底部 **项目关系**；展开状态存 `meta.wfExpanded`；**v8.18** 每项左侧 `--wf-color` 色条（`workflowColor`/`WF_COLORS` 无自定义色时按 id 稳定写入） |
 | MIT pin + ② 次重要（v8.13 英雄卡去重） | Top1 钉住（🍅25/50/90′ 下拉/📌取消固定/📊得分折叠 `mit-score-fold`）+ 清单内算法 #2 徽章高亮 `pickNextTopId`；英雄卡/执行栈已移除 |
 | 精力流向图 | 年/月/周/日缩放、聚焦模式 |
 | 四象限 + V/E 矩阵 | 拖拽校准；价值/费力；⚡快速赢筛选；叶子：时段、微动作、SMART |
@@ -107,6 +117,14 @@
 | **v8.14 今日页三连修** | v8.13 后反馈：①`#metricsStrip` 从首屏迁入 `#zoneStatus`（状态折叠区，indexOf 位置断言守卫），`heroWrap` 只剩 `#pomoBar`、空闲零高度（`.hero-wrap:has(.pomo-bar.show)` 才有 top padding）②② 行 meta 显示「② N分」`.next-top-score`（focusScoreParts 分解进 title）；「✅今日已完成」行补完成时刻 `.done-hm`+单项得分 `.done-score`（`scoreOfDoneEntry(en, dayScoreLog)` 纯函数：scoreLog **倒序**找 nodeId 最新 done，pomo 不算）③❓ span→`button#todayExecHelp` 点击 toggle `.today-exec-help` 排序说明。verify-v814 25 项 + unit-done-score 13 例 |
 | **v8.15 数字口径澄清 + 需要关注计数修正** | 用户三连问：①今日页数字关系——盘点出**三种「分」同名异义**（关系正确但命名混淆）：优先级分（focusScore 算法排序，决定先做谁）/ 今日表现分（todayScore=Σ完成加分+番茄分，日目标 100）/ 单项完成加分（scoreDoneItem）→ 改名互指：MIT「📊 得分 N」→「📊 优先级 N · 为什么排最前」、②「N分」→「② 优先 N」、「今日总评分」→「今日表现分」（ts-label+晚安总结+statusSum 摘要），关键处 title 写明口径互指（「不是完成评价」「是两回事」）；②信息分层——metricsStrip/KR/审计已在 zoneStatus 折叠（v8.14），本轮补 title 说明链（statusSum/ts-label/MIT summary/attn chips/角标全部悬停看口径，attn chip 超 3 条补「等」）；③**需要关注角标实锤 bug**：旧算法数「非空子区块」——inboxPanel pend=0 但 someday>0 时仍渲染「已清空」占位（innerHTML 非空）→ 点掉后角标还在却找不到内容；且 onboard 欢迎卡/备份提示混入计数 → 新算法=`stagnationAlerts+parkedEntries+inboxPending`（条目数）+备份/倦怠/周回顾（提示各计 1），onboard 不计；badge.title 写明构成（`需要关注 N 项 = ⚠️停滞 a + ⏸暂停 b + …`）；全清空插 `#attentionEmpty` 空态（否则展开一片空白以为出 bug）；zoneAttention summary 加静态 title。verify-v815 26 项 |
 | **v8.16 今日页四连修** | ①**周预算口径 bug**（用户：「和单个项目一样了」）——`weekPlanFeasibility` 的 est 是全部项目合计，但无全局容量配置时 `weekCapGlobal()` 回落 `weekCap()`（当前项目净额）→ 全局 est vs 单项目 cap 错配假超支 → 渲染层 `wk.global` 分支（有配置才显示「本周总预算」行，否则 `dc-no-global` 引导⚙设置；summary 无全局时改用本项目口径）；`warnIfOverCapacity` 全局弹窗加 `f.global` 守卫（同根因） ②**备选区全可入今日**——`renderFocus` 的 `li()` 第三参 showToday 原只有两条 backlog lane 传 true → top3/立即做/核心投入全传；已在今日的（`n.time || planDate===dateKey() || daysLeft===0`）显示「✓ 今日」标记替代按钮（promoteNodeToToday 非幂等，重复点会顺延已排时间） ③**逾期并入需要关注**——`overdueLeaves()`（全活跃项目逾期叶子，排除 recur/habit）+ `splitStaleOverdue` 纯函数（逾期优先去重，unit-overdue 16 例）+ `attentionStaleOverdue()` 组合（renderTodayStale 与角标同口径）；停滞区改「⚠️ 停滞·逾期」双组（逾期行红色调 `.stale-row.od`，按钮复用跨流安全的 activateStale）；角标 title 构成加 🚨逾期 ④**metricsStrip 去重**——叶子% 与页头 progressChip 同数据 → 条内移除（页头常驻）；本周动量 title 写明「跨全部项目·近 7 天」；「指标 N▾」summary + KR pill 的 Δ 口径进 title；**KR pill 加节点名前缀（截 8 字 `${tag}·${name8}`）**——树里多个结构相似目标节点进度相同时 pill 两两雷同无法分辨（用户「是重复的」实指这个，数据真实+展示无法区分，非渲染 bug）。verify-v816 33 项（verify-v815 两条角标断言同步重定向） |
+| **v8.17 指标迁出今日 + 番茄中文 + 移动溢出** | ①**「指标 8」不该在今日**——旧过滤 `(KR\|\|habit\|\|targetNum>0)` 把文案「(1/2)」也当指标，塞进今日状态；与今日完成无关 → 今日 metricsStrip **只留「本周完成」**；`projectKrNodes` 纯筛选（仅 `role===KR` 未完成）+ **项目总览**承接 KR 行（信心打卡仍可点） ②**已删项目残留**——启动 `load` 后即 `reconcileRefsAfterRestore`，清 planShare/capacity 孤儿键（aliveWf 集） ③**番茄/动作图标全带中文**——`🍅 专注`/`⋯ 更多`/`进度 N%`/`⏹ 结束`/时长「25′ 标准」；行内微动作/预案/等待/阻塞/标签/删除 ④**mobile.css §46**——main/zone/today-row/pomo/fitem/acts 全面 `max-width:100%`+`min-width:0`+`flex-wrap`，番茄任务名截断。verify-v817 34 项 + unit-project-kr 10 例 |
+| **v8.18 完成折叠+顶栏减负+色条+提醒** | ①`FOLD_DEFAULT.done=false`，「✅今日已完成」走 `details.fold` 默认收起 ②移动端：`body[data-view]`；今日藏 `.app-title`、顶栏常显 `.ab-mini`、空 `#heroWrap` 收起、藏 `.today-alarm-st`（mobile §47）③侧栏 `.wf-item` 左色条 `var(--wf-color)` + `WF_COLORS`/`workflowColor` 无色时稳定写入 ④`remindAtFromTime`（HH:MM→time−5，00:05 前落 00:00）；`ensureRemindDefaults` 填/同步非手动提醒；MIT 跨项目并入 remindNodes；`_remindManual`/`_remindOff` 序列化。verify-v818 + unit-remind |
+| **v8.19 移动端降级** | 口径=查看+勾选+捕捉+简单改时。①`.d-only`：抽屉视图隐藏，项目只留 `#wfBar`；顶栏去 `btnProjects`，明暗进⋯ ②行⋯移动只留提醒/计划时间/删除 ③闹钟条藏 `.alarm-set`，⚙设置加仪式时间 ④底栏曾收成三键（v8.20 起恢复五键） |
+| **v8.20 关闭钮+基础设置+移动顶底** | ①`.mh-x` 真按钮（40–44px）+ 搜索 `gsClose` + 归档 `archX` ②侧栏「⚙ 基础设置」常显；`meta.profile.displayName`；设置含全局资料/空闲/仪式 ③移动藏 `#todayAlarmBar`，`#todayBrief` 问候+待办/完成；仪式抽屉常显 ④底栏恢复 今日\|规划\|⚡\|洞察\|AI。verify-v820 |
+| **v8.21 设置扩充+去摘要+全局时段** | todayBrief 并入 `renderAppTitle`→abMini；基础设置扩外观/番茄/AI Key/通知/关于；`globalTimeWindows`/`globalWorkdayWins`/`globalWeekendWins`；项目窗口回落全局。verify-v821 |
+| **v8.22 公共 UI 壳** | 盘点 20+ 弹窗手写 modal-head/mh-x/show/遮罩关闭；抽出 `modalHeadHtml`/`modalFootHtml`/`buildModalHtml`/`openModalMask` + `foldSectionHtml`/`emptyStateHtml`；业务弹窗已迁：settings/workflowMeta/habit/review/ritual(晨晚)/weekPlan/commit 等；**刻意未迁**：`openSmart`（`render()` 反复整页 innerHTML）、`openGlobalSearch`（`gs-bar` 非标准 modal-head）；二者关闭仍 `classList.remove('show')`+`innerHTML=''`。verify-v822 |
+| **v8.23 今日跨日+置顶** | 根因=`n.time` 无日期，隔夜未完成仍带昨日 HH:MM 进今日时间序。`timeDk`+`scrubStaleTodayTimes`+`rolloverTodayState`（启动/换日/渲染前）；习惯保留 time；排序 `sortTodayExecEntries`：置顶→time 升序→未设→逾期补做→溢出；`meta.todayListPins[dk]`+行内 📌（≠ MIT topPin）。verify-v823 + unit-today-sort |
+| **v8.28 Batch4+5 简洁/a11y/色板** | `meta.prefs.simpleMode` 默认 true + 设置 `#setSimpleMode` + `body.simple-mode` 隐藏今日次级区；桑基/关系图/审计/exportPNG 走 `svgGold`/`svgNoise`/`cssVar`；`summary`/`fold`/`zone` 同步 `aria-expanded`；`base.css` 扩展 `:focus-visible`；动效 `gf-modal-in`/`gf-check-pop`/`gf-mit-in`+`prefers-reduced-motion`。verify-v828 |
 | **v8.9 模块间增删同步审计（8 处修复）** | **三级引用清理体系**：①`purgeNodeRefs(wfId, droppedIds, backup)` 节点级——清 weekPlans rocks（nodeId 匹配）/tomorrowMit/habitStreaks（`wfId|`前缀），backup=true 返回被清内容；`restoreNodeRefs(bak)` 供 undo 还原 ②`purgeCurrentTreeRefs()` 整树替换前置——旧 id 集 + purgeNodeRefs + topPin/番茄钟解绑 + saveMeta；**doParse/autoDecomposeGoal/applyWorkflowTemplate 三处共用**（新建流空集 no-op）③`purgeWorkflowRefs(wfId)` 项目级——v8.8 deleteWorkflow 内联块抽出 + 补番茄钟 wfId/nodeId 解绑，与 clearAll 共用。**8 处修复**：deleteNode 级联（备份→undo 还原）+番茄钟解绑；doParse 整树替换清旧引用；removeWizardNodes 向导重生成删子树补级联（不走 deleteNode 的删除路径）；clearAll 改 confirmModal（原生 confirm 被吞同 v8.8）+ meta 入快照 + 全流 purgeWorkflowRefs + undo 还原 meta；adoptPendingAction 同流采纳补 afterChange（原仅跨流经 switchWorkflow 刷新，今日面板停旧数据）；autoDecomposeGoal/applyWorkflowTemplate 防御性接入 purgeCurrentTreeRefs。smoke-v89 35 项实跑（删除级联/undo 还原/整树替换/clearAll 取消+确认+undo） |
 
 ## Visual (v6.0 · app shell + 三视图导航 + 主题×明暗)
@@ -152,6 +170,19 @@
 - v8.14：**版本号断言必须滚动式**（从 index.html 正则取当前版再断言）——verify-v813 写死 `?v=8.13` 升 v8.14 立红，这是 verify-v810 已记过的教训又在亲手新写的文件里复发：**新 verify 文件的版本断言要复制滚动模板而非手写正则**；**移除首屏区块后要检查「孤儿容器」**——英雄卡删了但 metricsStrip 还留在原位（视觉锚点没了变成「残留」），删区块时连同其 wrapper 内所有子元素的归宿一起盘；**只读 meta 展示类信息（单项得分/时刻）优先从既有日志 JOIN 而非加字段**——executionLog 无 score 但 scoreLog 有，按 nodeId 倒序匹配零迁移；**hover-only 的 title 说明在移动端等于不存在**，帮助性图标一律按钮化可点击（❓ 教训：用户会把它当 bug 报）
 - v8.15：**「同名异义」是数字型 UI 的头号可理解性陷阱**——三种「分」（优先级/表现/单项加分）数学关系全对、用户照样困惑；修法不是加文档而是**命名分层+title 互指**（每个数字的 title 既说自口己径、也指路「另一个分在哪看」）；**「角标计数」必须数领域条目而非 DOM 非空块**——数 innerHTML 的伪实现会被「已清空」占位/someday-only 态骗过（点掉后数字还在的经典 bug 形态），且引导卡/提示条会混入「事项」计数；计数口径变更后**空态显式化**（全 0 也要渲染一行「已清空」而非留白，否则用户把正常当 bug）；**徽章/角标/pill 多处显示同一族数字时，title 写明构成公式**（N = 停滞 a + 暂停 b + …）是最便宜的消歧手段
 - v8.16：**「全局 vs 单项目」口径错配排查法——分别追问分子与分母各自的口径**——周预算假超支的根因不是 est 也不是 cap 本身，而是「est=全部项目合计」撞上「无配置时 cap 回落单项目净额」；配置缺省值的回落路径（`weekCapGlobal → weekCap`）是错配高发区，**回落时要追问「回落到的值与原语义还一致吗」**；同一错配会多处发（渲染行 + 弹窗守卫同根因），修复时 grep 所有消费方；**「给所有行加动作按钮」前先查动作幂等性**——promoteNodeToToday 会重排时间，对已排时间的节点就是破坏性操作，正解是状态分流（在今日 → 显示标记，不在 → 显示按钮）而非放任重复点；**两类告警合并展示区时计数必须同一去重口径**——拆一个纯函数（splitStaleOverdue）同时喂渲染与角标，否则「区块里 3 项、角标写 4」的新不一致又会冒出来；**改了共享函数的输出口径，立刻全量跑搜旧 verify 断言**（verify-v815 当场红两条——v8.14 已记过的教训，行为变更=旧断言同步重定向）
+- v8.17：**「页面区块该不该出现某类数字」先问时间口径**——项目级 KR/带分数目标 ≠ 今日完成；塞进今日状态就是范畴错误，修法是迁走（项目总览）而非加说明；**解析副作用会污染过滤**——文案「(1/2)」写进 targetNum 后被 `targetNum>0` 当指标，过滤条件要钉语义字段（`role===KR`）而非派生字段；**删除实体后的 meta 孤儿键要在启动路径清**（不只恢复备份时）——planShare/capacity 挂已删 wfId 会让「带宽」区幽灵复活；**图标按钮一律图标+中文**（移动端无 hover title）；**flex 溢出三件套**：父 `max-width:100%` + 子 `min-width:0` + `flex-wrap`（纯 emoji 改「图标+中文」后宽度暴涨必触发）
+- v8.18：**首屏减负优先砍重复标题**——移动端今日 `.app-title` 与顶栏/面板重复，用 `body[data-view]` 按视图 CSS 藏，顶栏 `ab-mini` 常显；空番茄区 `:has(.pomo-bar.show)` 收起；**侧栏辨识靠色条不是灰点**——`workflowColor` 按 id 稳定取色写入 `w.color` + CSS `--wf-color` inset；**有 time 必有提醒**与「手改不覆盖」并存：`_remindManual` 标手改、`_remindOff` 标当天清空；`remindAtFromTime` 必须校验 HH:MM（`hmToMin('xx')` 会静默变 0）
+- v8.19：**行操作分层**=勾选常驻 + ⋯里只留提醒/时间/删除；**设置项不要放首屏**——晨晚仪式时间进⚙；与桌面重复的视图导航用 `.d-only` 藏
+- v8.20：**弹窗关闭必须像按钮**——`mh-x` 有边框/底色/44px 触控，别做成装饰 ×；**移动首页对标 Things**：问候+日期+待办计数，闹钟仪式不进首屏（抽屉/设置）；**底栏五键比「更多」更符合用户预期**（收进 sheet 后反馈立刻反悔）
+- v8.21：**设置是总控台**——外观/番茄默认/AI Key/通知/空闲时段集中一处；问候并入顶栏 ab-mini 比独立摘要条更少占首屏；空闲改为多段 wins，小时数派生
+- v8.24：**弹窗壳铺完 + 文档对账**——除 `openSmart`/`openGlobalSearch` 外一律 `buildModalHtml`+`openModalMask`；DESIGN/PRODUCT-FLOW 去掉英雄卡叙事；设置关于展示快捷键；verify-v824
+- v8.24/8.25：**无 bundler 拆分**——`gf-model`（域+壳纯函数）→ `gf-ui`（render/open）→ `app`（boot+exports）；Node/checks 必须拼接；**升版后旧 verify 的 `vCount===4` 与硬编码版号要改滚动 ≥N**
+- v8.25：**全局=「我的空闲时段」、项目=可再收窄**——`clipWinsToGlobal`/`clipProjectWinsToGlobals`；unit-clip-wins
+- v8.26：**rowChrome 统一行壳**——今日/收件箱/树/石头；洞察 `emptyStateHtml`；Things 降噪；verify-v826
+- v8.28：**simpleMode 默认开 + tokens/a11y/动效**——`body.simple-mode`；`svgGold`/`cssVar`；`aria-expanded`；`prefers-reduced-motion`；verify-v828
+- v8.22：**重复 UI 壳优先抽 helper**——`buildModalHtml`+`openModalMask`；并行会话撞车顺延版本号
+- v8.23：**「像没按时间排 / 像上一天」优先查 date-less 字段隔夜残留**——`time` 语义=今天几点，必须配 `timeDk`；换日路径（refresh/load/render）统一 `rolloverTodayState`；**清单置顶 ≠ MIT 固定**（`todayListPins` 只改今日顺序，`topPin` 仍管算法 MIT）
+- v8.23 规范合规：**原生 confirm 在 WebView 会吞**→危险确认一律 `confirmModal`；期限五字段只经 `setNodeDeadline`；新弹窗优先 `buildModalHtml`/`openModalMask`；容量 UI「全局」标签必须与 `globalCapacityHours()` 同真假
 - v8.10 跨天测试：**flow 层可控时钟模式**——stub `__now`（Date）+ `dateKey: d => dkOf(d || stubs.__now)` + `today0: () => startOfDay(stubs.__now)`，换天 = `__now.setDate(+1)`（别用 +86400000ms，月界/年界会断）；**「取消/回退」类操作要测对称性到具体数值**：updateHabitStreak 取消旧实现直接 cur=0/lastDate=''，跨天旅程一跑就现形（连续 2 天取消后应为 cur=1/lastDate=昨天——cur 语义=含今天的连续数，取消即 cur-1 回昨天）；**streak 三字段语义**：cur=当前连续（含今天）、best=历史最好（取消不回退）、lastDate=最近打卡日（中断判定的依据）；**按 dk 分桶的日志（executionLog/打卡 log/dailyCompletions）取消只回滚当天桶**——昨天勾的今天取消，历史保留、节点状态复位，这是设计语义不是 bug（测试要断言「不动昨天」而非「回滚昨天」）
 - v8.10：**meta 写入函数分两类：自带 saveMeta（appendScore/removeTodayScore/logEnergy/addInbox）vs 依赖调用方（appendExecutionLog/updateHabitStreak/logHabitCheck/bumpDailyCompletion）**——混用时「写 meta 的顺序」决定丢失风险：依赖型函数若排在自带型之后执行，其变更要等下一个 saveMeta 才落盘，期间刷新即回滚；根治=调用方出口统一 saveMeta（setNodeDone 模式），别依赖内部 saveMeta 的位置巧合；**「对称操作」检查法：有 append 就要想 remove**——executionLog 只增不减导致取消勾选后所有下游统计虚报（scoreLog 早有 removeTodayScore 对称物，executionLog 缺了两年）；**删除路径审计要同时 grep `state.nodes =` 和 `w.nodes =`**——v8.9 只查前者漏了 deleteTodayNode 的 `w.nodes=` 直改；**模块级 TODAY 缓存必须跨午夜自愈**——长开页面（30s 轮询+wakeCheck 双挂载）换天要刷 TODAY+转换到期 planDate+全链重渲染，否则「今日」面板/执行日志日期各认各的；**期限字段五件套（deadline/deadlineDate/daysLeft/overdue/deadlineText）只能经 setNodeDeadline 写**——手搓子集必残留；**恢复类操作（快照/备份）后必须 reconcile 引用**——恢复的树与现存 meta 不配套，按「全流 wfId|nodeId 存活集」清孤儿；**smoke 里 buildCtx 形参是快照**：函数内 `TODAY = now` 改的是闭包形参不回写 stub 对象，验证 TODAY 刷新要靠行为副作用（planDate 转换生效）而非回读 stub 属性
 - v8.9：**删除/替换路径审计要穷举所有 `state.nodes =` 赋值点**——grep 出 16 处，逐个分类：引用共享（applyActiveWorkflow/switchWorkflow）安全、整树替换（doParse/autoDecomposeGoal/applyWorkflowTemplate/clearAll/removeWizardNodes）必须级联清理、迁移/恢复（applyWorkflowsData/单树迁移）自带配套 meta 安全；**级联清理要带备份进 undo 快照**——deleteNode 原 undo 只快照 nodes+topId+topPin，级联清了 rocks/打卡不备份则「撤销删除」永久丢数据（purgeNodeRefs backup 模式 + restoreNodeRefs）；**同函数名清理逻辑抽共用助手时，旧版核查断言要同步重定向**（v8.8 的 deleteWorkflow 内联断言 → purgeWorkflowRefs，smoke 的 buildCtx 提取列表也要加新函数名）；**「同流 vs 跨流」双路径函数要两条都验刷新**——adoptPendingAction 跨流经 switchWorkflow 隐式刷新，同流什么都不调（加 else afterChange()）；**番茄钟是隐形引用方**——pomo.wfId/nodeId 指向被删实体时显示层有空兜底不炸，但计时挂在空名上，删除路径都要解绑 |

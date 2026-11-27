@@ -585,13 +585,15 @@ header.topbar {
   border-radius: 8px;
   background: var(--panel);
   overflow: hidden;
+  /* v8.18: 每个项目左侧色条（--wf-color 由 renderWorkflowBar 写入），一眼区分模块 */
+  box-shadow: inset 3px 0 0 var(--wf-color, var(--accent));
 }
 
-/* v8.4：当前项目不再用整圈 accent 边框（用户反馈「框和其他不一样」），
-   统一灰框 + 左侧 3px accent 竖条指示当前 */
+/* v8.4 / v8.18：当前项目仍用左侧竖条（色=项目色），略提亮底色，不用整圈 accent 边框 */
 .wf-item.active {
   border-color: var(--stroke-soft);
-  box-shadow: inset 3px 0 0 var(--accent);
+  box-shadow: inset 3px 0 0 var(--wf-color, var(--accent));
+  background: color-mix(in srgb, var(--wf-color, var(--accent)) 9%, var(--panel));
 }
 
 .wf-row {
@@ -1598,8 +1600,10 @@ header.topbar {
 /* ===== v6.2 移动端 H5 适配（≤900px：查看 + 勾选完成 + 弹窗式闹钟） ===== */
 .mtab{display:none;}
 .m-only{display:none;}
+/* v8.19: .d-only = 桌面专用标记（不改桌面 display）；≤900px 隐藏 */
 @media(max-width:900px){
   .m-only{display:inline;}
+  .d-only{display:none !important;}
   .mtab{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;
     background:var(--topbar-bg);backdrop-filter:blur(12px);
     border-top:1px solid var(--stroke);

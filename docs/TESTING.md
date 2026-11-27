@@ -2,6 +2,8 @@
 
 测试是这个项目敢快速迭代的原因。纯前端、无构建、数据全在 localStorage 的应用，最怕「改 A 坏 B 不知道」。四层测试各管一段，全部零依赖（node 直跑 .cjs，无 jest/vitest/npm）。
 
+**相关流程**：用例设计用 `@goalflow-test-case-generator`（评审后再改套件）· 场景顺序见 [`dev/agent-scenario-workflows.md`](./dev/agent-scenario-workflows.md) · Agent 总入口 [`../AGENTS.md`](../AGENTS.md)。
+
 ## 四层结构
 
 ```

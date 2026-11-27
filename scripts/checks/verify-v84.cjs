@@ -38,7 +38,8 @@ L.assertContains('ai-step 完成勾', ".ai-step.done i::after", mobile);
 L.assertFnContains('deleteWorkflow 无「至少保留一个」拦截', 'deleteWorkflow', 'v8.4：允许删除最后一个项目');
 L.assertFnNotContains('不再 alert 至少保留', 'deleteWorkflow', '至少保留一个项目');
 L.assertFnContains('删空重建空白项目', 'deleteWorkflow', "name: '默认目标', nodes: []");
-L.assertContains('active 框 = 灰框+左竖条', 'box-shadow: inset 3px 0 0 var(--accent)', layout);
+// v8.18: 左竖条改用项目色 --wf-color（不再写死 accent）
+L.assertContains('active 框 = 灰框+左竖条', 'box-shadow: inset 3px 0 0 var(--wf-color, var(--accent))', layout);
 L.assertNotContains('active 不再整圈 accent', 'box-shadow: 0 0 0 1px var(--accent) inset', layout);
 
 // ④ 删除按钮遮挡修复

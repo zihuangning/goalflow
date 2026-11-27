@@ -41,10 +41,13 @@ L.assertFnContains('setNodeDone 取消分支调回滚', 'setNodeDone', "removeEx
 // ③ 跨午夜自愈
 L.assertFnContains('convertDuePlanDate 抽出共用', 'convertDuePlanDate', 'if (dk > dateKey()) return false;');
 L.assertFnContains('normalizeNode 复用 convertDuePlanDate', 'normalizeNode', 'convertDuePlanDate(n);');
-L.assertFnContains('refreshTodayIfNeeded 换天才动', 'refreshTodayIfNeeded', 'if (dateKey(now) === dateKey()) return false;');
+// v8.23: 换天逻辑抽到 rolloverTodayState（含 convertDuePlanDate + scrubStaleTodayTimes），refresh 只判日+委托
+L.assertFnContains('refreshTodayIfNeeded 同日且已滚过则跳过', 'refreshTodayIfNeeded', 'sameClock && state.meta.lastTodayDk === dateKey()');
 L.assertFnContains('refreshTodayIfNeeded 刷新 TODAY', 'refreshTodayIfNeeded', 'TODAY = now;');
-L.assertFnContains('refreshTodayIfNeeded 全流转 planDate', 'refreshTodayIfNeeded', 'forEach(convertDuePlanDate)');
-L.assertFnContains('refreshTodayIfNeeded 落盘并重渲染', 'refreshTodayIfNeeded', 'save();\n  afterChange();');
+L.assertFnContains('refreshTodayIfNeeded 委托 rollover', 'refreshTodayIfNeeded', 'rolloverTodayState()');
+L.assertFnContains('refreshTodayIfNeeded 重渲染', 'refreshTodayIfNeeded', 'afterChange();');
+L.assertFnContains('rollover 全流转 planDate', 'rolloverTodayState', 'convertDuePlanDate(n)');
+L.assertFnContains('rollover 脏则 save', 'rolloverTodayState', 'if (dirty) save();');
 L.assertContains('30s 轮询挂跨午夜检查', 'setInterval(() => { refreshTodayIfNeeded(); tickReminders();');
 L.assertContains('唤醒补跑挂跨午夜检查', 'const wakeCheck = () => { try { refreshTodayIfNeeded();');
 L.assertContains('beforeunload 补 saveMeta', '() => { try { save(); saveMeta(); }');

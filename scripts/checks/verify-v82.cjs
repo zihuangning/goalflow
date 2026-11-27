@@ -16,7 +16,8 @@ L.assertFnContains('兜底：当日任务写 time，未来写 planDate', 'backfi
 L.assertFnContains('insertAITasks 最外层调用兜底', 'insertAITasks', 'backfillAISchedule(collected, anchorD)');
 
 // ② 提醒默认 = 开始前 5 分钟
-L.assertFnContains('ensureRemindDefaults 存在', 'ensureRemindDefaults', 'hmToMin(n.time) - 5');
+// v8.18: 抽出 remindAtFromTime 纯函数（含 HH:MM 校验），不再内联 hmToMin(n.time)-5
+L.assertFnContains('ensureRemindDefaults 存在', 'ensureRemindDefaults', 'remindAtFromTime(n.time, day0)');
 L.assertFnContains('_remindOff 换天重置', 'ensureRemindDefaults', "n._remindOff && n._remindOff !== dk");
 L.assertFnContains('setNodeRemind 清空记 _remindOff 当天不回填', 'setNodeRemind', '_remindOff');
 

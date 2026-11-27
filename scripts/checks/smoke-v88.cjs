@@ -24,6 +24,12 @@ const stubs = {
   ensureWorkflows: () => {},
   workflowById: id => (stubs.state.workflows || []).find(w => w.id === id),
   byId: id => stubs.state.nodes.find(n => n.id === id),
+  // v8.23: promoteNodeToToday 改走 setNodeDeadline + stampNodeTimeDk，grabFn 上下文必须提供
+  setNodeDeadline: (n, val) => {
+    n.deadline = val; n.deadlineText = val;
+    n.deadlineDate = stubs.today0(); n.daysLeft = 0; n.overdue = false;
+  },
+  stampNodeTimeDk: (n, dk) => { if (!n) return; if (n.time) n.timeDk = dk || stubs.dateKey(); else n.timeDk = ''; },
   wfTimeWindows: wfId => (((stubs.state.meta.capacity || {})[wfId] || {}).wins || []).map(w => ({ start: w.start, end: (() => { const m = stubs.hmToMin(w.start) + w.mins; return stubs.minToHm(m); })(), mins: w.mins })),
   confirmModal: () => Promise.resolve(stubs.__confirmRet !== false),  // 经 __confirmRet 可变标志控制（buildCtx 是参数快照，事后换 stub 属性无效）
   showUndoToast: (msg, restore) => { stubs.__lastUndo = restore; },

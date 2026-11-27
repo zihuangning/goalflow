@@ -89,6 +89,7 @@ log = s.meta.executionLog[dk];
 const stubs3 = {
   TODAY: YEST,                  // 模块级 TODAY 形参：假装页面是昨天打开的
   state: {
+    meta: {},
     workflows: [
       { id: 'wf1', nodes: [
         { id: 'r', text: '根' },
@@ -103,11 +104,15 @@ const stubs3 = {
     ],
   },
   dateKey: d => dkOf(d || stubs3.TODAY),   // dateKey() 无参读模块 TODAY（=昨天）
+  ensureScoreMeta: () => { if (!stubs3.state.meta) stubs3.state.meta = {}; },
+  saveMeta: () => {},
+  isRecurringTask: () => false,
   save: () => { stubs3.__save++; },
   afterChange: () => { stubs3.__afterChange++; },
   __save: 0, __afterChange: 0,
 };
-const ctx3 = L.buildCtx(['refreshTodayIfNeeded', 'convertDuePlanDate'], stubs3);
+// v8.23: refresh 委托 rolloverTodayState（含 convert + scrub）
+const ctx3 = L.buildCtx(['refreshTodayIfNeeded', 'convertDuePlanDate', 'rolloverTodayState', 'scrubStaleTodayTimes'], stubs3);
 const w1 = stubs3.state.workflows[0].nodes;
 const w2 = stubs3.state.workflows[1].nodes;
 
@@ -123,14 +128,18 @@ const changed = ctx3.refreshTodayIfNeeded();
   ['换天 · 别的目标流也一起转（q1）', w2[1].planDate === '' && w2[1].time === '21:30'],
 ].forEach(([name, ok]) => ok ? L.ok(name) : L.bad(name, JSON.stringify({ p1: w1[1], p2: w1[2], q1: w2[1] }).slice(0, 160)));
 
-// 同一天：不再触发
+// 同一天：不再触发（v8.23：同日且 lastTodayDk 已是今天）
 const stubs3b = {
-  TODAY: NOW, state: { workflows: [] },
+  TODAY: NOW,
+  state: { workflows: [], meta: { lastTodayDk: dkOf(NOW) } },
   dateKey: d => dkOf(d || stubs3b.TODAY),
+  ensureScoreMeta: () => {},
+  saveMeta: () => {},
+  isRecurringTask: () => false,
   save: () => { stubs3b.__save++; }, afterChange: () => { stubs3b.__afterChange++; },
   __save: 0, __afterChange: 0,
 };
-const ctx3b = L.buildCtx(['refreshTodayIfNeeded', 'convertDuePlanDate'], stubs3b);
+const ctx3b = L.buildCtx(['refreshTodayIfNeeded', 'convertDuePlanDate', 'rolloverTodayState', 'scrubStaleTodayTimes'], stubs3b);
 const same = ctx3b.refreshTodayIfNeeded();
 [
   ['同一天 · 返回 false', same === false],

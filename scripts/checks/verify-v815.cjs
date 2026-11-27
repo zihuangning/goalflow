@@ -62,6 +62,6 @@ L.assertContains('需要关注 summary 带 title', '角标 = 实际事项数（�
 // 版本滚动守卫：跟随 index.html 当前版本（升版不再改这里）
 const curV = (html.match(/\?v=([\d.]+)/) || [])[1];
 const vCount = (html.match(new RegExp('\\?v=' + String(curV).replace(/\./g, '\\.'), 'g')) || []).length;
-(vCount === 4 ? L.ok : L.bad)('index.html 4 处版本号（当前滚动版 ' + curV + '）', '实际 ' + vCount + ' 处');
+(vCount >= 4 && new Set([...html.matchAll(/\?v=([\d.]+)/g)].map(m => m[1])).size === 1 ? L.ok : L.bad)('index.html 版本号一致且 ≥4 处（' + curV + ' ×' + vCount + '）', '实际 ' + vCount);
 
 process.exit(L.summary('verify-v815') ? 1 : 0);

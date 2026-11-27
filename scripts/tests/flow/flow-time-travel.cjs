@@ -45,7 +45,7 @@ const dkNow = () => stubs.dateKey();
 const ctx = L.buildCtx([
   'setNodeDone', 'appendExecutionLog', 'removeExecutionLogEntry',
   'updateHabitStreak', 'logHabitCheck', 'isHabitLike', 'nodeHabitKey',
-  'habitRecurrence', 'habitTarget', 'ensureRemindDefaults', 'convertDuePlanDate',
+  'habitRecurrence', 'habitTarget', 'remindAtFromTime', 'ensureRemindDefaults', 'convertDuePlanDate',
 ], stubs);
 const s = stubs.state;
 const h1 = s.nodes[1], t1 = s.nodes[2];
@@ -133,18 +133,23 @@ const exp1855 = stubs.today0(); exp1855.setHours(18, 55, 0, 0);
   ['C 换天 · 自动回填 18:55（开始前 5 分钟）', r1.remindAt === exp1855.getTime()],
 ].forEach(([n, ok]) => ok ? L.ok(n) : L.bad(n, JSON.stringify(r1)));
 
+// v8.18: 有 time 必有 time−5（00:05 前 clamp 到 00:00）；非手动旧提醒随 time 同步；_remindManual 才不覆盖
 const r2 = { id: 'r2', time: '00:03', remindAt: null, _remindOff: '' };
 const r3 = { id: 'r3', time: '09:00', remindAt: null, _remindOff: '' };
-const r4 = { id: 'r4', time: '10:00', remindAt: 123, _remindOff: '' };        // 已有提醒不覆盖
-const r5 = { id: 'r5', time: '11:00', remindAt: null, done: true };           // 已完成不回填
-ctx.ensureRemindDefaults([r2, r3, r4, r5]);
+const r4 = { id: 'r4', time: '10:00', remindAt: 123, _remindOff: '', _remindManual: false };
+const r4m = { id: 'r4m', time: '10:00', remindAt: 123, _remindOff: '', _remindManual: true };
+const r5 = { id: 'r5', time: '11:00', remindAt: null, done: true };
+ctx.ensureRemindDefaults([r2, r3, r4, r4m, r5]);
+const exp0000 = stubs.today0(); exp0000.setHours(0, 0, 0, 0);
 const exp0855 = stubs.today0(); exp0855.setHours(8, 55, 0, 0);
+const exp0955 = stubs.today0(); exp0955.setHours(9, 55, 0, 0);
 [
-  ['C 边界 · 00:03 前 5 分钟是昨天 → 不设置', r2.remindAt === null],
+  ['C 边界 · 00:03 → 提醒落 00:00（不跨昨天）', r2.remindAt === exp0000.getTime()],
   ['C 回填 · 09:00 → 08:55', r3.remindAt === exp0855.getTime()],
-  ['C 已有提醒 · 不覆盖', r4.remindAt === 123],
+  ['C 非手动旧提醒 · 随 time 同步到 09:55', r4.remindAt === exp0955.getTime()],
+  ['C 手动提醒 · 不覆盖', r4m.remindAt === 123],
   ['C 已完成 · 不回填', r5.remindAt === null],
-].forEach(([n, ok]) => ok ? L.ok(n) : L.bad(n, JSON.stringify({ r2: r2.remindAt, r3: r3.remindAt, r4: r4.remindAt, r5: r5.remindAt })));
+].forEach(([n, ok]) => ok ? L.ok(n) : L.bad(n, JSON.stringify({ r2: r2.remindAt, r3: r3.remindAt, r4: r4.remindAt, r4m: r4m.remindAt, r5: r5.remindAt })));
 
 // ---------- D. 执行日志跨天分桶：取消只动当天桶，昨天历史不回滚 ----------
 ctx.setNodeDone(t1, true);                       // d6 完成普通任务

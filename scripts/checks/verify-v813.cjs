@@ -34,7 +34,9 @@ L.assertFnContains('syncTop 仍用全局候选', 'syncTop', 'heroGlobalCandidate
 
 // ③ 番茄启动器承接
 L.assertContains('MIT 区时长下拉', 'id="pomoLen"');
-L.assertContains('90′ 深潜选项保留', '<option value="90">🌊 90′</option>');
+// v8.21: 默认番茄走 prefs.pomoMinutes，option 带条件 selected —— 锁文案片段
+L.assertContains('90′ 深潜选项保留（v8.17 起带「深潜」中文）', '🌊 90′ 深潜');
+L.assertContains('MIT 番茄 option value=90', 'option value="90"', L.APP_JS);
 L.assertFnContains('行内 🍅 读下拉时长', 'bindTodayPanel', "getElementById('pomoLen')");
 L.assertFnNotContains('行内 🍅 不再写死 25', 'bindTodayPanel', 'startPomo(25)');
 L.assertContains('🍅 按钮提示时长来源', '时长取 MIT 区下拉');
@@ -53,10 +55,11 @@ L.assertFnContains('节奏 pill 迁移', 'renderTodayPanel', 'paceStatus(mitN)')
 L.assertFnContains('pickNextTopId 排除溢出', 'pickNextTopId', 'n._overflow');
 L.assertFnContains('pickNextTopId 排除 MIT 自身', 'pickNextTopId', 'excludeId');
 L.assertFnContains('pickNextTopId 按算法分取最高', 'pickNextTopId', 'focusScore(n)');
-L.assertFnContains('todayRowHtml 支持 nextTop 选项', 'todayRowHtml', "opts.nextTop ? ' next-top' : ''");
+L.assertFnContains('todayRowHtml 支持 nextTop 选项', 'todayRowHtml', "opts.nextTop ? 'next-top'");
 L.assertFnContains('todayRowHtml ② 徽章', 'todayRowHtml', 'next-top-badge');
 L.assertFnContains('renderTodayPanel 计算 nextTopId', 'renderTodayPanel', 'pickNextTopId(inPool, mitId)');
-L.assertFnContains('renderTodayPanel 行传 nextTop', 'renderTodayPanel', '{ nextTop: true }');
+// v8.23: nextTop 经 opts 对象传入（兼 listPinned）
+L.assertFnContains('renderTodayPanel 行传 nextTop', 'renderTodayPanel', 'opts.nextTop = true');
 
 // ⑦ 样式 + 导出 + 版本
 L.assertContains('next-top 行样式', '.today-row.next-top {', css);
@@ -69,6 +72,6 @@ L.assertContains('导出 pickNextTopId', 'pickNextTopId,');
 // 滚动版本守卫：跟随 index.html 当前版本（v8.14 升版教训：写死 8.13 必红——与 verify-v810 同模式）
 const curV = (html.match(/\?v=([\d.]+)/) || [])[1];
 const vCount = (html.match(new RegExp('\\?v=' + String(curV).replace(/\./g, '\\.'), 'g')) || []).length;
-(vCount === 4 ? L.ok : L.bad)('index.html 4 处版本号（当前滚动版 ' + curV + '）', '实际 ' + vCount + ' 处');
+(vCount >= 4 && new Set([...html.matchAll(/\?v=([\d.]+)/g)].map(m => m[1])).size === 1 ? L.ok : L.bad)('index.html 版本号一致且 ≥4 处（' + curV + ' ×' + vCount + '）', '实际 ' + vCount);
 
 process.exit(L.summary('verify-v813') ? 1 : 0);

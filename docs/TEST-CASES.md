@@ -3,12 +3,14 @@
 用例总览：模块 × 覆盖层。生成于 2026-11-25（测试基建落地），随套件增删手动同步。
 运行方式见 [TESTING.md](TESTING.md)。
 
-**总量**：tests 16 套件 333 例（unit 258 + flow 75）+ checks 22 环节 552 项 = **885 项断言**。
+**总量**：随套件增减；含 `unit-capacity`（v8.23）与 `verify-v823`。运行见 [TESTING.md](TESTING.md)。
 
 ## 覆盖矩阵
 
 | 模块 | 关键行为 | unit | flow | smoke | verify |
 |---|---|---|---|---|---|
+| 时间预算/容量（v8.23） | `globalCapacityHours` 无/有 wins、旧小时回落、`weekPlanFeasibility.global` 守卫、`setNodeDeadline` 五字段 | ✅ unit-capacity 20 | | | ✅ v8.23 |
+| 确认门闩（v8.23） | 树删/换父/新建跳规划/Skill 重置 → `confirmModal`；设置弹窗 `buildModalHtml`+`openModalMask` | | | | ✅ v8.23 |
 | 期限解析 `parseDeadline` | 今天/明天/后天、YYYY-MM-DD、X月X日跨年回落、下周三=下自然周、N天后、两周内、第N周锚点、逾期、无期限 | ✅ 15 例 | | | |
 | 尺度/重复/估时推断 | `inferScale` 日周月年、`inferRecur` 每天/每周N次、`parseEstimateMinutes` 小时/分钟/半天 | ✅ 11 例 | | | |
 | 文本→树 `parseText` | 树形/id 序列/缩进挂父/单根收敛/分支尺度重推/空输入 | ✅ 7 例 | | ✅ v8.9 | |
@@ -35,7 +37,7 @@
 | AI 排期回填 | 多窗口/顺排 bump/窗口满换次日/recur 补窗口/anchor 容忍 | | | ✅ v8.2 15 例 | ✅ v8.2 |
 | 提醒系统 | 默认回填/换天重置/手动关不回填/三通道告警 | | ✅ 时间旅行 | | ✅ v8.3/v8.10 |
 | 跨天 streak | 连续/中断/防重/取消回退 cur-1（v8.10 修复） | | ✅ 时间旅行 | | ✅ v8.10 |
-| 跨天分桶 | executionLog/打卡 log/dailyCompletions 按 dk 隔离、取消只动当天桶 | | ✅ 时间旅行 | ✅ v8.10 | ✅ v8.10 |
+| 跨天分桶 | executionLog/打卡 log/dailyCompletions 按 dk 隔离、取消·只动当天桶 | | ✅ 时间旅行 | ✅ v8.10 | ✅ v8.10 |
 | 期限重算 | recomputeSchedule 跨天自适应/「第2周」锚定不漂移/setNodeDeadline 五字段 | ✅ unit-schedule | | | ✅ v8.10 |
 | 排期过夜 | planDate 到期转 time/未来不动/已完成不动/已有 time 不覆盖 | ✅ unit-schedule | ✅ 时间旅行 | ✅ v8.10 | ✅ v8.10 |
 | 周期判定 | habitDueToday 七型/interval 锚点推算/recurringTask 当天完成不再到期 | ✅ unit-schedule | | | |
@@ -47,6 +49,7 @@
 | 今日页三连修 | metricsStrip 迁 zoneStatus/heroWrap 空闲零高度；② 行算法分可见；已完成区完成时刻+单项得分（scoreOfDoneEntry 倒序取最新/pomo 不算/脏数据安全）；❓ 帮助按钮化可点击 | ✅ 13 例 | | | ✅ v8.14 |
 | 数字口径澄清 + 关注计数修正 | 三种「分」改名互指（优先级/表现/单项加分）；需要关注角标数条目而非非空区块（onboard 不计/someday-only 不计）；角标 title 构成公式；全清空空态；悬停说明链 | | | | ✅ v8.15 |
 | 周预算口径/备选入今日/逾期并入 | 周预算 wk.global 分支（无配置不错配假超支）+ 弹窗同根守卫；备选区 Top3/四象限全有「→今天」+ 已在今日显示标记；overdueLeaves + splitStaleOverdue 逾期优先去重（渲染与角标同口径）；metricsStrip 去叶子% + 口径 title | ✅ 16 例 | | | ✅ v8.16 |
+| 指标迁出今日/番茄中文/移动溢出 | projectKrNodes 仅 role===KR（排除文案分数/habit/已完成）；今日 metrics 只留本周完成；项目总览承接 KR；启动 reconcile 清孤儿；番茄/动作图标+中文；mobile §46 溢出 | ✅ 10 例 | | | ✅ v8.17 |
 | 自动排时 `nextFreeTimeToday` | 跨项目占用/10 分钟缓冲/不排过去/窗口满 null | | | ✅ v8.8 | ✅ v8.8 |
 | 项目删除级联 | rocks/pendingActions/tomorrowMit/planShare/capacity/habitStreaks/topWfId/番茄钟 | | ✅ 生命周期 | ✅ v8.8/v8.9 | ✅ v8.8/v8.9 |
 | 节点删除级联 | 子树删除/topId/topPin/番茄钟解绑/引用备份还原 | | ✅ 生命周期 | ✅ v8.9 35 例 | ✅ v8.9 |
@@ -59,7 +62,10 @@
 | 晚总结期限 | 明天继续/改期走 setNodeDeadline 唯一写入口 | | | | ✅ v8.10 |
 | 版本号一致性 | index.html 4 处 ?v= 同步 | | | | ✅ run.cjs |
 
-## 单元测试明细（258 例）
+## 单元测试明细（268 例）
+
+### unit-project-kr.cjs · 真 KR 筛选（10，v8.17）
+projectKrNodes：空/null/undefined→[]；只收未完成 role===KR；排除已完成 KR、纯 targetNum 普通任务（文案分数）、habit、无 parent 根。
 
 ### unit-overdue.cjs · 逾期停滞去重（16，v8.16）
 splitStaleOverdue：双空/无重叠各保留、重叠时 od 全保留+stale 去重（逾期优先）、全重叠 stale 清空、去重后总数=去重节点数、null/undefined 双参安全、alerts 含缺 node/null 不炸且安全侧保留（只删确定重复）、od 含缺 node 不误删。
@@ -152,7 +158,15 @@ C backfill 本批纠偏：AI 直给两个 9:00→写库前纠成 09:00/09:40。
 | verify-v8.13 | 38 | 英雄卡移除/topId 归一 syncTop/MIT 区承接番茄时长+取消固定+得分折叠/② 次重要高亮/版本号 |
 | verify-v8.14 | 25 | metricsStrip 迁位/heroWrap 空态/② 行分数/已完成时刻+得分/❓ 按钮化/滚动版本守卫 |
 | verify-v8.15 | 26 | 角标数条目（停滞+暂停+待澄清+提示/onboard 不计）/title 构成公式/全清空空态/三种「分」改名互指/attn chip 口径+「等」/滚动版本守卫 |
-| verify-v8.16 | 33 | 周预算 global 分支+弹窗守卫/备选区三区按钮+在今日标记/metricsStrip 去重+口径 title+KR pill 节点名前缀/逾期并入（overdueLeaves/splitStaleOverdue/双组/角标构成）/滚动版本守卫 |
+| verify-v8.16 | 31 | 周预算 global 分支+弹窗守卫/备选区三区按钮+在今日标记/metricsStrip 去重（v8.17 重定向：KR 折叠负向断言）/逾期并入/滚动版本守卫 |
+| verify-v8.17 | 34 | 指标迁出今日+projectKrNodes/项目总览承接/reconcile 孤儿/番茄与动作中文/mobile §46 溢出/滚动版本守卫 |
+| verify-v8.18 | 28 | 今日已完成默认折叠/body data-view+mobile §47/侧栏--wf-color/remindAtFromTime+MIT并入/滚动版本守卫 |
+| verify-v8.19 | 25 | 移动端降级（v8.20 重定向底栏五键+仪式抽屉常显） |
+| verify-v8.20 | 23 | 弹窗mh-x按钮/侧栏基础设置+displayName/底栏五键/滚动版本守卫 |
+| verify-v8.21 | 32 | 去 todayBrief/设置扩充/全局多段空闲/滚动版本守卫 |
+| verify-v8.22 | 30 | 公共 modal/fold/empty 壳 + 高频弹窗接入 + require 冒烟 |
+| verify-v8.23 | 22 | 跨日 scrub timeDk + 今日置顶排序 + require 冒烟 |
+| unit-today-sort | 13 | scrubStaleTodayTimes / sortTodayExecEntries 置顶与时间序 |
 | smoke-v8.2 | 15 | 排期回填 5 场景实跑 |
 | smoke-v8.7 | 10 | 今日池 6 场景实跑 |
 | smoke-v8.8 | 17 | 自动排时 5 场景+删除级联实跑 |

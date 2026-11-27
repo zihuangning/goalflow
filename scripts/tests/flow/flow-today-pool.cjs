@@ -31,6 +31,8 @@ const stubs = {
   recurringTaskDueToday: () => false,
   habitDueToday: () => true,
   parseAIStart: raw => raw || '',
+  // v8.23: backfill 写今日 time 后盖章 timeDk
+  stampNodeTimeDk: (n, dk) => { if (!n) return; if (n.time) n.timeDk = dk || stubs.dateKey(); else n.timeDk = ''; },
   beginTick: () => {}, endTick: () => {},
   _rankSlot: null, _tickN: 0,
   state: { activeWorkflowId: 'wf1', nodes: [], workflows: [], meta: {} },
