@@ -2398,6 +2398,29 @@ function foldSectionHtml(opts) {
     <div class="fold-body">${opts.body || ''}</div>
   </details>`;
 }
+/* 导航/工具栏内联图标（stroke 随 currentColor；HTML 静态页可复制同名 path） */
+function gfIcon(name, opts) {
+  opts = opts || {};
+  const extra = opts.cls ? ' ' + String(opts.cls).trim() : '';
+  const paths = {
+    today: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+    plan: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+    insights: '<path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="8" rx=".5"/><rect x="12" y="8" width="3" height="11" rx=".5"/><rect x="17" y="13" width="3" height="6" rx=".5"/>',
+    ai: '<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M5 17l.8 2.2L8 20l-2.2.8L5 23l-.8-2.2L2 20l2.2-.8z"/><path d="M19 14l.6 1.8L21 17l-1.8.6L19 19l-.6-1.8L17 17l1.8-.6z"/>',
+    capture: '<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>',
+    more: '<circle cx="6" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.5" fill="currentColor" stroke="none"/>'
+  };
+  const body = paths[name] || paths.more;
+  return `<span class="gf-icon${extra}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${body}</svg></span>`;
+}
+function isLightMode() {
+  try { return document.documentElement.dataset.mode === 'light'; } catch (e) { return false; }
+}
+function svgDimStroke() { return isLightMode() ? 'rgba(30,35,50,.28)' : 'rgba(255,255,255,.25)'; }
+function svgDimFill() { return isLightMode() ? 'rgba(30,35,50,.12)' : 'rgba(255,255,255,.10)'; }
+function svgDimFillStrong() { return isLightMode() ? 'rgba(30,35,50,.45)' : 'rgba(255,255,255,.55)'; }
+function svgDimStrokeMid() { return isLightMode() ? 'rgba(30,35,50,.38)' : 'rgba(255,255,255,.35)'; }
+function svgDimDotInactive() { return isLightMode() ? 'rgba(30,35,50,.14)' : 'rgba(255,255,255,.14)'; }
 /* 空态：今日/规划等共用（btnOnclick 由调用方控制，不 esc） */
 function emptyStateHtml(opts) {
   opts = opts || {};
@@ -2537,18 +2560,9 @@ function openWorkflowMetaModal(mode, wfId) {
       <div class="wfm-wins">
         <div class="wfm-wins-h"><span>本项目可安排（须落在我的空闲内）</span><button type="button" class="gf-btn gf-btn--sm gf-btn--ghost" id="wfmWinAdd">＋ 添加时段</button></div>
         <div id="wfmWinsList"></div>
-        <div class="hint">人有空闲时段；项目可再收窄。保存时超出「我的空闲」的时段会自动裁掉；留空 = 沿用我的空闲（不设项目级收窄）。</div>
+        <div class="hint">人有空闲时段（⚙ 基础设置）；项目可再收窄。保存时超出空闲的时段会自动裁掉；时段合计小时作本项目日预算。留空 = 沿用我的空闲。</div>
       </div>
       <label class="wfm-row"><span>目标描述</span><textarea id="wfmDesc" class="gf-input" rows="2" placeholder="想达成什么？达到什么水平？">${esc(desc)}</textarea></label>
-
-      <div class="wfm-section">
-        <h4>⏱ 时间预算（每周可投入多少时间）</h4>
-        <div class="wfm-2col">
-          <label class="wfm-row"><span>工作日（每天）</span><input id="wfmWorkdayHours" type="number" min="0" max="16" step="0.5" class="gf-input" value="${isNew ? '' : ((state.meta.capacity || {})[wfId || state.activeWorkflowId] || {}).workdayHours ?? ''}" placeholder="如 1.5"></label>
-          <label class="wfm-row"><span>周末（每天）</span><input id="wfmWeekendHours" type="number" min="0" max="16" step="0.5" class="gf-input" value="${isNew ? '' : ((state.meta.capacity || {})[wfId || state.activeWorkflowId] || {}).weekendHours ?? ''}" placeholder="如 3"></label>
-        </div>
-        <div class="hint">系统会自动计算每周可用时间 = 工作日×5 + 周末×2</div>
-      </div>
 
       <label class="wfm-row"><span>计划带宽（% 精力）</span><input id="wfmShare" type="number" min="0" max="100" class="gf-input" value="${isNew ? '' : (state.meta.planShare || {})[wfId || state.activeWorkflowId] ?? ''}" placeholder="如 40 = 打算投 40% 精力"></label>
       <div class="hint" style="margin:-4px 0 0">计划带宽 = 你「打算」投入的精力占比，桑基图上会与近 7 天实际投入对比。</div>`;
@@ -2619,8 +2633,6 @@ function openWorkflowMetaModal(mode, wfId) {
         const endD = new Date(); endD.setDate(endD.getDate() + (tpl.preset.days || 90));
         setForce('#wfmStart', today);
         setForce('#wfmEnd', dateKey(endD));
-        setForce('#wfmWorkdayHours', String(tpl.preset.workdayHours || ''));
-        setForce('#wfmWeekendHours', String(tpl.preset.weekendHours || ''));
         setForce('#wfmShare', String(tpl.preset.share || ''));
         const descEl = overlay.querySelector('#wfmDesc');
         if (descEl && !descEl.value.trim()) descEl.placeholder = tpl.desc;
@@ -2646,8 +2658,6 @@ function openWorkflowMetaModal(mode, wfId) {
     const v = (id) => overlay.querySelector(id) ? overlay.querySelector(id).value.trim() : '';
     const meta = { name: v('#wfmName'), tags: parseTagsInput(v('#wfmTags')), startDate: v('#wfmStart'), endDate: v('#wfmEnd'), description: v('#wfmDesc') };
     const shareRaw = v('#wfmShare');
-    const workdayHours = parseFloat(v('#wfmWorkdayHours')) || 0;
-    const weekendHours = parseFloat(v('#wfmWeekendHours')) || 0;
     let wins = readWins();
     if (wins === null) { alert('本项目可安排时段：每行都要填「开始时间 + 时长」，不用的行请删掉'); return; }
     const rawWinN = wins.length;
@@ -2656,14 +2666,15 @@ function openWorkflowMetaModal(mode, wfId) {
       alert('本项目时段须落在「我的空闲时段」内——与全局无交集，请调整后再保存。');
       return;
     }
+    // 日预算由时段合计派生（不再双轨编辑工作日/周末小时）
+    const derivedH = wins.length ? winsTotalHours(wins) : 0;
     ensureScoreMeta();
     if (isNew) {
       createWorkflow(meta);
       if (shareRaw !== '') state.meta.planShare[state.activeWorkflowId] = clamp(+shareRaw || 0, 0, 100);
-      // 保存时间预算 + 每日可安排时段（多段）
       if (!state.meta.capacity) state.meta.capacity = {};
-      if (workdayHours > 0 || weekendHours > 0 || wins.length) {
-        state.meta.capacity[state.activeWorkflowId] = { workdayHours, weekendHours, wins };
+      if (wins.length) {
+        state.meta.capacity[state.activeWorkflowId] = { workdayHours: derivedH, weekendHours: derivedH, wins };
       }
       saveMeta();
       // v8.7：选模板也进 AI 分析 —— 模板=预填表单+方向+失败兜底骨架；
@@ -2700,10 +2711,9 @@ function openWorkflowMetaModal(mode, wfId) {
     updateWorkflowMeta(id, meta);
     if (shareRaw === '') delete state.meta.planShare[id];
     else state.meta.planShare[id] = clamp(+shareRaw || 0, 0, 100);
-    // 保存时间预算 + 每日可安排时段（多段）
     if (!state.meta.capacity) state.meta.capacity = {};
-    if (workdayHours > 0 || weekendHours > 0 || wins.length) {
-      state.meta.capacity[id] = { workdayHours, weekendHours, wins };
+    if (wins.length) {
+      state.meta.capacity[id] = { workdayHours: derivedH, weekendHours: derivedH, wins };
     } else {
       delete state.meta.capacity[id];
     }
@@ -3494,6 +3504,16 @@ function renderCompletionHistory() {
   const tl = document.getElementById('histTimeline');
   if (!stats && !heat && !tl) return;
   const s = completionStreaks();
+  // v8.29：完成历史默认折叠，记忆 goalflow.zone.historyPanel
+  const histPanel = document.getElementById('historyPanel');
+  if (histPanel && histPanel.tagName === 'DETAILS') {
+    if (!histPanel._zoneBound) {
+      histPanel.open = typeof zoneOpenPref === 'function' ? zoneOpenPref('historyPanel', false) : false;
+      if (typeof bindZonePersist === 'function') bindZonePersist(histPanel);
+    }
+    const sum = histPanel.querySelector(':scope > summary.ins-fold-sum');
+    if (sum) sum.innerHTML = `📈 完成历史 · 时间线与热力 <span class="zone-sum">连续 ${s.cur} · 近7天 ${s.last7}</span>`;
+  }
   if (stats) stats.innerHTML = `<div class="hs-cell"><b>${s.total}</b><span>累计完成</span></div><div class="hs-cell"><b>${s.cur}</b><span>当前连续·天</span></div><div class="hs-cell"><b>${s.longest}</b><span>最长连续·天</span></div><div class="hs-cell"><b>${s.last7}</b><span>近7天完成</span></div>`;
   if (heat) {
     const map = completionByDay(); const t = today0(); const cells = [];
@@ -3973,8 +3993,8 @@ function render() {
     const inGold = topId && (function () { let c = byId(topId); while (c) { if (c.id === n.id) return true; c = c.parentId ? byId(c.parentId) : null; } return false; })();
     const c = category(n.im, n.ur);
     const isNoiseNode = !inGold && category(n.im, n.ur).key === 'noise';
-    let barFill = isRoot ? 'rgba(255,255,255,.55)' : (inGold ? 'url(#g_' + n.id + ')' : (isNoiseNode ? 'rgba(150,158,180,.5)' : urColor(n.ur)));
-    let stroke = isTop ? 'var(--gold)' : (inGold ? 'rgba(245,196,81,.7)' : 'rgba(255,255,255,.25)');
+    let barFill = isRoot ? svgDimFillStrong() : (inGold ? 'url(#g_' + n.id + ')' : (isNoiseNode ? 'rgba(150,158,180,.5)' : urColor(n.ur)));
+    let stroke = isTop ? 'var(--gold)' : (inGold ? 'rgba(245,196,81,.7)' : svgDimStroke());
     let sw = isTop ? 2.4 : (inGold ? 1.8 : 1);
     let filt = (isTop || inGold) ? 'filter="url(#glow)"' : '';
     const scaleTag = (n.scale && n.scale !== 'long') ? { t: SCALE_LABEL[n.scale] || '', cls: 'nlabel sub', col: COLORS.scaleLabel || 'var(--accent)' } : null;
@@ -4046,7 +4066,7 @@ function renderNetwork() {
     const isTop = (n.id === topId);
     const inGold = topId && (function () { let c = byId(topId); while (c) { if (c.id === n.id) return true; c = c.parentId ? byId(c.parentId) : null; } return false; })();
     const fill = inGold ? svgGold() : (category(n.im, n.ur).color);
-    const stroke = isTop ? 'var(--ink)' : (inGold ? svgGoldSoft() : 'rgba(255,255,255,.35)');
+    const stroke = isTop ? 'var(--ink)' : (inGold ? svgGoldSoft() : svgDimStrokeMid());
     const sw = isTop ? 2 : 1;
     dots += `<g class="node${isTop ? ' hot' : ''}" data-id="${n.id}">
       <circle class="nbar" cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" fill-opacity="${n.done ? 0.35 : 0.92}" stroke="${stroke}" stroke-width="${sw}" ${isTop || inGold ? 'filter="url(#glow)"' : ''}/>
@@ -4172,6 +4192,19 @@ function bindScrollMemory(el) {
   }, true);
 }
 function renderQuadrant() {
+  // v8.29：四象限默认折叠，记忆 goalflow.zone.quadPanel（首屏留给精力图）
+  const quadPanel = document.getElementById('quadPanel');
+  if (quadPanel && quadPanel.tagName === 'DETAILS') {
+    if (!quadPanel._zoneBound) {
+      quadPanel.open = typeof zoneOpenPref === 'function' ? zoneOpenPref('quadPanel', false) : false;
+      if (typeof bindZonePersist === 'function') bindZonePersist(quadPanel);
+    }
+    const sum = quadPanel.querySelector(':scope > summary.ins-fold-sum');
+    if (sum) {
+      const n = (typeof quadNodes === 'function' ? quadNodes() : []).length;
+      sum.innerHTML = `🗺 四象限校准 · 拖拽归位${n ? ` <span class="zone-sum">${n} 叶</span>` : ''}`;
+    }
+  }
   const wrap = document.getElementById('quadGrid'); if (!wrap) return;
   bindQuadDelegation();
   getCachedTree(state.nodes);
@@ -4867,7 +4900,7 @@ function renderRhythm() {
     // 仍渲染空比例尺，让用户看到尺度已切换
     const max = 1; const tnow = new Date(TODAY);
     let hint = `<div class="rtitle">📊 ${title}（条高 = 该${scaleUnit(state.scale)}的重要度之和 · 红=越急）<span class="rsub2">${sub}</span></div><div class="rbars">`;
-    buckets.forEach(b => { const isCur = (tnow >= b.start && tnow < b.end); hint += `<div class="rcol${isCur ? ' cur' : ''}" title="${b.label}"><div class="rbar" style="height:5px;background:rgba(255,255,255,.10)"></div><div class="rmo">${b.label}</div>${b.sub ? `<div class="rsub">${b.sub}</div>` : ''}</div>`; });
+    buckets.forEach(b => { const isCur = (tnow >= b.start && tnow < b.end); hint += `<div class="rcol${isCur ? ' cur' : ''}" title="${b.label}"><div class="rbar" style="height:5px;background:${svgDimFill()}"></div><div class="rmo">${b.label}</div>${b.sub ? `<div class="rsub">${b.sub}</div>` : ''}</div>`; });
     hint += '</div>';
     box.innerHTML = capHtml + hint; return;
   }
@@ -4894,7 +4927,7 @@ function renderRhythm() {
     const l = load[i];
     const h = Math.max(5, l.val / max * 64);
     const ur = l.cnt ? clamp(Math.round(l.ur / l.cnt), 1, 5) : (l.val > 0 ? 3 : 1);
-    const col = l.val > 0 ? urColor(ur) : 'rgba(255,255,255,.10)';
+    const col = l.val > 0 ? urColor(ur) : svgDimFill();
     const isCur = (tnow >= b.start && tnow < b.end);
     const tasks = slotTasks[b.key] ? `<div class="rhythm-tasks" title="${esc(slotTasks[b.key].join(' · '))}">${esc(slotTasks[b.key].slice(0, 2).join(' · '))}${slotTasks[b.key].length > 2 ? '…' : ''}</div>` : '';
     html += `<div class="rcol${isCur ? ' cur' : ''}" title="${b.label}：重要度 ${l.val.toFixed(1)}${l.cnt ? ' · 平均紧急 ' + (l.ur / l.cnt).toFixed(1) : ''}">

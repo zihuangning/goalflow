@@ -39,7 +39,7 @@ L.assertContains('空态样式', '.attention-empty {', css);
 L.assertContains('角标悬停提示手势', '.zone-badge[title]', css);
 
 // ① 三种「分」改名 + 口径互指
-L.assertFnContains('MIT 折叠改「优先级」', 'renderTodayPanel', '📊 优先级 ${mitFs.total} · 为什么排最前');
+L.assertFnContains('MIT 折叠改「优先级」', 'renderTodayPanel', '优先级 ${mitFs.total} · 为什么排最前');
 L.assertNotContains('MIT 折叠不再叫「得分」', '📊 得分 ${mitFs.total}');
 L.assertFnContains('MIT 折叠 summary 带口径 title', 'renderTodayPanel', '优先级分：算法排序用，决定「先做谁」');
 L.assertFnContains('② 行改「优先 N」', 'todayRowHtml', '② 优先 ${fsp.total}');

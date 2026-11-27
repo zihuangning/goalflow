@@ -3112,6 +3112,58 @@ button.ve-more:hover { text-decoration: underline; }
 .wf-arch-name { font-size: 13.5px; color: var(--ink); }
 .wf-unarch { flex-shrink: 0; }
 
+/* ===== v8.29 今日脉搏 / 洞察折叠 / AI 枢纽 ===== */
+.today-pulse {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--stroke-soft);
+  border-radius: var(--radius-sm, 10px);
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg1, transparent));
+}
+.pulse-cell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pulse-k { font-size: 11px; color: var(--muted); letter-spacing: .02em; }
+.pulse-v { font-size: 13.5px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pulse-bar { display: block; height: 3px; margin-top: 4px; border-radius: 999px; background: var(--stroke-soft); overflow: hidden; }
+.pulse-bar > i { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
+.pulse-cell.over .pulse-v { color: var(--warn, #c47a2a); }
+.pulse-next { grid-column: span 1; }
+@media (max-width: 720px) {
+  .today-pulse { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pulse-next { grid-column: 1 / -1; }
+}
+body.simple-mode #todayPulse { display: grid !important; }
+
+.ins-fold-sum {
+  list-style: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--ink);
+  padding: 10px 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ins-fold-sum::-webkit-details-marker { display: none; }
+.ins-fold-sum .zone-sum { font-size: 12px; font-weight: 600; color: var(--muted); }
+.quad-panel.panel, .history-panel.panel { padding-top: 4px; padding-bottom: 8px; }
+.quad-panel[open], .history-panel[open] { padding-bottom: 14px; }
+
+.ai-usage-strip { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+.ai-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12.5px; padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--stroke-soft); color: var(--ink-2); background: var(--bg1);
+}
+.ai-chip.ok { border-color: color-mix(in srgb, var(--ok, #4caf7d) 40%, transparent); color: var(--ok, #4caf7d); }
+.ai-chip.warn { border-color: color-mix(in srgb, var(--warn, #c47a2a) 45%, transparent); color: var(--warn, #c47a2a); }
+.ai-hub-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+.ai-guide { margin-bottom: 4px; }
+
 /* ===== 完成历史 · 时间线 ===== */
 .history-panel h2 { margin-bottom: 12px; }
 .hist-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -3233,7 +3285,11 @@ button.ve-more:hover { text-decoration: underline; }
 .today-row.gf-row .gf-row-meta { margin-left: 25px; }
 .ib-row.gf-row { align-items: center; padding: 7px 8px; border: 1px solid var(--line, rgba(255, 255, 255, .07)); border-radius: 10px; background: var(--panel, rgba(255, 255, 255, .02)); margin-bottom: 6px; border-bottom: 1px solid var(--line, rgba(255, 255, 255, .07)); }
 .ib-row.gf-row .gf-row-meta { flex-basis: auto; margin: 0 0 0 4px; }
-.rock-chip.gf-row { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--stroke-soft); border-radius: 999px; border-bottom: 1px solid var(--stroke-soft); flex-wrap: nowrap; }
+.gf-icon { display: inline-flex; width: 1.1em; height: 1.1em; vertical-align: -0.15em; }
+.gf-icon svg { width: 100%; height: 100%; display: block; }
+.ric .gf-icon, .mtab-ic .gf-icon { width: 20px; height: 20px; }
+.sidx .gf-icon { width: 14px; height: 14px; margin-right: 4px; }
+.rock-chip > .gf-row { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: none; background: transparent; flex-wrap: nowrap; }
 .rock-chip .gf-row-title { flex: 0 1 auto; font-size: 12.5px; white-space: nowrap; }
 .rock-chip .rock-ic { font-size: 14px; line-height: 1; }
 .trow.gf-row { gap: 8px; padding: 6px 4px; align-items: center; }
@@ -3243,20 +3299,22 @@ button.ve-more:hover { text-decoration: underline; }
 .zone-body { gap: 6px; padding: 4px 12px 10px; }
 .zone > summary { padding: 8px 12px; }
 
-/* ===== v8.27 简洁模式 + 动效（尊重 prefers-reduced-motion） ===== */
+/* ===== v8.27/8.29 简洁模式 + 动效（尊重 prefers-reduced-motion） =====
+   默认只留：问候/进度 · MIT · 今日清单 · 收件箱捕捉；番茄条在进行中仍可见。
+   不藏 #heroWrap（内含 #pomoBar）、不藏 #inboxCapture。 */
 body.simple-mode #zoneStatus,
 body.simple-mode #zoneAttention,
 body.simple-mode #zoneFocus,
 body.simple-mode #todayRocks,
-body.simple-mode #inboxCapture,
 body.simple-mode #todayCtxBar,
 body.simple-mode #todayMicro,
 body.simple-mode #todayChecklist,
 body.simple-mode #todayAttnPill,
 body.simple-mode #todayHint,
 body.simple-mode #flowIndicator,
-body.simple-mode #heroWrap,
 body.simple-mode .today-alarm-bar { display: none !important; }
+/* 简洁模式：未专注时压掉空 hero 占位；有 .pomo-bar.show 时照常显示控制条 */
+body.simple-mode #heroWrap:not(:has(.pomo-bar.show)) { display: none !important; }
 @keyframes gf-modal-in {
   from { opacity: 0; transform: translateY(10px) scale(0.98); }
   to { opacity: 1; transform: none; }

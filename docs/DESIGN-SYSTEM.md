@@ -12,7 +12,7 @@
 - 两个独立维度：`<html data-theme="linear" data-mode="dark">`，存储键 `goalflow.theme` + `goalflow.mode`
 - CSS：`:root` = 结构 token + `linear` dark；`[data-theme="x"]` 覆盖各主题 dark；`[data-theme="x"][data-mode="light"]` 覆盖各主题 light
 - JS：`gf-tokens.js` 的 `THEMES[t].dark/.light`；桑基/导出/条形一律走 `PALETTE_UR` / `COLORS`，禁止硬编码 hex
-- 切换：顶栏 `#themeSelect` / `#modeToggle`；资源 `?v=` 四处同步 bump
+- 切换：顶栏 `#themeSelect` / `#modeToggle`；资源 `?v=` **六处**同步 bump（css + 五 script）
 - light：gold 调深保对比；走查 SVG/导出是否仍写死深底金线
 
 ## 布局（三视图 · 非英雄卡）
@@ -50,7 +50,7 @@
 - **Modal**：`buildModalHtml` + `openModalMask` + `modalHeadHtml` / `modalFootHtml`；新弹窗禁止手写 `modal-head`。特例：`openSmart`（多轮重渲）、`openGlobalSearch`（`gs-bar`）只统一关闭行为。
 - **Fold**：`foldSectionHtml` / `<details class="fold">` + `goalflow.folds`
 - **Empty**：`emptyStateHtml` / `.empty-state`
-- **Row**：`rowChrome`（勾选 + 文案 + meta + ⋯）统一今日/树/收件箱/石头条
+- **Row**：`rowChrome`（勾选 + 文案 + meta + ⋯）——今日/收件箱/大石头（`button.rock-chip` 包内层 `.gf-row`）；树编辑器手写 DOM 但顺序对齐 gf-row；主导航图标用静态 `.gf-icon` SVG 或运行时 `gfIcon()`
 
 ## 按钮
 

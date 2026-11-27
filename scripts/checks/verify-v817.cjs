@@ -47,9 +47,9 @@ L.assertFnContains('标签带中文', 'todayRowHtml', '🏷 标签');
 L.assertFnContains('删除带中文', 'todayRowHtml', '🗑 删除');
 L.assertFnContains('番茄条进度中文', 'renderPomoBar', '进度 ${pct}%');
 L.assertFnContains('番茄条结束带⏹', 'renderPomoBar', '⏹ 结束');
-L.assertFnContains('时长下拉标准', 'renderTodayPanel', '🍅 25′ 标准');
-L.assertFnContains('时长下拉长专注', 'renderTodayPanel', '🍅 50′ 长专注');
-L.assertFnContains('时长下拉深潜', 'renderTodayPanel', '🌊 90′ 深潜');
+L.assertFnContains('时长下拉标准', 'renderTodayPanel', '>25′ 标准</option>');
+L.assertFnContains('时长下拉长专注', 'renderTodayPanel', '>50′ 长专注</option>');
+L.assertFnContains('时长下拉深潜', 'renderTodayPanel', '>90′ 深潜</option>');
 
 // ④ 移动端溢出
 L.assertContains('mobile §46 溢出整顿', 'v8.17 移动端溢出整顿', mobile);

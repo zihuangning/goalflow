@@ -2,7 +2,7 @@
 
 **目标流（GoalFlow）** — 纯前端单页应用：年度目标树 → 桑基精力图 → 算法选出「当下最重要」→ 今日执行闭环。数据仅存浏览器 `localStorage`，无账号、无云端、无构建。
 
-> **栈边界**：`index.html` + `assets/css/**` + `assets/js/{gf-tokens,gf-demos,app}.js`。禁止引入 React/Vue/打包器作为主路径。文档冲突时以 **本文件 + `docs/preflight/goalflow.md` + `.cursor/rules/00-project-core.mdc`** 为准。
+> **栈边界**：`index.html` + `assets/css/**` + `assets/js/{gf-tokens,gf-demos,gf-model,gf-ui,app}.js`（顺序见 `scripts/app-scripts.cjs`）。禁止引入 React/Vue/打包器作为主路径。文档冲突时以 **本文件 + `docs/preflight/goalflow.md` + `.cursor/rules/00-project-core.mdc`** 为准。
 
 ## 快速入口
 
@@ -47,7 +47,7 @@
 ## 项目硬约束（摘要）
 
 - **纯本地**：禁止默认要求账号/云同步/服务端权威状态
-- **版本串**：改 `assets/**` 或 `index.html` 引用资源时，四处 `?v=` 必须同步 bump
+- **版本串**：改 `assets/**` 或 `index.html` 引用资源时，**六处** `?v=`（css + 五 script）必须同步 bump
 - **节点工厂**：所有新节点走 `newNode(partial)`，禁止散落字面量漏字段
 - **期限唯一写入口**：`deadline/deadlineDate/daysLeft/overdue/deadlineText` 只经 `setNodeDeadline`
 - **删除级联**：删节点/项目/整树替换必须走 `purgeNodeRefs` / `purgeWorkflowRefs` / `purgeCurrentTreeRefs`

@@ -48,7 +48,7 @@ L.assertFnContains('renderToday MIT 排除溢出', 'renderTodayPanel', 'pool.fin
 // v8.23: 排序抽到 sortTodayExecEntries，溢出仍沉底
 L.assertFnContains('renderToday 走统一排序', 'renderTodayPanel', 'sortTodayExecEntries');
 L.assertContains('溢出沉底在 sortTodayExecEntries', '.concat(overflowed)', L.APP_JS);
-L.assertFnContains('renderToday 溢出分隔行', 'renderTodayPanel', '🌊 溢出 · 超出今日可投入，建议顺延或删减');
+L.assertFnContains('renderToday 溢出分隔行', 'renderTodayPanel', '溢出 · 超出今日可投入，建议顺延或删减');
 L.assertFnContains('todayRowHtml 溢出行 class', 'todayRowHtml', "n._overflow ? 'is-overflow'");
 L.assertFnContains('todayRowHtml 溢出标记', 'todayRowHtml', '🌊 溢出');
 L.assertContains('晨计划预览只列预算内', 'pool.filter(ent => !ent.node._overflow).slice(0, 6)');

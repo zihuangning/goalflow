@@ -35,8 +35,8 @@ function openSettingsModal() {
   const capOverview = hasGlobal
     ? `<div class="usage-row"><span>全局每周（空闲时段汇总）</span><b>${fmtHours(weekCapGlobal())}h</b></div>
           <div class="usage-row"><span>其他项目占用</span><b>${fmtHours(otherUsage.weekTotal)}h</b></div>
-          <div class="usage-row total"><span>本项目净可投入</span><b>${fmtHours(weekCap())}h</b>（工作日 ${c.workdayHours}h / 周末 ${c.weekendHours}h）</div>`
-    : `<div class="usage-row"><span>本项目净值</span><b>${fmtHours(weekCap())}h</b>（工作日 ${c.workdayHours}h / 周末 ${c.weekendHours}h）</div>
+          <div class="usage-row total"><span>本项目净可投入</span><b>${fmtHours(weekCap())}h</b>（日预算 ${c.workdayHours}h，来自时段合计）</div>`
+    : `<div class="usage-row"><span>本项目净值</span><b>${fmtHours(weekCap())}h</b>（日预算 ${c.workdayHours}h，来自时段合计）</div>
           <div class="hint" style="margin-top:6px">尚未配置全局空闲时段——上方添加工作日/周末时段后，才会按「全局每周」校验全部项目承诺。</div>`;
 
   const body = `
@@ -517,7 +517,7 @@ function todayRowHtml(entry, opts) {
     n._overflow ? 'is-overflow' : '',
     expanded ? 'expanded' : ''
   ].filter(Boolean).join(' ');
-  const titleLine = `${listPinned ? '<i class="today-pfx pin-badge" title="今日置顶 · 仅影响今日清单顺序">📌</i>' : ''}${opts.nextTop ? '<i class="today-pfx next-top-badge" title="② 次重要 · 今日池算法排序仅次于 MIT，值得排进下一段专注">②</i>' : ''}${isWfTop ? '<i class="today-pfx" title="各流最重要">★</i>' : ''}${habit ? '<i class="today-pfx">🔁</i>' : ''}${isMicro ? '<i class="today-pfx">🫳</i>' : ''}<input class="today-txt-in" data-edit="${n.id}" data-wf="${wfId}" value="${esc(n.text)}" title="编辑文案 · 回车或失焦保存" aria-label="任务文案">`;
+  const titleLine = `${listPinned ? '<i class="today-pfx pin-badge" title="今日置顶 · 仅影响今日清单顺序">置顶</i>' : ''}${opts.nextTop ? '<i class="today-pfx next-top-badge" title="② 次重要 · 今日池算法排序仅次于 MIT，值得排进下一段专注">②</i>' : ''}${isWfTop ? '<i class="today-pfx" title="各流最重要">★</i>' : ''}${habit ? '<i class="today-pfx">循环</i>' : ''}${isMicro ? '<i class="today-pfx">微</i>' : ''}<input class="today-txt-in" data-edit="${n.id}" data-wf="${wfId}" value="${esc(n.text)}" title="编辑文案 · 回车或失焦保存" aria-label="任务文案">`;
   const metaLine = `${nextScoreMeta}${wfName ? `<span class="today-meta wf-tag">${esc(wfName)}</span>` : ''}${timeVal ? `<span class="today-meta">🕐 ${esc(timeVal)}</span>` : ''}${recurMeta}${habit ? habitMeta : (streak ? `<span class="today-meta streak" title="习惯连续天数（执行记录驱动）">🔥 ${streak.cur}天</span>` : '')}${anchorMeta}${tagMeta}${n.daysLeft != null ? `<span class="today-meta meta-dleft">${n.overdue ? '逾期' : '剩'}${Math.abs(n.daysLeft)}天</span>` : ''}${waitMeta}${blockMeta}${overflowMeta}`;
   const moreInner = `<div class="today-timing">
       <label class="today-time-lbl" title="今日闹钟提醒">⏰ 提醒</label>
@@ -533,7 +533,7 @@ function todayRowHtml(entry, opts) {
       <button type="button" class="gf-btn gf-btn--sm${n.status === 'waiting' ? ' wait-on' : ''}" data-wait="${n.id}" data-wf="${wfId}" title="标记等待中（退出今日竞选，写清在等什么）">⏳ 等待</button>
       <button type="button" class="gf-btn gf-btn--sm${n.status === 'blocked' ? ' block-on' : ''}" data-block="${n.id}" data-wf="${wfId}" title="标记阻塞（退出今日竞选，写清被什么卡住）">🚫 阻塞</button>
       <button type="button" class="gf-btn gf-btn--sm${(n.tags && n.tags.length) ? ' woop-on' : ''}" data-tags="${n.id}" data-wf="${wfId}" title="情境标签（@电脑 / @外出 / @低能量 / @15分钟）">🏷 标签</button>
-      ${!opts.micro && !habit ? `<button type="button" class="gf-btn gf-btn--sm${isTodayListPinned(wfId, n.id) ? ' woop-on' : ''}" data-todaypin="${n.id}" data-wf="${wfId}" title="${isTodayListPinned(wfId, n.id) ? '取消今日置顶（仅影响今日清单顺序，不是 MIT）' : '置顶到今日清单最前（仅今天有效，可多条）'}">${isTodayListPinned(wfId, n.id) ? '📌 已置顶' : '📌 置顶'}</button>` : ''}
+      ${!opts.micro && !habit ? `<button type="button" class="gf-btn gf-btn--sm${isTodayListPinned(wfId, n.id) ? ' woop-on' : ''}" data-todaypin="${n.id}" data-wf="${wfId}" title="${isTodayListPinned(wfId, n.id) ? '取消今日置顶（仅影响今日清单顺序，不是 MIT）' : '置顶到今日清单最前（仅今天有效，可多条）'}">${isTodayListPinned(wfId, n.id) ? '已置顶' : '置顶'}</button>` : ''}
       <button type="button" class="gf-btn gf-btn--sm today-del" data-del="${n.id}" data-wf="${wfId}" title="删除该任务（10 秒内可撤销）">🗑 删除</button>
     </div>
     <div class="today-ifthen" data-ifthenbox="${n.id}" style="display:${n.ifThen ? 'flex' : 'none'}">
@@ -1049,6 +1049,66 @@ function renderTodayAlarmBar() {
   };
 }
 
+/* v8.29：今日脉搏条——对标 Things 进度 / Todoist 完成感 / Sunsama 下一项；
+   简洁模式下折叠区被藏时仍常驻，避免「今日空空」的错觉 */
+function renderTodayPulse() {
+  const box = document.getElementById('todayPulse'); if (!box) return;
+  let pool = [];
+  try { pool = todayAggregatedPool() || []; } catch (e) { pool = []; }
+  const todayLog = ((state.meta && state.meta.executionLog) || {})[dateKey()] || null;
+  const doneN = todayLog ? (todayLog.entries || []).length : 0;
+  const left = pool.filter(e => e && e.node && !e.node.done && !e.node._overflow);
+  const leftN = left.length;
+  const totalN = doneN + leftN;
+  const pct = totalN ? Math.min(100, Math.round(doneN / totalN * 100)) : 0;
+  let nextTxt = '暂无下一项';
+  let nextTitle = '';
+  try {
+    const pins = todayListPinsFor();
+    const ordered = sortTodayExecEntries(left, { pins });
+    const next = ordered[0] || left[0];
+    if (next && next.node) {
+      const hm = next.node.time ? String(next.node.time).slice(0, 5) : '';
+      const label = (next.node.text || '').slice(0, 18) + ((next.node.text || '').length > 18 ? '…' : '');
+      nextTxt = (hm ? hm + ' · ' : '') + (label || '未命名');
+      nextTitle = next.node.text || '';
+    }
+  } catch (e) { }
+  let streak = 0;
+  try { streak = (completionStreaks() || {}).cur || 0; } catch (e) { }
+  let capTxt = '—';
+  let capOver = false;
+  try {
+    const d = dayPlanFeasibilityAll();
+    capOver = !!d.over;
+    capTxt = d.over ? `超 ${d.est - d.cap}′` : `余 ${Math.max(0, d.cap - d.est)}′`;
+  } catch (e) { }
+  let grade = '—';
+  try { grade = (todayScore() || {}).grade || '—'; } catch (e) { }
+  box.innerHTML =
+    `<div class="pulse-cell" title="今日已完成 / 清单待办（不含溢出）">` +
+      `<span class="pulse-k">进度</span>` +
+      `<span class="pulse-v">${doneN}/${totalN || '—'}</span>` +
+      `<span class="pulse-bar" aria-hidden="true"><i style="width:${pct}%"></i></span>` +
+    `</div>` +
+    `<div class="pulse-cell pulse-next" title="${esc(nextTitle || '下一项待办')}">` +
+      `<span class="pulse-k">下一项</span>` +
+      `<span class="pulse-v">${esc(nextTxt)}</span>` +
+    `</div>` +
+    `<div class="pulse-cell" title="连续有完成记录的天数（今天无完成则看昨天起算）">` +
+      `<span class="pulse-k">连续</span>` +
+      `<span class="pulse-v">${streak ? streak + ' 天' : '—'}</span>` +
+    `</div>` +
+    `<div class="pulse-cell${capOver ? ' over' : ''}" title="今日预估 vs 可支配容量">` +
+      `<span class="pulse-k">容量</span>` +
+      `<span class="pulse-v">${esc(capTxt)}</span>` +
+    `</div>` +
+    `<div class="pulse-cell" title="今日表现分等级（已完成加分累计）">` +
+      `<span class="pulse-k">表现</span>` +
+      `<span class="pulse-v">${esc(grade)}</span>` +
+    `</div>`;
+}
+
 // v7.7 需要关注汇总信号外露：执行区头部只放两个可点数字，细节仍在「需要关注」里
 function renderTodayAttnPill() {
   const box = document.getElementById('todayAttnPill'); if (!box) return;
@@ -1154,6 +1214,7 @@ function renderTodayPanel() {
     renderParkedStrip();
     renderTodayAlarmBar();
     renderTodayAttnPill();
+    renderTodayPulse();
     renderBackupTip();
     renderBurnoutTip();
     renderOnboard();
@@ -1211,6 +1272,7 @@ function renderTodayPanel() {
   if (hint) hint.style.display = 'none';
   renderTodayAlarmBar();
   renderTodayAttnPill();
+  renderTodayPulse();
   // v7.7 执行区三块合一：MIT 置顶钉住 + 按时间任务 + 习惯子区段，共用一张执行清单
   if (mit) mit.innerHTML = '';
   if (micro) micro.innerHTML = '';
@@ -1275,11 +1337,11 @@ function renderTodayPanel() {
         const mitMp = metricProgress(mitN);
         const mitMpPill = mitMp && mitMp.kind !== 'leaf' ? `<span class="pill">📊 ${mitMp.done}/${mitMp.tgt}</span>` : '';
         const pomoDef = +((state.meta && state.meta.prefs && state.meta.prefs.pomoMinutes) || 25);
-        sh += `<div class="today-mit-pin"><div class="mit-pin-head"><span class="mit-pin-lbl">🎯 MIT · 当下最重要</span>` +
-          `<select class="gf-input gf-select mit-pomo-len" id="pomoLen" title="专注时长：25′ 标准 / 50′ 长专注 / 90′ 深潜（BRAC 完整周期，评分加权）——配合行内「🍅 专注」启动"><option value="25"${pomoDef === 25 ? ' selected' : ''}>🍅 25′ 标准</option><option value="50"${pomoDef === 50 ? ' selected' : ''}>🍅 50′ 长专注</option><option value="90"${pomoDef === 90 ? ' selected' : ''}>🌊 90′ 深潜</option></select>` +
-          (state.topPin === mitN.id ? `<button type="button" class="mit-unpin" id="btnUnpinTop" title="你在日历/洞察里手动固定了这件，算法暂不接管">📌 已固定 · 取消</button>` : '') +
+        sh += `<div class="today-mit-pin"><div class="mit-pin-head"><span class="mit-pin-lbl">MIT · 当下最重要</span>` +
+          `<select class="gf-input gf-select mit-pomo-len" id="pomoLen" title="专注时长：25′ 标准 / 50′ 长专注 / 90′ 深潜（BRAC 完整周期，评分加权）——配合行内「🍅 专注」启动"><option value="25"${pomoDef === 25 ? ' selected' : ''}>25′ 标准</option><option value="50"${pomoDef === 50 ? ' selected' : ''}>50′ 长专注</option><option value="90"${pomoDef === 90 ? ' selected' : ''}>90′ 深潜</option></select>` +
+          (state.topPin === mitN.id ? `<button type="button" class="mit-unpin" id="btnUnpinTop" title="你在日历/洞察里手动固定了这件，算法暂不接管">已固定 · 取消</button>` : '') +
           `</div>${todayRowHtml(mitEntry, { micro: true, pomo: true })}` +
-          `<details class="mit-score-fold"><summary title="优先级分：算法排序用，决定「先做谁」——不是完成评价（那个在📊今日状态里看表现分）">📊 优先级 ${mitFs.total} · 为什么排最前</summary><div class="hero-more">${mitProgPill}${mitMpPill}${mitPacePill}${mitSprint}</div><div class="hero-score" title="为什么选这个：${mitParts.map(p => p.label).join('、')}">${mitPartsHtml}</div></details>` +
+          `<details class="mit-score-fold"><summary title="优先级分：算法排序用，决定「先做谁」——不是完成评价（那个在今日状态里看表现分）">优先级 ${mitFs.total} · 为什么排最前</summary><div class="hero-more">${mitProgPill}${mitMpPill}${mitPacePill}${mitSprint}</div><div class="hero-score" title="为什么选这个：${mitParts.map(p => p.label).join('、')}">${mitPartsHtml}</div></details>` +
           `</div>`;
       }
       if (ordered.length) {
@@ -1292,15 +1354,15 @@ function renderTodayPanel() {
           if (!pinSplit && pinSet.has(k)) {
             pinSplit = true;
             const nPin = ordered.filter(e => pinSet.has(todayListPinKey(e.wfId, e.node.id))).length;
-            div += `<div class="today-sec-div">📌 今日置顶 <span class="cnt">${nPin}</span></div>`;
+            div += `<div class="today-sec-div">置顶 <span class="cnt">${nPin}</span></div>`;
           }
           if (!odSplit && !ent.node._overflow && !pinSet.has(k) && !ent.node.time && (ent.node.overdue || (ent.node.daysLeft != null && ent.node.daysLeft < 0))) {
             odSplit = true;
-            div += `<div class="today-sec-div">⏪ 补做 · 逾期未完成（已清昨日排程时间）</div>`;
+            div += `<div class="today-sec-div">补做 · 逾期未完成（已清昨日排程时间）</div>`;
           }
           if (!ovfSplit && ent.node._overflow) {
             ovfSplit = true;
-            div += `<div class="today-sec-div">🌊 溢出 · 超出今日可投入，建议顺延或删减 <span class="cnt">${overflowed.length}</span></div>`;
+            div += `<div class="today-sec-div">溢出 · 超出今日可投入，建议顺延或删减 <span class="cnt">${overflowed.length}</span></div>`;
           }
           const opts = {};
           if (ent.node.id === nextTopId) opts.nextTop = true;
@@ -1332,7 +1394,7 @@ function renderTodayPanel() {
       if (old) { old.remove(); helpEl.classList.remove('on'); return; }
       helpEl.classList.add('on');
       helpEl.closest('.today-block-h').insertAdjacentHTML('afterend',
-        `<div class="today-exec-help">排序规则：📌 用户置顶（⋯里点「置顶」，仅今日有效）→ 设了「🕐 计划时间」的按时间升序 → 未设时间按重要度 → ⏪ 逾期补做 → 🌊 溢出沉底。隔夜会清掉昨日的计划时间，避免「上一天」混进今日。🎯 MIT / ② 由算法钉选。</div>`);
+        `<div class="today-exec-help">排序规则：置顶（⋯里点「置顶」，仅今日有效）→ 设了计划时间的按时间升序 → 未设时间按重要度 → 补做（逾期）→ 溢出沉底。隔夜会清掉昨日的计划时间，避免「上一天」混进今日。MIT / ② 由算法钉选。</div>`);
     };
     // v8.13: MIT 区「📌 取消固定」（英雄卡移除后的承接入口）
     const unpinEl = slots.querySelector('#btnUnpinTop');
@@ -1820,7 +1882,6 @@ function renderTreeEditor() {
       ? (n.deadlineDate ? ' 📅' + dateKey(new Date(n.deadlineDate)).slice(5) : '') + (n.time ? ' 🕐' + n.time : '')
       : '';
     meta.textContent = (isLeaf ? '叶' : '枝') + schedMeta;
-    row.appendChild(txt); row.appendChild(meta);
     if (isLeaf) {
       const done = document.createElement('label');
       done.className = 'trow-done gf-row-check';
@@ -1828,11 +1889,13 @@ function renderTreeEditor() {
       done.appendChild(cb); done.appendChild(document.createTextNode('✓'));
       row.appendChild(done);
     }
+    row.appendChild(txt); row.appendChild(meta);
     const moreBtn = document.createElement('button');
     moreBtn.type = 'button'; moreBtn.className = 'gf-btn gf-btn--sm gf-btn--ghost trow-more-btn';
     moreBtn.dataset.act = 'more'; moreBtn.dataset.id = n.id;
     moreBtn.title = '展开高级字段：重要 / 紧急 / 预估 / 实际 / 子任务';
     moreBtn.textContent = expanded ? '▲' : '⋯';
+    moreBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     row.appendChild(moreBtn);
     // 高级字段：收进行展开（重要/紧急手动后不被文本重推断覆盖）
     const more = document.createElement('div');
@@ -1896,6 +1959,7 @@ function bindTreeEditorDelegation() {
       const row = btn.closest('.trow');
       if (row) row.classList.toggle('expanded', on);
       btn.textContent = on ? '▲' : '⋯';
+      btn.setAttribute('aria-expanded', on ? 'true' : 'false');
     }
     else if (btn.dataset.act === 'child') addTreeChild(id);
     else if (btn.dataset.act === 'del') {
@@ -2040,18 +2104,54 @@ function renderAIView() {
     skillInput.value = customSkill;
   }
 
+  // v8.29：枢纽条——Key / 历史 / SMART 弱项一眼可见（v8.6 拆掉页内分解后的「空页」修复）
+  const hasKey = !!getLLMKey();
+  const histN = getAIHistory().length;
+  const weakAll = (state.nodes || []).filter(n => n.parentId && !smartEval(n).smart);
+  const strip = document.getElementById('aiUsageStrip');
+  if (strip) {
+    strip.innerHTML =
+      `<span class="ai-chip${hasKey ? ' ok' : ' warn'}" title="DeepSeek API Key">${hasKey ? '🔑 Key 已配置' : '⚠ 未配置 Key'}</span>` +
+      `<span class="ai-chip" title="本机 AI 分解历史">${histN ? `📜 ${histN} 次记录` : '📜 尚无记录'}</span>` +
+      `<span class="ai-chip${weakAll.length ? ' warn' : ' ok'}" title="当前流不够 SMART 的目标数">${weakAll.length ? `🩺 ${weakAll.length} 个待补强` : '✅ SMART 全过'}</span>` +
+      `<span class="ai-chip" title="分解入口在新建项目">入口：新建项目</span>`;
+  }
+  const btnNew = document.getElementById('aiOpenNewProject');
+  if (btnNew && !btnNew._aiBound) {
+    btnNew._aiBound = true;
+    btnNew.onclick = () => openWorkflowMetaModal('create');
+  }
+  const btnSet = document.getElementById('aiOpenSettings');
+  if (btnSet && !btnSet._aiBound) {
+    btnSet._aiBound = true;
+    btnSet.onclick = () => {
+      const cfg = document.getElementById('panelAIConfigDetails');
+      if (cfg) { cfg.open = true; cfg.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      else openSettingsModal();
+      const keyEl = document.getElementById('aiApiKey');
+      if (keyEl) setTimeout(() => keyEl.focus(), 120);
+    };
+  }
+  const btnSmart = document.getElementById('aiJumpSmart');
+  if (btnSmart && !btnSmart._aiBound) {
+    btnSmart._aiBound = true;
+    btnSmart.onclick = () => {
+      const p = document.getElementById('panelSMART');
+      if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  }
+
   // 诊断前置：把最弱的 3 个目标直接推到分解入口旁
   const suggest = document.getElementById('aiSmartSuggest');
   if (suggest) {
-    const weak = state.nodes
-      .filter(n => n.parentId && !smartEval(n).smart)
+    const weak = weakAll
       .map(n => ({ n, ev: smartEval(n) }))
       .sort((a, b) => b.ev.gaps.length - a.ev.gaps.length || b.n.im - a.n.im)
       .slice(0, 3);
     if (!weak.length) { suggest.innerHTML = ''; suggest.style.display = 'none'; }
     else {
       suggest.style.display = '';
-      suggest.innerHTML = `<div class="ai-suggest-h">🩺 体检发现 ${state.nodes.filter(n => n.parentId && !smartEval(n).smart).length} 个目标不够 SMART，先拆这几个：</div>` +
+      suggest.innerHTML = `<div class="ai-suggest-h">🩺 体检发现 ${weakAll.length} 个目标不够 SMART，先拆这几个：</div>` +
         weak.map(({ n, ev }) => `<button type="button" class="ai-suggest-item" data-suggest="${n.id}" title="${esc(ev.gaps.join('；'))}">
           <span class="dot" style="background:${category(n.im, n.ur).color}"></span>
           <b>${esc(n.text.slice(0, 22))}${n.text.length > 22 ? '…' : ''}</b>
@@ -2524,7 +2624,7 @@ function openSmart(id) {
 
   function scoreDots(v) {
     const g = COLORS.gradSmartDot || [COLORS.goldSoft || 'var(--gold-soft)', COLORS.svgGlow || 'var(--accent)'];
-    let s = ''; for (let i = 1; i <= 3; i++) s += `<i style="background:${i <= v ? `linear-gradient(135deg,${g[0]},${g[1]})` : 'rgba(255,255,255,.14)'}"></i>`; return s;
+    let s = ''; for (let i = 1; i <= 3; i++) s += `<i style="background:${i <= v ? `linear-gradient(135deg,${g[0]},${g[1]})` : svgDimDotInactive()}"></i>`; return s;
   }
   function render() {
     const mask = document.getElementById('smartModal');
@@ -4028,7 +4128,11 @@ function renderTodayRocks() {
     const done = n ? !!n.done : false;
     const txt = n ? n.text : r.text;
     const short = txt.length > 16 ? txt.slice(0, 16) + '…' : txt;
-    return `<button type="button" class="rock-chip gf-row${done ? ' done' : ''}" data-rock-done="${r.nodeId}" data-wf="${r.wfId}" title="${done ? '已完成 · 点击撤销' : '点击勾掉这块大石头'}"><span class="gf-row-check rock-ic">${done ? '✅' : '🪨'}</span><span class="gf-row-title">${esc(short)}</span></button>`;
+    const inner = rowChrome({
+      checkHtml: `<span class="gf-row-check rock-ic" aria-hidden="true">${done ? '✓' : '○'}</span>`,
+      title: short
+    });
+    return `<button type="button" class="rock-chip${done ? ' done' : ''}" data-rock-done="${r.nodeId}" data-wf="${r.wfId}" title="${done ? '已完成 · 点击撤销' : '点击勾掉这块大石头'}">${inner}</button>`;
   }).join('');
   const doneCount = plan.rocks.filter(r => { const n = nodeInWorkflow(r.wfId, r.nodeId); return n && n.done; }).length;
   box.innerHTML = `<div class="today-rocks"><span class="rocks-lbl">本周大石头 ${doneCount}/${plan.rocks.length}</span>${chips}</div>`;

@@ -166,6 +166,12 @@ C backfill 本批纠偏：AI 直给两个 9:00→写库前纠成 09:00/09:40。
 | verify-v8.21 | 32 | 去 todayBrief/设置扩充/全局多段空闲/滚动版本守卫 |
 | verify-v8.22 | 30 | 公共 modal/fold/empty 壳 + 高频弹窗接入 + require 冒烟 |
 | verify-v8.23 | 22 | 跨日 scrub timeDk + 今日置顶排序 + require 冒烟 |
+| verify-v8.24 | 42 | 弹窗壳铺完 + gf-model/ui/app 拆分接线 + DESIGN 对账 |
+| verify-v8.26 | 16 | rowChrome + 洞察空态 + zone 默认折 |
+| verify-v8.28 | 21 | simpleMode / tokens / a11y / 动效 |
+| verify-v8.29 | 30+ | 简洁模式不藏番茄&捕捉 / 项目时段单轨 / 六处 ?v= / 今日脉搏 / 洞察默认折 / AI 枢纽 |
+| verify-v8.30 | 17 | gfIcon 导航 / 石头 rowChrome / 树 aria-expanded / svgDim* 浅色 / MIT 去 emoji |
+| unit-clip-wins | 8 | clipWinsToGlobal 项目窗 ⊆ 全局 |
 | unit-today-sort | 13 | scrubStaleTodayTimes / sortTodayExecEntries 置顶与时间序 |
 | smoke-v8.2 | 15 | 排期回填 5 场景实跑 |
 | smoke-v8.7 | 10 | 今日池 6 场景实跑 |

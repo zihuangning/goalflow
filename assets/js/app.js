@@ -332,7 +332,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     resolveTimeConflicts, ensureTodayTimeResolved, todayExecutionPoolFor, backfillAISchedule,
     remindAtFromTime, ensureRemindDefaults, workflowColor, WF_COLORS,
     scrubStaleTodayTimes, stampNodeTimeDk, sortTodayExecEntries, toggleTodayListPin, todayListPinsFor, rolloverTodayState,
-    modalHeadHtml, modalFootHtml, buildModalHtml, openModalMask, foldSectionHtml, emptyStateHtml, rowChrome, confirmModal,
+    modalHeadHtml, modalFootHtml, buildModalHtml, openModalMask, foldSectionHtml, emptyStateHtml, rowChrome, gfIcon, isLightMode, svgDimStroke, svgDimFill, svgDimFillStrong, confirmModal,
     prefsSimpleMode, syncSimpleModeClass,
     addInbox, clarifyInbox, inboxPending, planVsActual,
     archiveWorkflow, unarchiveWorkflow, isWorkflowComplete, activeWorkflows, openCommitCard, togglePomoPause, quickCapture,

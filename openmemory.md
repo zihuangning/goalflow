@@ -21,7 +21,7 @@
 - **持久化:** 权威数据 `goalfocus.*`；UI prefs `goalflow.*`；遗留只读 v1/v3；特例 `gf_llm_key`
 - **核心算法:** `parseText` → `focusScore` / `pickRanked` → `buildView` + `sankeyLayout`
 - **测试钩子:** `module.exports` 在 `app.js` 末尾；Node 经 `requireApp()` 拼接编译（不可分别 require 三文件）
-- **测试体系:** `scripts/checks/`（verify+smoke →v8.28）+ `scripts/tests/`；`node scripts/tests/run.cjs [--with-checks]`
+- **测试体系:** `scripts/checks/`（verify+smoke →v8.29）+ `scripts/tests/`；`node scripts/tests/run.cjs [--with-checks]`
 - **v8.24–8.28 优化 backlog:** 弹窗壳铺完（特例 Smart/搜索）→ 三文件拆分 → 空闲「人/项目收窄」→ rowChrome + Things 降噪 → tokens/a11y → simpleMode+动效
 
 ## User Defined Namespaces
@@ -32,7 +32,7 @@
 
 | 区域 | 作用 |
 |------|------|
-| 今日行动 `#todayPanel` | **分区去重**（v6.3，v8.11 扩）：MIT（唯一，排除溢出）→ 执行清单按时间升序（渲染前 `ensureTodayTimeResolved` 冲突纠偏）→ 🌊 溢出沉底区（超全局日预算降权，v8.11）→ 习惯打卡（recur/habit + 🔥streak）→ ✅ 今日已完成（executionLog 当日，**v8.18 默认折叠**）；有 time 必有 time−5 提醒（MIT 同口径）；清单头有 🗓 顺排提示条；行内 ⏰/时长/时段；`#todayAlarmBar` |
+| 今日行动 `#todayPanel` | **分区去重**（v6.3，v8.11 扩）：头下 `#todayPulse`（v8.29 常驻：进度/下一项/连续/容量/表现，简洁模式也显）→ MIT（唯一，排除溢出）→ 执行清单按时间升序（渲染前 `ensureTodayTimeResolved` 冲突纠偏）→ 🌊 溢出沉底区（超全局日预算降权，v8.11）→ 习惯打卡（recur/habit + 🔥streak）→ ✅ 今日已完成（executionLog 当日，**v8.18 默认折叠**）；有 time 必有 time−5 提醒（MIT 同口径）；清单头有 🗓 顺排提示条；行内 ⏰/时长/时段；`#todayAlarmBar` |
 | 项目总览 `#projectModal` | 点项目名打开：整体/分支进度条、今日待办数、近 7 天执行（估/实/偏差）、习惯连续；入口 🗺 重新规划 + ✎ 设置 |
 | 规划向导 `#planWizardModal` | 必经步骤（【里程碑】【例行】【习惯】【行动】，decomposeSuggestions 预填）→ 生成子节点：里程碑按达成日均排 deadline、例行 recur week、习惯 day+slot、行动 day+30′；新建项目后引导至目标规划 |
 | 多项目 `#wfBar` | **手风琴列表**（v6.2）：独立区块（非 side-ws 内），可多展开；展开 = 项目本地概览（标签/时间段/叶子进度条/树预览/今日待办数），不含视图链接——视图归下方「视图」导航；✎ 设置；＋新建；底部 **项目关系**；展开状态存 `meta.wfExpanded`；**v8.18** 每项左侧 `--wf-color` 色条（`workflowColor`/`WF_COLORS` 无自定义色时按 id 稳定写入） |
@@ -125,6 +125,7 @@
 | **v8.22 公共 UI 壳** | 盘点 20+ 弹窗手写 modal-head/mh-x/show/遮罩关闭；抽出 `modalHeadHtml`/`modalFootHtml`/`buildModalHtml`/`openModalMask` + `foldSectionHtml`/`emptyStateHtml`；业务弹窗已迁：settings/workflowMeta/habit/review/ritual(晨晚)/weekPlan/commit 等；**刻意未迁**：`openSmart`（`render()` 反复整页 innerHTML）、`openGlobalSearch`（`gs-bar` 非标准 modal-head）；二者关闭仍 `classList.remove('show')`+`innerHTML=''`。verify-v822 |
 | **v8.23 今日跨日+置顶** | 根因=`n.time` 无日期，隔夜未完成仍带昨日 HH:MM 进今日时间序。`timeDk`+`scrubStaleTodayTimes`+`rolloverTodayState`（启动/换日/渲染前）；习惯保留 time；排序 `sortTodayExecEntries`：置顶→time 升序→未设→逾期补做→溢出；`meta.todayListPins[dk]`+行内 📌（≠ MIT topPin）。verify-v823 + unit-today-sort |
 | **v8.28 Batch4+5 简洁/a11y/色板** | `meta.prefs.simpleMode` 默认 true + 设置 `#setSimpleMode` + `body.simple-mode` 隐藏今日次级区；桑基/关系图/审计/exportPNG 走 `svgGold`/`svgNoise`/`cssVar`；`summary`/`fold`/`zone` 同步 `aria-expanded`；`base.css` 扩展 `:focus-visible`；动效 `gf-modal-in`/`gf-check-pop`/`gf-mit-in`+`prefers-reduced-motion`。verify-v828 |
+| **v8.29 脉搏/洞察折/AI 枢纽** | 今日头下常驻 `#todayPulse`（进度·下一项·连续·容量·表现）；洞察四象限+完成历史 `<details>` 默认折、记忆 `goalflow.zone.*`；AI 页补 `#panelAIHub`（怎么用 + Key/历史/SMART 条 + CTA 新建项目）修复 v8.6 拆页内分解后的空页感。verify-v829 |
 | **v8.9 模块间增删同步审计（8 处修复）** | **三级引用清理体系**：①`purgeNodeRefs(wfId, droppedIds, backup)` 节点级——清 weekPlans rocks（nodeId 匹配）/tomorrowMit/habitStreaks（`wfId|`前缀），backup=true 返回被清内容；`restoreNodeRefs(bak)` 供 undo 还原 ②`purgeCurrentTreeRefs()` 整树替换前置——旧 id 集 + purgeNodeRefs + topPin/番茄钟解绑 + saveMeta；**doParse/autoDecomposeGoal/applyWorkflowTemplate 三处共用**（新建流空集 no-op）③`purgeWorkflowRefs(wfId)` 项目级——v8.8 deleteWorkflow 内联块抽出 + 补番茄钟 wfId/nodeId 解绑，与 clearAll 共用。**8 处修复**：deleteNode 级联（备份→undo 还原）+番茄钟解绑；doParse 整树替换清旧引用；removeWizardNodes 向导重生成删子树补级联（不走 deleteNode 的删除路径）；clearAll 改 confirmModal（原生 confirm 被吞同 v8.8）+ meta 入快照 + 全流 purgeWorkflowRefs + undo 还原 meta；adoptPendingAction 同流采纳补 afterChange（原仅跨流经 switchWorkflow 刷新，今日面板停旧数据）；autoDecomposeGoal/applyWorkflowTemplate 防御性接入 purgeCurrentTreeRefs。smoke-v89 35 项实跑（删除级联/undo 还原/整树替换/clearAll 取消+确认+undo） |
 
 ## Visual (v6.0 · app shell + 三视图导航 + 主题×明暗)
@@ -142,6 +143,7 @@
 - v8.11：**「AI 可错，网页纠偏」分层原则**——LLM 产出（start/date）只当建议，`resolveTimeConflicts`（占用尾+10′间隔顺延，链式传导，出日界保持原样比逆序强）在渲染前 ensure 式兜底（`ensureTodayTimeResolved` 先于 `ensureRemindDefaults`，dirty 才 save，modeled on ensureRemindDefaults）；**backfill 避让必须含「本批之外」**——`dayNext` 占用表只记本批会让第二次 AI 拆解与旧任务撞车（两个 9:00 的根因），扫 `state.nodes` 今日 time/各日 planDate 补齐；**「被吞」类抱怨 = 过滤条款 + 无声丢弃的叠加**，根治三板斧：①排除条款注释写清「为什么」②被排除的给可见性（`today-shifted-hint` 顺排提示条：≤+3 天 planDate 叶子列前 3 条）③被截断的留池降权（`_overflow` 留池+🌊标记+沉底分区，不再 return 丢弃——heroGlobalCandidates/ICS 消费方本就有 filter，渲染层 MIT 候选要排除溢出）；**容量类指标分子分母必须同口径且「每项目独享预算」是结构性错误**——`todayExecutionPoolFor(nodes, budgetCap)` 预算参数化，聚合层 `dayCapGlobal()` 递减分配（当前项目优先，保底条款仍保证每项目露脸 1 个），主区合计天然 ≤ 全局容量；「超负荷」文案必须带超出分钟数+行动建议（`超出 X′，建议删减或顺延`），抽象标签用户只会困惑
 - **示例主题库:** `assets/js/gf-demos.js` → `GoalFlowDemos.list`（10 条）；`#demoSelect` +「载入示例」调用 `loadDemo()`
 - **产品全景文档:** `docs/PRODUCT-FLOW.md`（目的/流程/功能全景/科学依据映射/改进路线图 v6.3+）；进度口径 `docs/PROGRESS-ROLLUP.md`
+- **竞品调研（2026-11-27）:** `docs/research/github-similar-products.md` — myOKR/Goalloom/RUOK/Mission Control/Momentum/OpenThings/GoalCheck/Super Productivity/Open Sunsama/FocusAssist 等；P0 可引入：今日 Skip 换一批、Cmd+K、目标链高亮、轻量日时间轴、休息提醒、Inbox 保鲜；明确不引入强制账号/RPG/议题同步/可编程查询引擎
 - 叶子任务优先进入 `pickRanked`；进度 rollup 见 `docs/PROGRESS-ROLLUP.md`
 - 节点字段：`val`/`eff`/`recur`/`doneAt`（v4.2）
 - 例行任务在无期限时按尺度展开到节奏条 + 日 slot
@@ -180,6 +182,8 @@
 - v8.25：**全局=「我的空闲时段」、项目=可再收窄**——`clipWinsToGlobal`/`clipProjectWinsToGlobals`；unit-clip-wins
 - v8.26：**rowChrome 统一行壳**——今日/收件箱/树/石头；洞察 `emptyStateHtml`；Things 降噪；verify-v826
 - v8.28：**simpleMode 默认开 + tokens/a11y/动效**——`body.simple-mode`；`svgGold`/`cssVar`；`aria-expanded`；`prefers-reduced-motion`；verify-v828
+- v8.29：**简洁模式误伤修复**——不整藏 `#heroWrap`（仅空闲无番茄时藏），保留 `#inboxCapture`；项目设置去掉工作日/周末小时双轨，日预算由 wins 派生；AGENTS/核心规则/DESIGN 改「六处 ?v=」；**今日脉搏** `#todayPulse`/`renderTodayPulse`；**洞察** `#quadPanel`/`#historyPanel` 改 `<details>` 默认折 + `zoneOpenPref`；**AI 枢纽** `#panelAIHub`（usage strip + 新建项目/设置/SMART CTA + 恢复 suggest/context）；verify-v829
+- v8.30：**P1/P2 抛光**——`gfIcon`+静态 `.gf-icon` 导航；大石头 `rowChrome`+✓/○；树 `trow-more` `aria-expanded`；`svgDimStroke/Fill*` 浅色图；MIT/分区文案去 emoji；verify-v830
 - v8.22：**重复 UI 壳优先抽 helper**——`buildModalHtml`+`openModalMask`；并行会话撞车顺延版本号
 - v8.23：**「像没按时间排 / 像上一天」优先查 date-less 字段隔夜残留**——`time` 语义=今天几点，必须配 `timeDk`；换日路径（refresh/load/render）统一 `rolloverTodayState`；**清单置顶 ≠ MIT 固定**（`todayListPins` 只改今日顺序，`topPin` 仍管算法 MIT）
 - v8.23 规范合规：**原生 confirm 在 WebView 会吞**→危险确认一律 `confirmModal`；期限五字段只经 `setNodeDeadline`；新弹窗优先 `buildModalHtml`/`openModalMask`；容量 UI「全局」标签必须与 `globalCapacityHours()` 同真假

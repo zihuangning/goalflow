@@ -8,37 +8,26 @@
 
 ```
 scripts/
-├── checks/                    # 第 1-2 层：回归守卫（按版本组织，v8.2 ~ v8.10）
-│   ├── lib.cjs                #   grabFn 从 app.js 源码抠函数 + 断言工具
-│   ├── run.cjs                #   统一入口（自动扫 verify-*/smoke-*）
-│   ├── verify-v8X.cjs         #   ① 字符串核查：确认关键代码结构没被改坏（防误删/防回退）
-│   └── smoke-v8X.cjs          #   ② 冒烟：grabFn+stub 实跑某个版本的修复场景
-└── tests/                     # 第 3-4 层：行为测试（按领域组织）
-    ├── lib.cjs                #   requireApp() 真 require app.js + 断言工具
-    ├── run.cjs                #   统一入口（--with-checks 连 checks 一起跑）
-    ├── unit/                  #   ③ 单元测试：app.js 有 module.exports，直接 require 调真实函数
-    │   ├── unit-parse.cjs     #     解析族（期限/尺度/重复/估时/文本→树）· 33 例
-    │   ├── unit-node.cjs      #     节点族（VE/象限/树构建/进度/序列化/停放）· 30 例
-    │   ├── unit-score.cjs     #     评分族（焦点分/优先级/完成分/番茄分/等级）· 33 例
-    │   ├── unit-time.cjs      #     时间与习惯族（周键/停滞/习惯强度/SMART/拆解）· 30 例
-    │   ├── unit-schedule.cjs  #     时间安排与期限族（跨天重算/期限写入口/排期转换/周期判定/时间冲突纠偏）· 55 例
-    │   └── unit-history.cjs   #     仪式历史聚合族（评分/番茄/dkWeekLabel/晨晚周历史合并）· 34 例
-    └── flow/                  #   ④ 流程测试：grabFn+stub 串多函数走完整用户旅程
-        ├── flow-goal-lifecycle.cjs   # 项目全生命周期（解析→引用→替换→删节点→删项目→清空+撤销）· 7 例
-        ├── flow-today-execution.cjs  # 今日执行（提到今天/撤回/澄清/采纳跨流）· 6 例
-        ├── flow-today-pool.cjs       # 今日池容量与时间纠偏（预算截断/保底/全局避让/本批纠偏）· 7 例
-        ├── flow-inbox.cjs            # 收件箱（捕获时间词/澄清/撤回/暂缓/容错）· 10 例
-        ├── flow-habit-strength.cjs   # 习惯 30 天强度之旅（连续/漏打/低频/封顶）· 6 例
-        └── flow-time-travel.cjs      # 时间旅行（跨天 streak/打卡分桶/提醒换天/日志分桶/排期过夜）· 39 例
+├── checks/                    # 第 1-2 层：回归守卫（verify/smoke → v8.29；APP_JS=三文件拼接）
+│   ├── lib.cjs                #   grabFn + 断言；源码来自 app-scripts.logicSource()
+│   ├── run.cjs                #   统一入口（自动扫 verify-*/smoke-*；三文件 --check）
+│   ├── verify-v8X.cjs         #   ① 字符串核查
+│   └── smoke-v8X.cjs          #   ② 冒烟：grabFn+stub
+├── app-scripts.cjs            #   APP_SCRIPT_PARTS 加载顺序（浏览器/bundle/require 共用）
+└── tests/                     # 第 3-4 层：行为测试
+    ├── lib.cjs                #   requireApp() 按 APP_SCRIPT_PARTS 拼接编译
+    ├── run.cjs                #   --with-checks 连 checks
+    ├── unit/                  #   ③ 单元（含 unit-clip-wins / unit-capacity / unit-today-sort 等）
+    └── flow/                  #   ④ 流程旅程
 ```
 
 ## 运行
 
 ```powershell
-node scripts/tests/run.cjs                 # 单元 + 流程（12 套件 290 例，约 2 秒）
-node scripts/tests/run.cjs --with-checks   # 再加上 checks 全量守卫（18 环节 430 项）
-node scripts/checks/run.cjs                # 只跑 checks（日常改代码后）
-node scripts/tests/unit/unit-parse.cjs     # 单跑一个套件（排错时，stderr 完整可见）
+node scripts/tests/run.cjs                 # 单元 + 流程（约 20 套件）
+node scripts/tests/run.cjs --with-checks   # 再加上 checks 全量守卫
+node scripts/checks/run.cjs                # 只跑 checks
+node scripts/tests/unit/unit-parse.cjs     # 单跑一个套件
 ```
 
 ## 各层怎么用

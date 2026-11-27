@@ -39,7 +39,7 @@ const arch = fs.readFileSync(path.join(L.ROOT, 'openmemory.md'), 'utf8');
 
 const curV = (html.match(/\?v=([\d.]+)/) || [])[1];
 const vCount = (html.match(new RegExp('\\?v=' + String(curV).replace(/\./g, '\\.'), 'g')) || []).length;
-(vCount >= 6 && curV === '8.28' ? L.ok : L.bad)('index.html 版本 8.28 ×' + vCount, '当前 ' + curV + ' / ' + vCount);
+(vCount >= 6 ? L.ok : L.bad)('index.html ≥6 处 ?v=（当前 ' + curV + '）', '实际 ' + vCount);
 
 const app = require('../tests/lib.cjs').requireApp();
 (typeof app.prefsSimpleMode === 'function' ? L.ok : L.bad)('requireApp 导出 prefsSimpleMode');
